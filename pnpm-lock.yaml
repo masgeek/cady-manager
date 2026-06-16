@@ -164,12 +164,12 @@ importers:
 
   packages/db:
     dependencies:
-      '@caddy-manager/config':
-        specifier: workspace:*
-        version: link:../config
       '@caddy-manager/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.6.1
       drizzle-orm:
         specifier: ^0.44.0
         version: 0.44.7(@types/pg@8.20.0)(postgres@3.4.9)

@@ -27,7 +27,7 @@
     "db:purge:demo": "tsx src/seed-demo.ts --purge"
   },
   "dependencies": {
-    "@caddy-manager/config": "workspace:*",
+    "dotenv": "^16.5.0",
     "@caddy-manager/shared-types": "workspace:*",
     "drizzle-orm": "^0.44.0",
     "postgres": "^3.4.5",

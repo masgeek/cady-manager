@@ -1,3 +1,4 @@
+export { buildDatabaseUrl } from './env';
 export { db, queryClient, runMigrations, closeDb } from './connection';
 export * from './schema';
 export * from './repositories/index';
