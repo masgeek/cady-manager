@@ -1,3 +1,4 @@
+import { config } from '@caddy-manager/config';
 import { randomBytes, scryptSync } from 'node:crypto';
 import { db, closeDb } from './lib/db';
 
@@ -8,9 +9,9 @@ function hashPassword(password: string): string {
 }
 
 async function seed() {
-  const email = process.env.SEED_EMAIL || 'admin@caddy.local';
-  const password = process.env.SEED_PASSWORD || 'admin';
-  const role = process.env.SEED_ROLE || 'admin';
+  const email = config.seedEmail;
+  const password = config.seedPassword;
+  const role = config.seedRole;
 
   const existing = await db
     .selectFrom('users')

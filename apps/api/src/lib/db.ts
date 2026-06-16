@@ -1,3 +1,4 @@
+import { config } from '@caddy-manager/config';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,11 +10,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = join(__dirname, '../../migrations');
 
 const pool = new pg.Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  database: process.env.DB_NAME || 'caddy',
-  user: process.env.DB_USER || 'caddy',
-  password: process.env.DB_PASSWORD || 'caddy',
+  host: config.dbHost,
+  port: config.dbPort,
+  database: config.dbName,
+  user: config.dbUser,
+  password: config.dbPassword,
   max: 10,
 });
 

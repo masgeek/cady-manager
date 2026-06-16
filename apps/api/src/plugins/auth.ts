@@ -1,10 +1,11 @@
+import { config } from '@caddy-manager/config';
 import type { FastifyInstance } from 'fastify';
 import fastifyAuth from '@fastify/auth';
 import fastifyBasicAuth from '@fastify/basic-auth';
 import { UnauthorizedError } from '../lib/errors.js';
 
-const ADMIN_USERNAME = process.env.AUTH_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.AUTH_PASSWORD || 'admin';
+const ADMIN_USERNAME = config.authUsername;
+const ADMIN_PASSWORD = config.authPassword;
 
 export async function registerAuth(app: FastifyInstance) {
   await app.register(fastifyBasicAuth, {

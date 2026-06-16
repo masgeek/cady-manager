@@ -20,6 +20,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@caddy-manager/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@caddy-manager/shared-api':
         specifier: workspace:*
         version: link:../../packages/shared-api
@@ -147,7 +150,17 @@ importers:
         version: 3.2.6(@types/node@25.9.3)(jsdom@26.1.0)(tsx@4.22.4)(yaml@2.9.0)
 
   packages/config:
+    dependencies:
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.6.1
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
     devDependencies:
+      '@types/node':
+        specifier: ^25.9.3
+        version: 25.9.3
       typescript:
         specifier: ^5.8.0
         version: 5.9.3
@@ -1286,6 +1299,10 @@ packages:
 
   dom-helpers@5.2.1:
     resolution: {integrity: sha512-nRCa7CK3VTrM2NmGkIy4cbK7IZlgBE/PYMn55rrXefr5xXDP0LdtfPnblFDoVdcAfslJ7or6iqAUnx0CCGIWQA==}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   electron-to-chromium@1.5.373:
     resolution: {integrity: sha512-G2Hym8JIf/QreuseqkDibgH8Ci8KfJzqGDKdakbhSx9UltwRBH2cBLAWU/lBX0sCdv0TlhyxQyDCnSfxgMWsjA==}
@@ -2989,6 +3006,8 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.7
       csstype: 3.2.3
+
+  dotenv@16.6.1: {}
 
   electron-to-chromium@1.5.373: {}
 

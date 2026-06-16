@@ -23,7 +23,7 @@ export async function registerHealthRoutes(app: FastifyInstance) {
     async () => {
       return {
         status: 'online',
-        version: process.env.npm_package_version || '0.1.0',
+        version: '0.1.0',
         uptime: process.uptime(),
         checkedAt: new Date().toISOString(),
       };

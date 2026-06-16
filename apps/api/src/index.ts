@@ -1,3 +1,4 @@
+import { config } from '@caddy-manager/config';
 import { buildApp } from './app.js';
 import { runMigrations, closeDb } from './lib/db.js';
 
@@ -7,8 +8,7 @@ const start = async () => {
   await runMigrations();
 
   try {
-    const port = parseInt(process.env.PORT || '3500', 10);
-    await app.listen({ port, host: '0.0.0.0' });
+    await app.listen({ port: config.port, host: '0.0.0.0' });
   } catch (err) {
     app.log.error(err);
     await closeDb();

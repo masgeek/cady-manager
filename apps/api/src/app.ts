@@ -1,3 +1,4 @@
+import { config } from '@caddy-manager/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
@@ -16,7 +17,7 @@ import { registerAuditRoutes } from './routes/audit';
 export async function buildApp() {
   const app = Fastify({
     logger: {
-      level: process.env.LOG_LEVEL || 'info',
+      level: config.logLevel,
     },
   });
 

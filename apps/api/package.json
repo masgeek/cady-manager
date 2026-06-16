@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@caddy-manager/shared-api": "workspace:*",
+    "@caddy-manager/config": "workspace:*",
     "@caddy-manager/shared-types": "workspace:*",
     "@caddy-manager/utils": "workspace:*",
     "@fastify/auth": "^5.0.4",
