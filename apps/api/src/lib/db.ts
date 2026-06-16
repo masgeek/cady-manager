@@ -1,6 +1,12 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { Kysely, PostgresDialect, sql } from 'kysely';
 import type { DB } from './types';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const MIGRATIONS_DIR = join(__dirname, '../../migrations');
 
 const pool = new pg.Pool({
   host: process.env.DB_HOST || 'localhost',
@@ -16,71 +22,31 @@ export const db = new Kysely<DB>({
 });
 
 export async function runMigrations() {
-  const exists = await sql<{ table_name: string }>`
-    SELECT table_name FROM information_schema.tables 
-    WHERE table_schema = 'public'
+  await sql`
+    CREATE TABLE IF NOT EXISTS _migrations (
+      name VARCHAR(255) PRIMARY KEY,
+      executed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
   `.execute(db);
 
-  const tables = exists.rows.map(r => r.table_name);
+  const { rows } = await sql<{ name: string }>`
+    SELECT name FROM _migrations ORDER BY name
+  `.execute(db);
 
-  if (!tables.includes('servers')) {
-    await sql`
-      CREATE TABLE servers (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(100) NOT NULL,
-        hostname VARCHAR(255) NOT NULL,
-        api_endpoint VARCHAR(255) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'unknown',
-        version VARCHAR(50),
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `.execute(db);
-  }
+  const executed = new Set(rows.map(r => r.name));
+  const files = readdirSync(MIGRATIONS_DIR)
+    .filter(f => f.endsWith('.sql'))
+    .sort();
 
-  if (!tables.includes('sites')) {
-    await sql`
-      CREATE TABLE sites (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        server_id UUID NOT NULL REFERENCES servers(id) ON DELETE CASCADE,
-        domain VARCHAR(255) NOT NULL,
-        upstream VARCHAR(255) NOT NULL,
-        tls_enabled BOOLEAN NOT NULL DEFAULT true,
-        status VARCHAR(20) NOT NULL DEFAULT 'inactive',
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `.execute(db);
-  }
+  for (const file of files) {
+    if (executed.has(file)) continue;
 
-  if (!tables.includes('audit_events')) {
-    await sql`
-      CREATE TABLE audit_events (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id VARCHAR(100) NOT NULL DEFAULT 'admin',
-        action VARCHAR(20) NOT NULL,
-        entity VARCHAR(20) NOT NULL,
-        entity_id VARCHAR(255),
-        details TEXT,
-        result VARCHAR(10) NOT NULL DEFAULT 'success',
-        timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `.execute(db);
-  }
-
-  if (!tables.includes('users')) {
-    await sql`
-      CREATE TABLE users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        email VARCHAR(255) NOT NULL UNIQUE,
-        role VARCHAR(20) NOT NULL DEFAULT 'viewer',
-        password_hash VARCHAR(255) NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `.execute(db);
+    const sqlContent = readFileSync(join(MIGRATIONS_DIR, file), 'utf-8');
+    await sql.raw(sqlContent).execute(db);
+    await sql`INSERT INTO _migrations (name) VALUES (${file})`.execute(db);
   }
 }
 
 export async function closeDb() {
-  await db.destroy();
+  await pool.end();
 }
