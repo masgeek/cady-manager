@@ -4,7 +4,7 @@ import * as auditService from '../services/audit';
 
 export async function registerAuditRoutes(app: FastifyInstance) {
   app.get(
-    '/api/audit',
+    '/audit',
     {
       schema: {
         tags: ['Audit'],

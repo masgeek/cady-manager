@@ -8,7 +8,7 @@ import { NotFoundError } from '../lib/errors';
 
 export async function registerConfigRoutes(app: FastifyInstance) {
   app.get(
-    '/api/config',
+    '/config',
     {
       schema: {
         tags: ['Config'],
@@ -29,7 +29,7 @@ export async function registerConfigRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    '/api/config/reload',
+    '/config/reload',
     {
       schema: {
         tags: ['Config'],
@@ -65,7 +65,7 @@ export async function registerConfigRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    '/api/config/generated',
+    '/config/generated',
     {
       schema: {
         tags: ['Config'],

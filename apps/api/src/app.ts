@@ -33,22 +33,24 @@ export async function buildApp() {
   await registerSwagger(app);
   await registerAuth(app);
 
-  await registerHealthRoutes(app);
-  await registerServerRoutes(app);
-  await registerSiteRoutes(app);
-  await registerConfigRoutes(app);
-  await registerLogRoutes(app);
-  await registerAuditRoutes(app);
+  await app.register(async (scoped) => {
+    await registerHealthRoutes(scoped);
+    await registerServerRoutes(scoped);
+    await registerSiteRoutes(scoped);
+    await registerConfigRoutes(scoped);
+    await registerLogRoutes(scoped);
+    await registerAuditRoutes(scoped);
 
-  app.addHook('onRequest', async (request, reply) => {
-    if (request.url.startsWith('/api') && !request.url.startsWith('/api/health') && request.url !== '/docs' && !request.url.startsWith('/docs/') && !request.url.startsWith('/swagger')) {
-      try {
-        await app.authenticate(request, reply);
-      } catch {
-        reply.status(401).send({ statusCode: 401, message: 'Unauthorized' });
+    scoped.addHook('onRequest', async (request, reply) => {
+      if (!request.url.startsWith('/health')) {
+        try {
+          await app.authenticate(request, reply);
+        } catch {
+          reply.status(401).send({ statusCode: 401, message: 'Unauthorized' });
+        }
       }
-    }
-  });
+    });
+  }, { prefix: '/api' });
 
   return app;
 }

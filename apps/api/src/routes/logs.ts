@@ -4,7 +4,7 @@ import * as logService from '../services/log';
 
 export async function registerLogRoutes(app: FastifyInstance) {
   app.get(
-    '/api/logs',
+    '/logs',
     {
       schema: {
         tags: ['Logs'],

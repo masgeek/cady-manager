@@ -5,7 +5,7 @@ import { recordAuditEvent } from '../services/audit';
 
 export async function registerSiteRoutes(app: FastifyInstance) {
   app.get(
-    '/api/sites',
+    '/sites',
     {
       schema: {
         tags: ['Sites'],
@@ -21,7 +21,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    '/api/sites/:id',
+    '/sites/:id',
     {
       schema: {
         tags: ['Sites'],
@@ -37,7 +37,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    '/api/sites',
+    '/sites',
     {
       schema: {
         tags: ['Sites'],
@@ -62,7 +62,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
   );
 
   app.put(
-    '/api/sites/:id',
+    '/sites/:id',
     {
       schema: {
         tags: ['Sites'],
@@ -89,7 +89,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
   );
 
   app.delete(
-    '/api/sites/:id',
+    '/sites/:id',
     {
       schema: {
         tags: ['Sites'],

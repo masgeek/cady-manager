@@ -6,7 +6,7 @@ import { recordAuditEvent } from '../services/audit';
 
 export async function registerServerRoutes(app: FastifyInstance) {
   app.get(
-    '/api/servers',
+    '/servers',
     {
       schema: {
         tags: ['Servers'],
@@ -20,7 +20,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    '/api/servers/:id',
+    '/servers/:id',
     {
       schema: {
         tags: ['Servers'],
@@ -36,7 +36,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    '/api/servers',
+    '/servers',
     {
       schema: {
         tags: ['Servers'],
@@ -61,7 +61,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
   );
 
   app.put(
-    '/api/servers/:id',
+    '/servers/:id',
     {
       schema: {
         tags: ['Servers'],
@@ -88,7 +88,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
   );
 
   app.delete(
-    '/api/servers/:id',
+    '/servers/:id',
     {
       schema: {
         tags: ['Servers'],
@@ -114,7 +114,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    '/api/servers/:id/health',
+    '/servers/:id/health',
     {
       schema: {
         tags: ['Servers'],
