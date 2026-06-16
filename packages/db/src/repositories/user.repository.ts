@@ -6,6 +6,7 @@ import { users } from '../schema';
 
 export const createUserSchema = z.object({
   email: z.string().email(),
+  username: z.string().min(1).max(30),
   role: z.string().optional(),
   passwordHash: z.string(),
 });
@@ -16,6 +17,7 @@ function toUser(row: typeof users.$inferSelect): User {
   return {
     id: row.id,
     email: row.email,
+    username: row.username,
     role: row.role as User['role'],
     createdAt: row.createdAt.toISOString(),
   };
@@ -35,6 +37,7 @@ class UserRepository {
   async create(data: CreateUserInput): Promise<User> {
     const [row] = await db.insert(users).values({
       email: data.email,
+      username: data.username,
       role: data.role ?? 'viewer',
       passwordHash: data.passwordHash,
     }).returning();

@@ -9,6 +9,7 @@ function hashPassword(password: string): string {
 
 async function seed() {
   const email = process.env.SEED_EMAIL ?? 'admin@caddy.local';
+  const username = process.env.SEED_USERNAME ?? 'admin';
   const password = process.env.SEED_PASSWORD;
   const role = process.env.SEED_ROLE ?? 'admin';
 
@@ -24,6 +25,7 @@ async function seed() {
   } else {
     await userRepo.create({
       email,
+      username,
       role,
       passwordHash: hashPassword(password),
     });

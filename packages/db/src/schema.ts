@@ -37,6 +37,7 @@ export const auditEvents = pgTable('audit_events', {
 
 export const users = pgTable('users', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  username: varchar('username', { length: 30 }).notNull().unique(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   role: varchar('role', { length: 20 }).notNull().default('viewer'),
   passwordHash: text('password_hash').notNull(),

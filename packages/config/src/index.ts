@@ -32,6 +32,7 @@ export const config = {
   dbPassword: process.env.DB_PASSWORD,
 
   seedEmail: process.env.SEED_EMAIL ?? 'admin@caddy.local',
+  seedUsername: process.env.SEED_USERNAME ?? 'admin',
   seedPassword: process.env.SEED_PASSWORD,
   seedRole: process.env.SEED_ROLE ?? 'admin',
 };

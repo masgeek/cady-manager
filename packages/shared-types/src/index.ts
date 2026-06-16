@@ -64,6 +64,7 @@ export const AUDIT_ENTITIES: AuditEntity[] = ['site', 'server', 'config', 'user'
 export interface User {
   id: string;
   email: string;
+  username: string;
   role: UserRole;
   createdAt: string;
 }

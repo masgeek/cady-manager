@@ -8,6 +8,13 @@
       "when": 1781624284377,
       "tag": "0000_initial_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781634135576,
+      "tag": "0001_add_username_column",
+      "breakpoints": true
     }
   ]
 }
