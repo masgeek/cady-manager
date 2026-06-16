@@ -1,10 +1,23 @@
-import { resolve, dirname } from 'node:path';
+import { existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: resolve(__dirname, '../../../.env') });
+
+function findRootEnv(start: string): string | undefined {
+  let dir = start;
+  for (;;) {
+    const candidate = join(dir, '.env');
+    if (existsSync(candidate)) return candidate;
+    const parent = dirname(dir);
+    if (parent === dir) return undefined;
+    dir = parent;
+  }
+}
+
+dotenv.config({ path: findRootEnv(__dirname) });
 
 const configSchema = z.object({
   port: z.coerce.number().default(3500),
@@ -20,7 +33,7 @@ const configSchema = z.object({
   dbPassword: z.string().default('caddy'),
 
   seedEmail: z.string().default('admin@caddy.local'),
-  seedPassword: z.string().default('admin'),
+  seedPassword: z.string().min(1, 'SEED_PASSWORD is required'),
   seedRole: z.string().default('admin'),
 });
 
