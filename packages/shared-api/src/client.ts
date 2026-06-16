@@ -28,7 +28,7 @@ export class ApiClient {
     };
   }
 
-  private async request<T>(path: string, options?: RequestInit): Promise<T> {
+  async request<T>(path: string, options?: RequestInit): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
       headers: { ...this.headers, ...options?.headers },
@@ -71,6 +71,10 @@ export class ApiClient {
   // Sites
   async getSites(): Promise<Site[]> {
     return this.request('/api/sites');
+  }
+
+  async getSite(id: string): Promise<Site> {
+    return this.request(`/api/sites/${id}`);
   }
 
   async createSite(data: CreateSiteRequest): Promise<Site> {

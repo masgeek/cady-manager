@@ -6,5 +6,5 @@ COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 RUN pnpm install --frozen-lockfile
 RUN pnpm build --filter=@caddy-manager/api
-EXPOSE 3001
+EXPOSE 3500
 CMD ["node", "apps/api/dist/index.js"]

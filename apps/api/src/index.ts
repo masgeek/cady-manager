@@ -1,17 +1,10 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-
-const app = Fastify({ logger: true });
-
-await app.register(cors, { origin: true });
-
-app.get('/api/health', async () => {
-  return { status: 'online', checkedAt: new Date().toISOString() };
-});
+import { buildApp } from './app.js';
 
 const start = async () => {
+  const app = await buildApp();
+
   try {
-    const port = parseInt(process.env.PORT || '3001', 10);
+    const port = parseInt(process.env.PORT || '3500', 10);
     await app.listen({ port, host: '0.0.0.0' });
   } catch (err) {
     app.log.error(err);

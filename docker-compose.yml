@@ -20,9 +20,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile.api
     ports:
-      - "3001:3001"
+      - "3500:3500"
     environment:
-      PORT: "3001"
+      PORT: "3500"
       DATABASE_URL: "postgres://caddy:caddy@postgres:5432/caddy_manager"
     depends_on:
       postgres:
@@ -35,7 +35,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      VITE_API_URL: "http://localhost:3001"
+      VITE_API_URL: "http://localhost:3500"
     depends_on:
       - api
 
