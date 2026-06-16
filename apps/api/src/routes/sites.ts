@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { createSiteSchema, updateSiteSchema, siteParamsSchema } from '../lib/schemas';
+import { createSiteSchema, updateSiteSchema, siteParamsSchema, toJsonSchema } from '../lib/schemas';
 import * as siteService from '../services/site';
 import { recordAuditEvent } from '../services/audit';
 
@@ -26,7 +26,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Sites'],
         summary: 'Get site by ID',
-        params: siteParamsSchema,
+        params: toJsonSchema(siteParamsSchema),
         response: { 200: { type: 'object' } },
       },
     },
@@ -42,7 +42,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Sites'],
         summary: 'Create a site',
-        body: createSiteSchema,
+        body: toJsonSchema(createSiteSchema),
         response: { 201: { type: 'object' } },
       },
     },
@@ -67,8 +67,8 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Sites'],
         summary: 'Update a site',
-        params: siteParamsSchema,
-        body: updateSiteSchema,
+        params: toJsonSchema(siteParamsSchema),
+        body: toJsonSchema(updateSiteSchema),
         response: { 200: { type: 'object' } },
       },
     },
@@ -94,7 +94,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Sites'],
         summary: 'Delete a site',
-        params: siteParamsSchema,
+        params: toJsonSchema(siteParamsSchema),
         response: { 204: { type: 'null' } },
       },
     },

@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import type { JsonSchema7Type } from 'zod-to-json-schema';
 import {
   createServerSchema,
   updateServerSchema,
@@ -34,3 +36,7 @@ export const logQuerySchema = z.object({
 export const auditQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(500).default(100),
 });
+
+export function toJsonSchema(schema: z.ZodType): JsonSchema7Type {
+  return zodToJsonSchema(schema, { target: 'jsonSchema7' });
+}

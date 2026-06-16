@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { auditQuerySchema } from '../lib/schemas';
+import { auditQuerySchema, toJsonSchema } from '../lib/schemas';
 import * as auditService from '../services/audit';
 
 export async function registerAuditRoutes(app: FastifyInstance) {
@@ -9,7 +9,7 @@ export async function registerAuditRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Audit'],
         summary: 'Get audit trail',
-        querystring: auditQuerySchema,
+        querystring: toJsonSchema(auditQuerySchema),
         response: { 200: { type: 'array' } },
       },
     },

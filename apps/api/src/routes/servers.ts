@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { createServerSchema, updateServerSchema, serverParamsSchema } from '../lib/schemas';
+import { createServerSchema, updateServerSchema, serverParamsSchema, toJsonSchema } from '../lib/schemas';
 import * as serverService from '../services/server';
 import { CaddyProvider } from '../providers/caddy';
 import { recordAuditEvent } from '../services/audit';
@@ -11,7 +11,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'List all servers',
-        response: { 200: { type: 'array' } },
+        response: { 200: { type: 'array', items: { type: 'object' } } },
       },
     },
     async () => {
@@ -25,7 +25,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'Get server by ID',
-        params: serverParamsSchema,
+        params: toJsonSchema(serverParamsSchema),
         response: { 200: { type: 'object' } },
       },
     },
@@ -41,7 +41,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'Create a server',
-        body: createServerSchema,
+        body: toJsonSchema(createServerSchema),
         response: { 201: { type: 'object' } },
       },
     },
@@ -66,8 +66,8 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'Update a server',
-        params: serverParamsSchema,
-        body: updateServerSchema,
+        params: toJsonSchema(serverParamsSchema),
+        body: toJsonSchema(updateServerSchema),
         response: { 200: { type: 'object' } },
       },
     },
@@ -93,7 +93,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'Delete a server',
-        params: serverParamsSchema,
+        params: toJsonSchema(serverParamsSchema),
         response: { 204: { type: 'null' } },
       },
     },
@@ -119,7 +119,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'Check server health',
-        params: serverParamsSchema,
+        params: toJsonSchema(serverParamsSchema),
       },
     },
     async (request) => {

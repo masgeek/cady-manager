@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { logQuerySchema } from '../lib/schemas';
+import { logQuerySchema, toJsonSchema } from '../lib/schemas';
 import * as logService from '../services/log';
 
 export async function registerLogRoutes(app: FastifyInstance) {
@@ -9,7 +9,7 @@ export async function registerLogRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Logs'],
         summary: 'Get application and Caddy logs',
-        querystring: logQuerySchema,
+        querystring: toJsonSchema(logQuerySchema),
         response: { 200: { type: 'array' } },
       },
     },
