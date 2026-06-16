@@ -1,4 +1,4 @@
-export { buildDatabaseUrl } from './env';
+export { buildDatabaseUrl } from '@caddy-manager/config';
 export { db, queryClient, runMigrations, closeDb } from './connection';
 export * from './schema';
 export * from './repositories/index';

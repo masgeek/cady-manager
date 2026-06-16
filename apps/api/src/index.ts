@@ -1,6 +1,8 @@
-import { config } from '@caddy-manager/config';
+import { config, validate } from '@caddy-manager/config';
 import { buildApp } from './app.js';
 import { runMigrations, closeDb } from './lib/db.js';
+
+validate();
 
 const start = async () => {
   const app = await buildApp();
