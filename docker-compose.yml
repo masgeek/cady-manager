@@ -1,50 +1,78 @@
 services:
-  postgres:
-    image: postgres:16-alpine
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: caddy
-      POSTGRES_USER: caddy
-      POSTGRES_PASSWORD: caddy
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${DB_NAME:-caddy}
+      POSTGRES_USER: ${DB_USER:-caddy}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U caddy -d caddy"]
-      interval: 5s
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-caddy} -d ${DB_NAME:-caddy}" ]
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
+
+  migrate:
+    image: caddy-manager-migrate:${TAG:-latest}
+    container_name: migrate
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.migrations
+    environment:
+      DB_USER: ${DB_USER:-caddy}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-caddy}
+      SEED_EMAIL: ${SEED_EMAIL:-admin@caddy.local}
+      SEED_USERNAME: ${SEED_USERNAME:-admin}
+      SEED_PASSWORD: ${SEED_PASSWORD:?SEED_PASSWORD is required}
+      SEED_ROLE: ${SEED_ROLE:-admin}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: no
+    networks:
+      - internal
 
   api:
+    image: caddy-manager-api:${TAG:-latest}
+    container_name: api
     build:
       context: .
-      dockerfile: docker/Dockerfile.api
-    ports:
-      - "3500:3500"
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
     environment:
-      PORT: "3500"
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_NAME: caddy
-      DB_USER: caddy
-      DB_PASSWORD: caddy
-      AUTH_USERNAME: ${AUTH_USERNAME:-admin}
-      AUTH_PASSWORD: ${AUTH_PASSWORD:-admin}
-      SEED_PASSWORD: ${SEED_PASSWORD:-admin}
+      PORT: 3500
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      AUTH_USERNAME: ${AUTH_USERNAME:?AUTH_USERNAME is required}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:?AUTH_PASSWORD is required}
+      DB_USER: ${DB_USER:-caddy}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-caddy}
+      SEED_EMAIL: ${SEED_EMAIL:-admin@caddy.local}
+      SEED_USERNAME: ${SEED_USERNAME:-admin}
+      SEED_PASSWORD: ${SEED_PASSWORD:?SEED_PASSWORD is required}
+      SEED_ROLE: ${SEED_ROLE:-admin}
+    ports:
+      - "${API_PORT:-3500}:3500"
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - internal
 
-  web:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.web
-    ports:
-      - "3000:3000"
-    environment:
-      VITE_API_URL: "http://localhost:3500"
-    depends_on:
-      - api
+networks:
+  internal:
+    external: true
 
 volumes:
-  pgdata:
+  db_data:

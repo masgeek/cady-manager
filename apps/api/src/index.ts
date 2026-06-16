@@ -1,13 +1,11 @@
 import { config, validate } from '@caddy-manager/config';
 import { buildApp } from './app.js';
-import { runMigrations, closeDb } from './lib/db.js';
+import { closeDb } from './lib/db.js';
 
 validate();
 
 const start = async () => {
   const app = await buildApp();
-
-  await runMigrations();
 
   try {
     await app.listen({ port: config.port, host: '0.0.0.0' });
