@@ -15,13 +15,14 @@ export async function registerSwagger(app: FastifyInstance) {
       ],
       components: {
         securitySchemes: {
-          basicAuth: {
+          bearerAuth: {
             type: 'http',
-            scheme: 'basic',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
           },
         },
       },
-      security: [{ basicAuth: [] }],
+      security: [{ bearerAuth: [] }],
     },
   });
 

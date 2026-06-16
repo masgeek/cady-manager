@@ -11,7 +11,6 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         tags: ['Sites'],
         summary: 'List all sites',
         querystring: { type: 'object', properties: { serverId: { type: 'string' } } },
-        response: { 200: { type: 'array' } },
       },
     },
     async (request) => {
@@ -27,7 +26,6 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         tags: ['Sites'],
         summary: 'Get site by ID',
         params: toJsonSchema(siteParamsSchema),
-        response: { 200: { type: 'object' } },
       },
     },
     async (request) => {
@@ -43,7 +41,6 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         tags: ['Sites'],
         summary: 'Create a site',
         body: toJsonSchema(createSiteSchema),
-        response: { 201: { type: 'object' } },
       },
     },
     async (request, reply) => {
@@ -69,7 +66,6 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         summary: 'Update a site',
         params: toJsonSchema(siteParamsSchema),
         body: toJsonSchema(updateSiteSchema),
-        response: { 200: { type: 'object' } },
       },
     },
     async (request) => {

@@ -36,11 +36,13 @@ export interface CreateSiteRequest {
   serverId: string;
   domain: string;
   upstream: string;
+  routeId?: string;
   tlsEnabled: boolean;
 }
 
 export interface UpdateSiteRequest {
   domain?: string;
   upstream?: string;
+  routeId?: string;
   tlsEnabled?: boolean;
 }

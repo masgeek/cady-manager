@@ -15,6 +15,13 @@
       "when": 1781634135576,
       "tag": "0001_add_username_column",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781726400000,
+      "tag": "0002_add_site_route_id",
+      "breakpoints": true
     }
   ]
 }

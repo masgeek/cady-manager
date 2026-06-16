@@ -14,24 +14,35 @@ import type {
 
 export class ApiClient {
   private baseUrl: string;
-  private credentials: string;
+  private token: string = '';
 
-  constructor(baseUrl: string, username: string, password: string) {
+  constructor(baseUrl: string, token?: string) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
-    this.credentials = btoa(`${username}:${password}`);
+    if (token) this.token = token;
+  }
+
+  setToken(token: string) {
+    this.token = token;
   }
 
   private get headers(): Record<string, string> {
-    return {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${this.credentials}`,
-    };
+    const headers: Record<string, string> = {};
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+    return headers;
   }
 
   async request<T>(path: string, options?: RequestInit): Promise<T> {
+    const headers: Record<string, string> = {
+      ...this.headers,
+    };
+    if (options?.body) {
+      headers['Content-Type'] = 'application/json';
+    }
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
-      headers: { ...this.headers, ...options?.headers },
+      headers: { ...headers, ...(options?.headers as Record<string, string>) },
     });
 
     if (!response.ok) {
@@ -129,5 +140,18 @@ export class ApiClient {
     if (params?.limit) query.set('limit', String(params.limit));
     const qs = query.toString();
     return this.request(`/audit${qs ? `?${qs}` : ''}`);
+  }
+
+  // Health
+  async checkServerHealth(id: string): Promise<{ status: string; server: Server }> {
+    return this.request(`/servers/${id}/health`, { method: 'POST' });
+  }
+
+  // Import
+  async importServerSites(id: string): Promise<{ imported: number; skipped: number; sites: Site[] }> {
+    return this.request(`/servers/${id}/import`, {
+      method: 'POST',
+      body: '{}',
+    });
   }
 }

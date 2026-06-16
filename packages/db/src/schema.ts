@@ -18,6 +18,7 @@ export const sites = pgTable('sites', {
   serverId: text('server_id').notNull().references(() => servers.id, { onDelete: 'cascade' }),
   domain: varchar('domain', { length: 255 }).notNull(),
   upstream: varchar('upstream', { length: 255 }).notNull(),
+  routeId: varchar('route_id', { length: 255 }),
   tlsEnabled: boolean('tls_enabled').notNull().default(true),
   status: varchar('status', { length: 20 }).notNull().default('inactive'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

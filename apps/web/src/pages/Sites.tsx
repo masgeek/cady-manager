@@ -20,6 +20,7 @@ import { api } from '../api/client';
 
 const columns: Column<Site>[] = [
   { field: 'domain', headerName: 'Domain' },
+  { field: 'routeId', headerName: '@id' },
   { field: 'upstream', headerName: 'Upstream' },
   {
     field: 'tlsEnabled',

@@ -7,6 +7,7 @@ import sensible from '@fastify/sensible';
 import { errorHandler } from './lib/errors';
 import { registerSwagger } from './plugins/swagger';
 import { registerAuth } from './plugins/auth';
+import { registerAuthRoutes } from './routes/auth';
 import { registerHealthRoutes } from './routes/health';
 import { registerServerRoutes } from './routes/servers';
 import { registerSiteRoutes } from './routes/sites';
@@ -34,21 +35,26 @@ export async function buildApp() {
   await registerAuth(app);
 
   await app.register(async (scoped) => {
-    await registerHealthRoutes(scoped);
-    await registerServerRoutes(scoped);
-    await registerSiteRoutes(scoped);
-    await registerConfigRoutes(scoped);
-    await registerLogRoutes(scoped);
-    await registerAuditRoutes(scoped);
+    // Public routes (no JWT required)
+    await scoped.register(async (public_) => {
+      await registerAuthRoutes(public_);
+      await registerHealthRoutes(public_);
+    });
 
-    scoped.addHook('onRequest', async (request, reply) => {
-      if (!request.url.startsWith('/health')) {
+    // Protected routes (JWT required)
+    await scoped.register(async (protected_) => {
+      protected_.addHook('onRequest', async (request, reply) => {
         try {
           await app.authenticate(request, reply);
         } catch {
           reply.status(401).send({ statusCode: 401, message: 'Unauthorized' });
         }
-      }
+      });
+      await registerServerRoutes(protected_);
+      await registerSiteRoutes(protected_);
+      await registerConfigRoutes(protected_);
+      await registerLogRoutes(protected_);
+      await registerAuditRoutes(protected_);
     });
   }, { prefix: '/api' });
 

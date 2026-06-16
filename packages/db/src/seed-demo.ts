@@ -1,17 +1,100 @@
-/**
- * seed-demo.ts — Generate demo data for development/testing.
- * All records tagged with [DEMO] for safe targeted purge.
- * Usage: tsx src/seed-demo.ts
- * Purge: tsx src/seed-demo.ts --purge
- */
-
 import { queryClient } from './connection';
+import { serverRepo } from './repositories/server.repository';
+import { siteRepo } from './repositories/site.repository';
+import { auditRepo } from './repositories/audit.repository';
 
 const TAG = '[DEMO]';
 
 async function seedDemo() {
   console.log(`Seeding demo data ${TAG}...`);
-  // TODO: generate realistic demo servers, sites, audit events
+
+  const prodServer = await serverRepo.create({
+    name: `Production Caddy ${TAG}`,
+    hostname: 'caddy-prod.example.com',
+    apiEndpoint: 'http://caddy-prod:2019',
+  });
+  await serverRepo.updateStatus(prodServer.id, 'online', 'v2.8.4');
+  console.log(`  Created server: Production Caddy (${prodServer.id})`);
+
+  const stagingServer = await serverRepo.create({
+    name: `Staging Caddy ${TAG}`,
+    hostname: 'caddy-staging.example.com',
+    apiEndpoint: 'http://caddy-staging:2019',
+  });
+  await serverRepo.updateStatus(stagingServer.id, 'online', 'v2.8.4');
+  console.log(`  Created server: Staging Caddy (${stagingServer.id})`);
+
+  const sites = await Promise.all([
+    siteRepo.create({
+      serverId: prodServer.id,
+      domain: `app.example.com ${TAG}`,
+      upstream: 'http://10.0.1.5:3000',
+      tlsEnabled: true,
+    }),
+    siteRepo.create({
+      serverId: prodServer.id,
+      domain: `api.example.com ${TAG}`,
+      upstream: 'http://10.0.1.6:8080',
+      tlsEnabled: true,
+    }),
+    siteRepo.create({
+      serverId: prodServer.id,
+      domain: `admin.example.com ${TAG}`,
+      upstream: 'http://10.0.1.7:5000',
+      tlsEnabled: true,
+    }),
+    siteRepo.create({
+      serverId: stagingServer.id,
+      domain: `staging.app.example.com ${TAG}`,
+      upstream: 'http://10.0.2.5:3000',
+      tlsEnabled: false,
+    }),
+    siteRepo.create({
+      serverId: stagingServer.id,
+      domain: `staging.api.example.com ${TAG}`,
+      upstream: 'http://10.0.2.6:8080',
+      tlsEnabled: false,
+    }),
+  ]);
+
+  for (const site of sites) {
+    console.log(`  Created site: ${site.domain.replace(` ${TAG}`, '')} (${site.id})`);
+  }
+
+  await auditRepo.create({
+    userId: 'admin',
+    action: 'login',
+    entity: 'auth',
+    details: JSON.stringify({ method: 'jwt', email: 'admin@caddy.local' }) + ` ${TAG}`,
+    result: 'success',
+  });
+
+  await auditRepo.create({
+    userId: 'admin',
+    action: 'create',
+    entity: 'site',
+    entityId: sites[0].id,
+    details: JSON.stringify({ domain: 'app.example.com', upstream: 'http://10.0.1.5:3000' }) + ` ${TAG}`,
+    result: 'success',
+  });
+
+  await auditRepo.create({
+    userId: 'admin',
+    action: 'reload',
+    entity: 'config',
+    details: JSON.stringify({ serverId: prodServer.id }) + ` ${TAG}`,
+    result: 'success',
+  });
+
+  await auditRepo.create({
+    userId: 'admin',
+    action: 'update',
+    entity: 'server',
+    entityId: prodServer.id,
+    details: JSON.stringify({ name: 'Production Caddy' }) + ` ${TAG}`,
+    result: 'success',
+  });
+
   console.log('Demo data seeding complete.');
 }
 

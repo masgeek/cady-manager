@@ -10,7 +10,6 @@ export async function registerAuditRoutes(app: FastifyInstance) {
         tags: ['Audit'],
         summary: 'Get audit trail',
         querystring: toJsonSchema(auditQuerySchema),
-        response: { 200: { type: 'array' } },
       },
     },
     async (request) => {

@@ -24,6 +24,9 @@ export const config = {
 
   authUsername: process.env.AUTH_USERNAME ?? '',
   authPassword: process.env.AUTH_PASSWORD,
+  jwtSecret: process.env.JWT_SECRET ?? 'dev-secret-change-in-production',
+
+  caddyAdminToken: process.env.CADDY_ADMIN_TOKEN ?? '',
 
   dbHost: process.env.DB_HOST ?? 'localhost',
   dbPort: Number(process.env.DB_PORT ?? '5432'),

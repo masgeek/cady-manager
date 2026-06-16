@@ -56,7 +56,7 @@ caddy-manager/
 - Health monitoring
 - Log viewer with search and filters
 - Audit trail
-- HTTP Basic Auth
+- JWT-based authentication
 - Docker Compose deployment
 
 ## Prerequisites

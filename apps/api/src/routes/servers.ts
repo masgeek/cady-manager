@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { createServerSchema, updateServerSchema, serverParamsSchema, toJsonSchema } from '../lib/schemas';
 import * as serverService from '../services/server';
 import { CaddyProvider } from '../providers/caddy';
+import { importSitesFromConfig } from '../services/config';
 import { recordAuditEvent } from '../services/audit';
 
 export async function registerServerRoutes(app: FastifyInstance) {
@@ -11,7 +12,6 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'List all servers',
-        response: { 200: { type: 'array', items: { type: 'object' } } },
       },
     },
     async () => {
@@ -26,7 +26,6 @@ export async function registerServerRoutes(app: FastifyInstance) {
         tags: ['Servers'],
         summary: 'Get server by ID',
         params: toJsonSchema(serverParamsSchema),
-        response: { 200: { type: 'object' } },
       },
     },
     async (request) => {
@@ -42,7 +41,6 @@ export async function registerServerRoutes(app: FastifyInstance) {
         tags: ['Servers'],
         summary: 'Create a server',
         body: toJsonSchema(createServerSchema),
-        response: { 201: { type: 'object' } },
       },
     },
     async (request, reply) => {
@@ -68,7 +66,6 @@ export async function registerServerRoutes(app: FastifyInstance) {
         summary: 'Update a server',
         params: toJsonSchema(serverParamsSchema),
         body: toJsonSchema(updateServerSchema),
-        response: { 200: { type: 'object' } },
       },
     },
     async (request) => {
@@ -134,6 +131,40 @@ export async function registerServerRoutes(app: FastifyInstance) {
       } catch {
         await serverService.updateServerStatus(id, 'offline');
         return { status: 'offline', server: await serverService.getServer(id) };
+      }
+    },
+  );
+
+  app.post(
+    '/servers/:id/import',
+    {
+      schema: {
+        tags: ['Servers'],
+        summary: 'Import sites from server config',
+        params: toJsonSchema(serverParamsSchema),
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const server = await serverService.getServer(id);
+      const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
+
+      try {
+        const result = await importSitesFromConfig(server, provider);
+
+        await recordAuditEvent({
+          action: 'create',
+          entity: 'site',
+          details: `Imported ${result.imported} sites from ${server.name} config (${result.skipped} skipped)`,
+        });
+
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return reply.status(502).send({
+          statusCode: 502,
+          message: `Failed to import config from ${server.apiEndpoint}: ${message}`,
+        });
       }
     },
   );

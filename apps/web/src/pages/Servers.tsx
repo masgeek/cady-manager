@@ -11,8 +11,10 @@ import {
   TextField,
   IconButton,
   Tooltip,
+  Snackbar,
+  Alert,
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, Refresh as RefreshIcon, Download as DownloadIcon } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -73,17 +75,25 @@ export default function Servers() {
   });
 
   const healthMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/servers/${id}/health`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      return response.json();
-    },
+    mutationFn: (id: string) => api.checkServerHealth(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['servers'] });
     },
   });
+
+  const importMutation = useMutation({
+    mutationFn: (id: string) => api.importServerSites(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['servers'] });
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      setSnackbar(`${data.imported} site(s) imported, ${data.skipped} skipped`);
+    },
+    onError: () => {
+      setSnackbar('Failed to import sites');
+    },
+  });
+
+  const [snackbar, setSnackbar] = useState<string | null>(null);
 
   const rows = query.data || [];
 
@@ -95,6 +105,11 @@ export default function Servers() {
         <Tooltip title="Check health">
           <IconButton size="small" onClick={() => healthMutation.mutate(row.id)}>
             <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Import sites from config">
+          <IconButton size="small" onClick={() => importMutation.mutate(row.id)}>
+            <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
@@ -169,6 +184,16 @@ export default function Servers() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         onCancel={() => setDeleteId(null)}
       />
+
+      <Snackbar
+        open={!!snackbar}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(null)}
+      >
+        <Alert severity={importMutation.isError ? 'error' : 'success'} onClose={() => setSnackbar(null)}>
+          {snackbar}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

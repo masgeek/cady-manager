@@ -1,40 +1,28 @@
 import { config } from '@caddy-manager/config';
-import type { FastifyInstance } from 'fastify';
-import fastifyAuth from '@fastify/auth';
-import fastifyBasicAuth from '@fastify/basic-auth';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import fjwt from '@fastify/jwt';
 import { UnauthorizedError } from '../lib/errors.js';
 
-const ADMIN_USERNAME = config.authUsername;
-const ADMIN_PASSWORD = config.authPassword;
-
 export async function registerAuth(app: FastifyInstance) {
-  await app.register(fastifyBasicAuth, {
-    validate: async (username: string, password: string) => {
-      if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
-        throw new UnauthorizedError('Invalid credentials');
-      }
-    },
-    authenticate: true,
-  });
+  await app.register(fjwt, { secret: config.jwtSecret });
 
-  await app.register(fastifyAuth);
-
-  app.decorate('authenticate', async (request: unknown, reply: unknown) => {
-    const req = request as { basicAuthUser?: string };
-    const rep = reply as {
-      unauthorized: (message: string) => void;
-    };
-    if (!req.basicAuthUser) {
-      rep.unauthorized('Missing authentication');
+  app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      await request.jwtVerify();
+    } catch {
+      throw new UnauthorizedError('Invalid or expired token');
     }
   });
 }
 
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: { username: string };
+  }
+}
+
 declare module 'fastify' {
   interface FastifyInstance {
-    authenticate: (
-      request: unknown,
-      reply: unknown,
-    ) => Promise<void>;
+    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }

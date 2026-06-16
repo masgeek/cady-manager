@@ -101,7 +101,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 
 | ID | Requirement |
 |---|---|
-| FR-04.1 | System SHALL perform periodic health checks against registered servers |
+| FR-04.1 | System SHALL perform health checks against registered servers |
 | FR-04.2 | System SHALL display server status (online/offline/degraded), version, and uptime |
 | FR-04.3 | System SHALL surface health indicators on the dashboard |
 
@@ -135,10 +135,10 @@ This creates operational risk, onboarding friction, and limited observability. T
 
 | ID | Requirement |
 |---|---|
-| FR-08.1 | System SHALL authenticate users via HTTP Basic Auth over HTTPS |
-| FR-08.2 | System SHALL verify credentials against stored credentials in PostgreSQL |
+| FR-08.1 | System SHALL authenticate users via a `POST /api/auth/login` endpoint that validates credentials and returns a JWT token |
+| FR-08.2 | System SHALL verify credentials against configured AUTH_USERNAME and AUTH_PASSWORD environment variables |
 | FR-08.3 | System SHALL reject unauthenticated requests with a 401 response |
-| FR-08.4 | System SHALL support a configurable session timeout |
+| FR-08.4 | System SHALL require a valid JWT `Bearer` token on all authenticated API routes except `/auth/login` and `/health` |
 
 ---
 
@@ -149,16 +149,14 @@ This creates operational risk, onboarding friction, and limited observability. T
 | NFR-01 | **Security** — Caddy Admin API MUST never be publicly exposed; all access MUST go through the backend service |
 | NFR-02 | **Security** — The platform SHALL enforce HTTPS-only communication |
 | NFR-03 | **Security** — Input validation SHALL be applied at both API and UI layers |
-| NFR-04 | **Security** — Rate limiting SHALL be implemented on authentication endpoints |
-| NFR-05 | **Security** — Sessions SHALL expire after a configurable timeout; secure cookies SHALL be used |
-| NFR-06 | **Security** — CSRF protection SHALL be enabled |
-| NFR-07 | **Performance** — Page loads SHALL complete within 2 seconds under normal conditions |
-| NFR-08 | **Reliability** — API errors SHALL never expose stack traces or internal details |
-| NFR-09 | **Maintainability** — All packages SHALL share TypeScript types via the `shared-types` package |
-| NFR-10 | **Testability** — Unit test coverage SHALL target 80%+ |
-| NFR-11 | **Portability** — The system SHALL be deployable via Docker Compose |
-| NFR-12 | **Persistence** — All persistent data (servers, sites, audit logs, users) SHALL be stored in PostgreSQL |
-| NFR-13 | **Auth** — MVP SHALL use HTTP Basic Auth with credentials stored in PostgreSQL; tokens/users table SHALL be designed to support future OIDC/RBAC migration |
+| NFR-04 | **Security** — Rate limiting SHALL be implemented on API endpoints |
+| NFR-05 | **Performance** — Page loads SHALL complete within 2 seconds under normal conditions |
+| NFR-06 | **Reliability** — API errors SHALL never expose stack traces or internal details |
+| NFR-07 | **Maintainability** — All packages SHALL share TypeScript types via the `shared-types` package |
+| NFR-08 | **Testability** — Unit test coverage SHALL target 80%+ |
+| NFR-09 | **Portability** — The system SHALL be deployable via Docker Compose |
+| NFR-10 | **Persistence** — All persistent data (servers, sites, audit logs, users) SHALL be stored in PostgreSQL |
+| NFR-11 | **Auth** — MVP SHALL use JWT token authentication with credentials configured via environment variables; users table SHALL be designed to support future OIDC/RBAC migration |
 
 ---
 
@@ -170,6 +168,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 - **Domain-Driven Design** — Code is organized by domain concept (Site, Server, Config, Audit)
 - **Type Safety** — All contracts are defined as TypeScript types in `shared-types` and consumed by both frontend and backend
 - **PostgreSQL Backed** — All persistent state (servers, sites, audit logs, users) is stored in PostgreSQL from MVP onward
+- **Shared Config** — Environment variables are loaded and validated in a central `config` package consumed by all backend packages
 
 ---
 
@@ -187,7 +186,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 | Health Monitoring | Basic health checks, version, status display |
 | Logging | Fetch and display recent logs with search/filter |
 | Audit Trail | Record and display configuration and auth events |
-| Docker Deployment | Docker Compose setup for web, api, and postgres services; Caddy is managed externally |
+| Docker Deployment | Docker Compose setup for web, api, migrate, and postgres services; Caddy is managed externally |
 
 ### Out of Scope (MVP)
 
@@ -246,10 +245,10 @@ This creates operational risk, onboarding friction, and limited observability. T
 | API Documentation | OpenAPI + Swagger |
 | Logging | Pino |
 | Database | PostgreSQL |
-| ORM / Query Builder | Kysely (type-safe SQL query builder for TypeScript) |
+| ORM | Drizzle ORM |
 | Package Manager | pnpm |
 | Build System | TurboRepo |
-| Testing | Vitest, React Testing Library, Playwright, Supertest |
+| Testing | Vitest, React Testing Library |
 | Containerization | Docker, Docker Compose |
 
 ---
@@ -260,14 +259,14 @@ This creates operational risk, onboarding friction, and limited observability. T
 |---|---|
 | M1 — Monorepo Foundation | pnpm workspace, TurboRepo config, tsconfig, ESLint, Prettier, Docker scaffolding |
 | M2 — Backend API Foundation | Fastify server, health endpoint, error handling, logging, OpenAPI setup |
-| M3 — Shared Packages | `shared-types`, `shared-api`, `ui`, `config`, `utils` packages published and consumable |
+| M3 — Shared Packages | `shared-types`, `shared-api`, `ui`, `config`, `utils`, `db` packages published and consumable |
 | M4 — Frontend Shell | Vite + React + Router + MUI + TanStack Query wired up, layout in place |
 | M5 — Dashboard | Server list, health status, site count — all wired to API |
 | M6 — Site Management | Full CRUD UI for sites with validation |
 | M7 — Configuration Management | Config viewer, reload trigger |
 | M8 — Logging | Log viewer with search and filters |
-| M9 — Authentication | Login flow, session management, basic auth |
-| M10 — Docker Deployment | Docker Compose with web, api, and postgres services; environment configuration |
+| M9 — Authentication | Basic auth setup with configurable credentials |
+| M10 — Docker Deployment | Docker Compose with web, api, migrate, and postgres services; environment configuration |
 | M11 — Testing & Hardening | Test coverage, security review, edge cases |
 | M12 — Release Candidate | Final polish, documentation, CI/CD finalization |
 
@@ -277,10 +276,11 @@ This creates operational risk, onboarding friction, and limited observability. T
 
 | Decision | Chosen Approach | Rationale |
 |---|---|---|
-| MVP Authentication | HTTP Basic Auth over HTTPS | Simplest secure option for MVP; users table designed for future OIDC/RBAC migration |
+| MVP Authentication | JWT tokens via `POST /api/auth/login` | Token-based auth keeps the client dumb and enables future SSO/OIDC/RBAC; JWT secret configured via `JWT_SECRET` env var |
 | Data Persistence | PostgreSQL from MVP | Production-ready from day one; avoids migration pain later; single DB for all entity types |
 | Log Retention | Configurable max entries (default: 1000) | Keeps MVP simple; oldest entries dropped when limit hit; limit configurable via environment variable |
 | Caddy Deployment | External (user-managed) | The manager is an administration plane, not a Caddy orchestrator; users bring their own Caddy instance |
+| ORM | Drizzle ORM | Type-safe SQL query builder with Drizzle Kit for migrations; lighter weight than Prisma, better PostgreSQL support than Kysely |
 
 ---
 

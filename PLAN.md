@@ -154,28 +154,27 @@ Provider Layer
 
 # 6. Monorepo Structure
 
+```
 caddy-manager/
-
-apps/
-├── web
-├── api
-
-packages/
-├── shared-types
-├── shared-api
-├── ui
-├── config
-├── utils
-
-docs/
-
-docker/
-
-.github/
-
-package.json
-pnpm-workspace.yaml
-turbo.json
+├── apps/
+│   ├── web/              # React + Vite + MUI frontend
+│   └── api/              # Fastify backend
+├── packages/
+│   ├── shared-types/     # TypeScript interfaces and const arrays
+│   ├── shared-api/       # Typed API client for the frontend
+│   ├── ui/               # Shared MUI components
+│   ├── config/           # Centralized env loading and validation
+│   ├── db/               # Drizzle ORM schema, repositories, migrations, seeds
+│   └── utils/            # Shared utility functions
+├── .github/workflows/    # CI and Docker GitHub Actions
+├── package.json
+├── pnpm-workspace.yaml
+├── docker-compose.yml
+├── .dockerignore
+├── PRD.md
+├── PLAN.md
+└── FEATURES.md
+```
 
 ---
 
@@ -211,6 +210,8 @@ TypeScript
 
 Zod
 
+Drizzle ORM
+
 OpenAPI
 
 Swagger
@@ -232,10 +233,6 @@ TurboRepo
 Vitest
 
 React Testing Library
-
-Playwright
-
-Supertest
 
 ---
 
@@ -327,6 +324,7 @@ Properties:
 
 * id
 * email
+* username
 * role
 
 ---
@@ -341,15 +339,11 @@ Shared contracts.
 
 Examples:
 
-Site
-
-Server
-
-User
-
-AuditEvent
-
-HealthResponse
+* Site
+* Server
+* User
+* AuditEvent
+* HealthResponse
 
 ---
 
@@ -375,30 +369,39 @@ Reusable components.
 
 Examples:
 
-Layout
-
-DataTable
-
-JsonViewer
-
-StatusBadge
-
-ConfirmDialog
-
-SiteForm
+* Layout
+* DataTable
+* JsonViewer
+* StatusBadge
+* ConfirmDialog
+* SiteForm
 
 ---
 
 ## config
 
-Shared tooling.
+Centralized environment variable loading.
 
 Contains:
 
-* ESLint
-* Prettier
-* TSConfig
-* Vitest
+* `.env` auto-discovery and loading
+* `config` object with env vars and defaults
+* `buildDatabaseUrl()` helper
+* `validate()` for required-variable checks
+
+---
+
+## db
+
+Database layer using Drizzle ORM.
+
+Contains:
+
+* Schema definitions (users, servers, sites, audit_events)
+* Repository classes (UserRepository, ServerRepository, SiteRepository)
+* Zod validation schemas for CRUD operations
+* Migration files (SQL + drizzle-kit)
+* Seed scripts
 
 ---
 
@@ -408,13 +411,9 @@ Shared utilities.
 
 Examples:
 
-Date formatting
-
-Validation
-
-Error helpers
-
-Logging helpers
+* Date formatting
+* Validation helpers
+* Error helpers
 
 ---
 
@@ -425,8 +424,7 @@ Logging helpers
 Handles:
 
 * Request validation
-* Authentication
-* Authorization
+* Authentication (JWT tokens)
 * Response formatting
 
 ---
@@ -437,13 +435,10 @@ Contains business logic.
 
 Examples:
 
-SiteService
-
-ServerService
-
-ConfigService
-
-AuditService
+* SiteService
+* ServerService
+* ConfigService
+* AuditService
 
 ---
 
@@ -454,27 +449,24 @@ Abstracts web server implementations.
 Interface:
 
 Provider
-├── CaddyProvider
-├── NginxProvider
-├── TraefikProvider
+├── CaddyProvider (MVP)
 
-MVP implements only:
+Future:
 
-CaddyProvider
+* NginxProvider
+* TraefikProvider
 
 ---
 
 ## Repository Layer
 
-Future persistence support.
+Drizzle-based persistence.
 
 Examples:
 
-SiteRepository
-
-UserRepository
-
-AuditRepository
+* ServerRepository
+* SiteRepository
+* UserRepository
 
 ---
 
@@ -488,7 +480,6 @@ Displays:
 
 * Server status
 * Site count
-* Configuration version
 * Health indicators
 
 ---
@@ -567,11 +558,15 @@ PUT /api/servers/:id
 
 DELETE /api/servers/:id
 
+POST /api/servers/:id/health
+
 ---
 
 ## Sites
 
 GET /api/sites
+
+GET /api/sites/:id
 
 POST /api/sites
 
@@ -587,9 +582,13 @@ GET /api/config
 
 POST /api/config/reload
 
-GET /api/config/history
+GET /api/config/generated
 
-POST /api/config/rollback
+---
+
+## Auth
+
+POST /api/auth/login
 
 ---
 
@@ -613,23 +612,17 @@ GET /api/audit
 
 # 13. Security Architecture
 
-## Authentication
+## Authentication (MVP)
 
-Phase 1
+JWT token authentication via `POST /api/auth/login`. The client sends credentials, receives a JWT, and includes it as a `Bearer` token on subsequent requests. The JWT secret is configured via the `JWT_SECRET` environment variable.
 
-Local admin account
+Future:
 
-Phase 2
-
-OIDC
-
-Azure AD
-
-Google
-
-GitHub
-
-Keycloak
+* OIDC
+* Azure AD
+* Google
+* GitHub
+* Keycloak
 
 ---
 
@@ -637,29 +630,20 @@ Keycloak
 
 Roles:
 
-Admin
+* Admin
+* Operator
+* Viewer
 
-Operator
-
-Viewer
+Future RBAC implementation.
 
 ---
 
 ## Security Controls
 
-HTTPS only
-
-Input validation
-
-Rate limiting
-
-Audit logging
-
-Session expiration
-
-Secure cookies
-
-CSRF protection
+* HTTPS only
+* Input validation
+* Rate limiting
+* Audit logging
 
 ---
 
@@ -675,13 +659,10 @@ Track:
 
 Store:
 
-Timestamp
-
-User
-
-Action
-
-Result
+* Timestamp
+* User
+* Action
+* Result
 
 ---
 
@@ -693,13 +674,13 @@ Read active configuration.
 
 ---
 
-## Configuration History
+## Configuration History (Phase 2)
 
 Store snapshots.
 
 ---
 
-## Rollback
+## Rollback (Phase 2)
 
 Allow restoring previous configurations.
 
@@ -721,9 +702,8 @@ Fetch logs through API.
 
 ## Future
 
-Live log streaming.
-
-WebSocket support.
+* Live log streaming
+* WebSocket support
 
 ---
 
@@ -731,21 +711,16 @@ WebSocket support.
 
 ## MVP
 
-Health checks.
-
-Version information.
-
-Uptime.
+* Health checks
+* Version information
 
 ---
 
 ## Future
 
-Prometheus metrics.
-
-Grafana dashboards.
-
-OpenTelemetry traces.
+* Prometheus metrics
+* Grafana dashboards
+* OpenTelemetry traces
 
 ---
 
@@ -753,37 +728,30 @@ OpenTelemetry traces.
 
 ## Unit Tests
 
-Coverage target:
-
-80%+
+Coverage target: 80%+
 
 ---
 
 ## Component Tests
 
-Forms
-
-Tables
-
-Hooks
+* Forms
+* Tables
+* Hooks
 
 ---
 
 ## API Tests
 
-Routes
-
-Validation
-
-Authentication
+* Routes
+* Validation
+* Authentication
 
 ---
 
 ## Integration Tests
 
-Provider layer
-
-Caddy communication
+* Provider layer
+* Caddy communication
 
 ---
 
@@ -800,10 +768,13 @@ Pipeline stages:
 1. Install
 2. Lint
 3. Type Check
-4. Test
-5. Build
-6. Docker Build
-7. Publish
+4. Build
+5. Docker Build & Push (multi-arch: linux/amd64 + linux/arm64)
+
+Two workflows:
+
+* **CI** — runs on push/PR to main: typecheck, lint, build
+* **Docker** — runs on push to main / version tags: builds and pushes api, web, and migrate images
 
 ---
 
@@ -811,19 +782,10 @@ Pipeline stages:
 
 Services:
 
-web
-
-api
-
-caddy
-
-Future:
-
-postgres
-
-redis
-
-worker
+* db (PostgreSQL 17)
+* migrate (runs drizzle-kit migrate + seed, then exits)
+* api (Fastify backend)
+* web (Nginx-served React SPA)
 
 ---
 
@@ -838,7 +800,7 @@ Included:
 * Health Monitoring
 * Logs
 * Audit Logging
-* Docker Deployment
+* Docker Deployment (web, api, migrate, postgres)
 
 Excluded:
 
@@ -876,41 +838,18 @@ Excluded:
 
 # 24. Development Milestones
 
-Milestone 1
-Monorepo Foundation
-
-Milestone 2
-Backend API Foundation
-
-Milestone 3
-Shared Packages
-
-Milestone 4
-Frontend Shell
-
-Milestone 5
-Dashboard
-
-Milestone 6
-Site Management
-
-Milestone 7
-Configuration Management
-
-Milestone 8
-Logging
-
-Milestone 9
-Authentication
-
-Milestone 10
-Docker Deployment
-
-Milestone 11
-Testing & Hardening
-
-Milestone 12
-Release Candidate
+Milestone 1: Monorepo Foundation
+Milestone 2: Backend API Foundation
+Milestone 3: Shared Packages
+Milestone 4: Frontend Shell
+Milestone 5: Dashboard
+Milestone 6: Site Management
+Milestone 7: Configuration Management
+Milestone 8: Logging
+Milestone 9: Authentication (JWT tokens via POST /api/auth/login)
+Milestone 10: Docker Deployment
+Milestone 11: Testing & Hardening
+Milestone 12: Release Candidate
 
 ---
 

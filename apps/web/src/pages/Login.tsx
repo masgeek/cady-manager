@@ -26,7 +26,7 @@ export default function Login() {
     }
   };
 
-  if (localStorage.getItem('auth')) {
+  if (localStorage.getItem('token')) {
     navigate('/');
     return null;
   }

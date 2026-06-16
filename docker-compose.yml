@@ -53,6 +53,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       AUTH_USERNAME: ${AUTH_USERNAME:?AUTH_USERNAME is required}
       AUTH_PASSWORD: ${AUTH_PASSWORD:?AUTH_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       DB_USER: ${DB_USER:-caddy}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       DB_HOST: db

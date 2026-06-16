@@ -18,6 +18,7 @@ export interface Site {
   serverId: string;
   domain: string;
   upstream: string;
+  routeId?: string;
   tlsEnabled: boolean;
   status: SiteStatus;
   createdAt: string;

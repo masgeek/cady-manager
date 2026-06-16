@@ -20,6 +20,7 @@ const siteSchema = z.object({
   serverId: z.string().min(1, 'Server is required'),
   domain: z.string().min(1, 'Domain is required'),
   upstream: z.string().url('Must be a valid URL'),
+  routeId: z.string().optional(),
   tlsEnabled: z.boolean(),
 });
 
@@ -59,6 +60,7 @@ export default function SiteEditor() {
         serverId: siteQuery.data.serverId,
         domain: siteQuery.data.domain,
         upstream: siteQuery.data.upstream,
+        routeId: siteQuery.data.routeId ?? '',
         tlsEnabled: siteQuery.data.tlsEnabled,
       });
     }
@@ -89,9 +91,10 @@ export default function SiteEditor() {
       </Typography>
       <Paper sx={{ p: 3, maxWidth: 600 }}>
         <form
-          onSubmit={handleSubmit((data) =>
-            isEdit ? updateMutation.mutate(data) : createMutation.mutate(data),
-          )}
+          onSubmit={handleSubmit((data) => {
+            const payload = { ...data, routeId: data.routeId || undefined };
+            return isEdit ? updateMutation.mutate(payload) : createMutation.mutate(payload);
+          })}
         >
           <TextField
             select
@@ -126,6 +129,15 @@ export default function SiteEditor() {
             fullWidth
             margin="normal"
             placeholder="http://localhost:8080"
+          />
+          <TextField
+            {...register('routeId')}
+            label="@id"
+            error={!!errors.routeId}
+            helperText={errors.routeId?.message}
+            fullWidth
+            margin="normal"
+            placeholder="fees"
           />
           <FormControlLabel
             control={

@@ -1,16 +1,8 @@
 import { ApiClient } from '@caddy-manager/shared-api';
 
 function createClient(): ApiClient {
-  const saved = localStorage.getItem('auth');
-  if (saved) {
-    try {
-      const { username, password } = JSON.parse(saved);
-      return new ApiClient('/api', username, password);
-    } catch {
-      // ignore
-    }
-  }
-  return new ApiClient('/api', 'admin', 'admin');
+  const saved = localStorage.getItem('token');
+  return new ApiClient('/api', saved ?? undefined);
 }
 
 export let api: ApiClient = createClient();
