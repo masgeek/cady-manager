@@ -1,23 +1,24 @@
-import 'dotenv/config';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import dotenv from 'dotenv';
 import { z } from 'zod';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: resolve(__dirname, '../../../.env') });
+
 const configSchema = z.object({
-  // Server
   port: z.coerce.number().default(3500),
   logLevel: z.string().default('info'),
 
-  // Auth
-  authUsername: z.string().default('admin'),
-  authPassword: z.string().default('admin'),
+  authUsername: z.string().min(1, 'AUTH_USERNAME is required'),
+  authPassword: z.string().min(1, 'AUTH_PASSWORD is required'),
 
-  // Database
   dbHost: z.string().default('localhost'),
   dbPort: z.coerce.number().default(5432),
   dbName: z.string().default('caddy'),
   dbUser: z.string().default('caddy'),
   dbPassword: z.string().default('caddy'),
 
-  // Seed
   seedEmail: z.string().default('admin@caddy.local'),
   seedPassword: z.string().default('admin'),
   seedRole: z.string().default('admin'),
