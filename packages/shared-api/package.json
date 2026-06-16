@@ -1,0 +1,26 @@
+{
+  "name": "@caddy-manager/shared-api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "@caddy-manager/shared-types": "workspace:*"
+  }
+}

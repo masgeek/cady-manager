@@ -1,0 +1,10 @@
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+WORKDIR /app
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.json ./
+COPY packages/ ./packages/
+COPY apps/api/ ./apps/api/
+RUN pnpm install --frozen-lockfile
+RUN pnpm build --filter=@caddy-manager/api
+EXPOSE 3001
+CMD ["node", "apps/api/dist/index.js"]
