@@ -1,13 +1,13 @@
 import { config } from '@caddy-manager/config';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
-import { Kysely, PostgresDialect, sql } from 'kysely';
+import { Kysely, PostgresDialect } from 'kysely';
+import { Migrator } from 'kysely/migration';
 import type { DB } from './types';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const MIGRATIONS_DIR = join(__dirname, '../../migrations');
 
 const pool = new pg.Pool({
   host: config.dbHost,
@@ -22,30 +22,39 @@ export const db = new Kysely<DB>({
   dialect: new PostgresDialect({ pool }),
 });
 
+const MIGRATIONS_DIR = join(__dirname, '../migrations');
+
 export async function runMigrations() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS _migrations (
-      name VARCHAR(255) PRIMARY KEY,
-      executed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `.execute(db);
-
-  const { rows } = await sql<{ name: string }>`
-    SELECT name FROM _migrations ORDER BY name
-  `.execute(db);
-
-  const executed = new Set(rows.map(r => r.name));
   const files = readdirSync(MIGRATIONS_DIR)
-    .filter(f => f.endsWith('.sql'))
+    .filter(f => f.endsWith('.ts') || f.endsWith('.js'))
     .sort();
 
-  for (const file of files) {
-    if (executed.has(file)) continue;
+  const provider = {
+    getMigrations: async () => {
+      const migrations: Record<string, { up: (db: Kysely<unknown>) => Promise<void>; down: (db: Kysely<unknown>) => Promise<void> }> = {};
+      for (const file of files) {
+        const name = file.replace(/\.(ts|js)$/, '');
+        const mod = await import(pathToFileURL(join(MIGRATIONS_DIR, file)).href);
+        migrations[name] = { up: mod.up, down: mod.down };
+      }
+      return migrations;
+    },
+  };
 
-    const sqlContent = readFileSync(join(MIGRATIONS_DIR, file), 'utf-8');
-    await sql.raw(sqlContent).execute(db);
-    await sql`INSERT INTO _migrations (name) VALUES (${file})`.execute(db);
+  const migrator = new Migrator({ db, provider });
+  const { error, results } = await migrator.migrateToLatest();
+
+  if (results) {
+    for (const result of results) {
+      if (result.status === 'Success') {
+        console.log(`  ✓ ${result.migrationName}`);
+      } else if (result.status === 'Error') {
+        console.error(`  ✗ ${result.migrationName}`);
+      }
+    }
   }
+
+  if (error) throw error;
 }
 
 export async function closeDb() {
