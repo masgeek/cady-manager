@@ -1,19 +1,5 @@
-import { randomUUID } from 'node:crypto';
 import type { AuditEvent, AuditAction, AuditEntity } from '@caddy-manager/shared-types';
-
-interface AuditRow {
-  id: string;
-  userId: string;
-  action: string;
-  entity: string;
-  entityId: string | null;
-  details: string | null;
-  result: string;
-  timestamp: string;
-}
-
-const events: AuditRow[] = [];
-const MAX_EVENTS = 1000;
+import { db } from '../lib/db';
 
 export async function recordAuditEvent(data: {
   userId?: string;
@@ -23,32 +9,25 @@ export async function recordAuditEvent(data: {
   details?: string;
   result?: 'success' | 'failure';
 }): Promise<AuditEvent> {
-  const event: AuditRow = {
-    id: randomUUID(),
-    userId: data.userId || 'admin',
-    action: data.action,
-    entity: data.entity,
-    entityId: data.entityId ?? null,
-    details: data.details ?? null,
-    result: data.result ?? 'success',
-    timestamp: new Date().toISOString(),
-  };
+  const row = await db
+    .insertInto('audit_events')
+    .values({
+      user_id: data.userId || 'admin',
+      action: data.action,
+      entity: data.entity,
+      entity_id: data.entityId ?? null,
+      details: data.details ?? null,
+      result: data.result ?? 'success',
+    })
+    .returningAll()
+    .executeTakeFirstOrThrow();
 
-  events.unshift(event);
-  if (events.length > MAX_EVENTS) {
-    events.length = MAX_EVENTS;
-  }
-
-  return toEvent(event);
-}
-
-function toEvent(row: AuditRow): AuditEvent {
   return {
     id: row.id,
-    userId: row.userId,
+    userId: row.user_id,
     action: row.action as AuditAction,
     entity: row.entity as AuditEntity,
-    entityId: row.entityId ?? undefined,
+    entityId: row.entity_id ?? undefined,
     details: row.details ?? undefined,
     result: row.result as 'success' | 'failure',
     timestamp: row.timestamp,
@@ -56,5 +35,21 @@ function toEvent(row: AuditRow): AuditEvent {
 }
 
 export async function getAuditEvents(limit = 100): Promise<AuditEvent[]> {
-  return events.slice(0, limit).map(toEvent);
+  const rows = await db
+    .selectFrom('audit_events')
+    .selectAll()
+    .orderBy('timestamp', 'desc')
+    .limit(limit)
+    .execute();
+
+  return rows.map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    action: row.action as AuditAction,
+    entity: row.entity as AuditEntity,
+    entityId: row.entity_id ?? undefined,
+    details: row.details ?? undefined,
+    result: row.result as 'success' | 'failure',
+    timestamp: row.timestamp,
+  }));
 }

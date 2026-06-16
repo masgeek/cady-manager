@@ -4,11 +4,7 @@ import { runMigrations, closeDb } from './lib/db.js';
 const start = async () => {
   const app = await buildApp();
 
-  try {
-    await runMigrations();
-  } catch (err) {
-    app.log.warn('Database not available, running with in-memory storage');
-  }
+  await runMigrations();
 
   try {
     const port = parseInt(process.env.PORT || '3500', 10);
