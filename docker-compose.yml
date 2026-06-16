@@ -3,9 +3,9 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-caddy}
-      POSTGRES_USER: ${DB_USER:-caddy}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_USER: ${DB_USER:-caddy}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_NAME: ${DB_NAME:-caddy}
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,6 +14,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
+      - web
       - internal
 
   migrate:
@@ -37,6 +38,7 @@ services:
         condition: service_healthy
     restart: no
     networks:
+      - web
       - internal
 
   api:
@@ -68,9 +70,27 @@ services:
       migrate:
         condition: service_completed_successfully
     networks:
+      - web
+      - internal
+
+  web:
+    image: caddy-manager-web:${TAG:-latest}
+    container_name: web
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      - api
+    networks:
+      - web
       - internal
 
 networks:
+  web:
+    external: true
   internal:
     external: true
 

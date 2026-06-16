@@ -1,3 +1,6 @@
+# Build context: monorepo root
+# docker build -f apps/api/Dockerfile .
+
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM node:24-alpine AS builder
 WORKDIR /repo
@@ -18,7 +21,7 @@ RUN pnpm install --frozen-lockfile
 COPY packages/ packages/
 COPY apps/api/ apps/api/
 
-# tsup bundles @caddy-manager/* inline
+# tsup bundles @caddy-manager/* inline — no separate package compilation needed
 RUN pnpm --filter @caddy-manager/api build
 
 # ─── Stage 2: Runtime ─────────────────────────────────────────────────────────
@@ -39,6 +42,8 @@ RUN pnpm install --prod --frozen-lockfile
 
 # Copy the bundled API output
 COPY --from=builder /repo/apps/api/dist apps/api/dist/
+
+RUN mkdir -p apps/api/uploads
 
 EXPOSE 3500
 CMD ["node", "apps/api/dist/index.js"]
