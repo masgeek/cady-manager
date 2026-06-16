@@ -43,70 +43,70 @@ export class ApiClient {
 
   // Servers
   async getServers(): Promise<Server[]> {
-    return this.request('/api/servers');
+    return this.request('/servers');
   }
 
   async getServer(id: string): Promise<Server> {
-    return this.request(`/api/servers/${id}`);
+    return this.request(`/servers/${id}`);
   }
 
   async createServer(data: CreateServerRequest): Promise<Server> {
-    return this.request('/api/servers', {
+    return this.request('/servers', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateServer(id: string, data: UpdateServerRequest): Promise<Server> {
-    return this.request(`/api/servers/${id}`, {
+    return this.request(`/servers/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
   async deleteServer(id: string): Promise<void> {
-    return this.request(`/api/servers/${id}`, { method: 'DELETE' });
+    return this.request(`/servers/${id}`, { method: 'DELETE' });
   }
 
   // Sites
   async getSites(): Promise<Site[]> {
-    return this.request('/api/sites');
+    return this.request('/sites');
   }
 
   async getSite(id: string): Promise<Site> {
-    return this.request(`/api/sites/${id}`);
+    return this.request(`/sites/${id}`);
   }
 
   async createSite(data: CreateSiteRequest): Promise<Site> {
-    return this.request('/api/sites', {
+    return this.request('/sites', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateSite(id: string, data: UpdateSiteRequest): Promise<Site> {
-    return this.request(`/api/sites/${id}`, {
+    return this.request(`/sites/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
   async deleteSite(id: string): Promise<void> {
-    return this.request(`/api/sites/${id}`, { method: 'DELETE' });
+    return this.request(`/sites/${id}`, { method: 'DELETE' });
   }
 
   // Config
   async getConfig(): Promise<Record<string, unknown>> {
-    return this.request('/api/config');
+    return this.request('/config');
   }
 
   async reloadConfig(): Promise<void> {
-    return this.request('/api/config/reload', { method: 'POST' });
+    return this.request('/config/reload', { method: 'POST' });
   }
 
   // Health
   async getHealth(): Promise<HealthResponse> {
-    return this.request('/api/health');
+    return this.request('/health');
   }
 
   // Logs
@@ -118,7 +118,7 @@ export class ApiClient {
     if (params?.limit) query.set('limit', String(params.limit));
     if (params?.search) query.set('search', params.search);
     const qs = query.toString();
-    return this.request(`/api/logs${qs ? `?${qs}` : ''}`);
+    return this.request(`/logs${qs ? `?${qs}` : ''}`);
   }
 
   // Audit
@@ -128,6 +128,6 @@ export class ApiClient {
     const query = new URLSearchParams();
     if (params?.limit) query.set('limit', String(params.limit));
     const qs = query.toString();
-    return this.request(`/api/audit${qs ? `?${qs}` : ''}`);
+    return this.request(`/audit${qs ? `?${qs}` : ''}`);
   }
 }
