@@ -9,15 +9,20 @@
     "test": "turbo test",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
-    "migrate": "pnpm --filter @caddy-manager/db db:migrate",
-    "migrate:generate": "pnpm --filter @caddy-manager/db db:generate",
-    "seed": "pnpm --filter @caddy-manager/api seed",
-    "purge": "pnpm --filter @caddy-manager/db db:purge"
+    "db:generate": "pnpm --filter @caddy-manager/db db:generate",
+    "db:migrate": "pnpm --filter @caddy-manager/db db:migrate",
+    "db:push": "pnpm --filter @caddy-manager/db db:push",
+    "db:pull": "pnpm --filter @caddy-manager/db db:pull",
+    "db:studio": "pnpm --filter @caddy-manager/db db:studio",
+    "db:seed": "pnpm --filter @caddy-manager/db db:seed",
+    "db:seed:demo": "pnpm --filter @caddy-manager/db db:seed:demo",
+    "db:purge": "pnpm --filter @caddy-manager/db db:purge",
+    "db:purge:demo": "pnpm --filter @caddy-manager/db db:purge:demo"
   },
   "devDependencies": {
-    "turbo": "^2.5.0",
-    "prettier": "^3.5.0",
-    "typescript": "^5.8.0"
+    "prettier": "^3.8.4",
+    "turbo": "^2.9.18",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20",

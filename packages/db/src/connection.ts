@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const databaseUrl = `postgresql://${config.dbUser}:${config.dbPassword}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
 export const queryClient = postgres(databaseUrl);
-export const db = drizzle(queryClient, { schema });
+export const db = drizzle({ client: queryClient, schema });
 
 export async function runMigrations() {
   const migrationsDir = join(__dirname, '../drizzle');
