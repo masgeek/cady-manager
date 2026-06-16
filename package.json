@@ -8,7 +8,11 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
+    "migrate": "pnpm --filter @caddy-manager/db db:migrate",
+    "migrate:generate": "pnpm --filter @caddy-manager/db db:generate",
+    "seed": "pnpm --filter @caddy-manager/api seed",
+    "purge": "pnpm --filter @caddy-manager/db db:purge"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

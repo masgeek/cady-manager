@@ -1,0 +1,38 @@
+{
+  "name": "@caddy-manager/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx src/seed.ts",
+    "db:purge": "tsx src/purge.ts"
+  },
+  "dependencies": {
+    "@caddy-manager/config": "workspace:*",
+    "@caddy-manager/shared-types": "workspace:*",
+    "drizzle-orm": "^0.44.0",
+    "postgres": "^3.4.5",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "drizzle-kit": "^0.31.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
+}

@@ -1,5 +1,7 @@
 import { randomBytes, scryptSync } from 'node:crypto';
-import { db, queryClient, userRepo } from '@caddy-manager/db';
+import { db, queryClient } from './connection';
+import { users } from './schema';
+import { eq } from 'drizzle-orm';
 
 function hashPassword(password: string): string {
   const salt = randomBytes(16).toString('hex');
@@ -17,12 +19,12 @@ async function seed() {
     process.exit(1);
   }
 
-  const existing = await userRepo.findByEmail(email);
+  const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
   if (existing) {
     console.log(`User ${email} already exists, skipping.`);
   } else {
-    await userRepo.create({
+    await db.insert(users).values({
       email,
       role,
       passwordHash: hashPassword(password),

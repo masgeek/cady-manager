@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: caddy_manager
+      POSTGRES_DB: caddy
       POSTGRES_USER: caddy
       POSTGRES_PASSWORD: caddy
     ports:
@@ -10,7 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U caddy -d caddy_manager"]
+      test: ["CMD-SHELL", "pg_isready -U caddy -d caddy"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,7 +23,14 @@ services:
       - "3500:3500"
     environment:
       PORT: "3500"
-      DATABASE_URL: "postgres://caddy:caddy@postgres:5432/caddy_manager"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: caddy
+      DB_USER: caddy
+      DB_PASSWORD: caddy
+      AUTH_USERNAME: ${AUTH_USERNAME:-admin}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:-admin}
+      SEED_PASSWORD: ${SEED_PASSWORD:-admin}
     depends_on:
       postgres:
         condition: service_healthy

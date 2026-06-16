@@ -15,16 +15,15 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
-    "@types/pg": "^8.20.0",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0",
     "vitest": "^3.1.0"
   },
   "dependencies": {
-    "@caddy-manager/shared-api": "workspace:*",
     "@caddy-manager/config": "workspace:*",
+    "@caddy-manager/db": "workspace:*",
+    "@caddy-manager/shared-api": "workspace:*",
     "@caddy-manager/shared-types": "workspace:*",
-    "@caddy-manager/utils": "workspace:*",
     "@fastify/auth": "^5.0.4",
     "@fastify/basic-auth": "^6.2.0",
     "@fastify/cors": "^11.0.0",
