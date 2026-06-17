@@ -49,6 +49,10 @@ export class ApiClient {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
 
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
     return response.json() as Promise<T>;
   }
 
@@ -153,5 +157,10 @@ export class ApiClient {
       method: 'POST',
       body: '{}',
     });
+  }
+
+  // Sync
+  async syncSite(id: string): Promise<Site> {
+    return this.request(`/sites/${id}/sync`, { method: 'POST', body: '{}' });
   }
 }
