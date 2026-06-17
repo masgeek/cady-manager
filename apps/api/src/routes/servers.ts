@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { createServerSchema, updateServerSchema, serverParamsSchema, toJsonSchema } from '../lib/schemas';
 import * as serverService from '../services/server';
 import { CaddyProvider } from '../providers/caddy';
-import { importSitesFromConfig } from '../services/config';
+import { importSitesFromConfig, discoverAndImport } from '../services/config';
 import { recordAuditEvent } from '../services/audit';
 
 export async function registerServerRoutes(app: FastifyInstance) {
@@ -164,6 +164,34 @@ export async function registerServerRoutes(app: FastifyInstance) {
         return reply.status(502).send({
           statusCode: 502,
           message: `Failed to import config from ${server.apiEndpoint}: ${message}`,
+        });
+      }
+    },
+  );
+
+  app.post(
+    '/servers/discover',
+    {
+      schema: {
+        tags: ['Servers'],
+        summary: 'Discover and import from Caddy admin API',
+        body: {
+          type: 'object',
+          properties: { apiEndpoint: { type: 'string' } },
+          required: ['apiEndpoint'],
+        },
+      },
+    },
+    async (request, reply) => {
+      const { apiEndpoint } = request.body as { apiEndpoint: string };
+      try {
+        const result = await discoverAndImport(apiEndpoint);
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return reply.status(502).send({
+          statusCode: 502,
+          message: `Failed to discover from ${apiEndpoint}: ${message}`,
         });
       }
     },

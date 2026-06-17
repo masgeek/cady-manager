@@ -166,4 +166,12 @@ export class ApiClient {
   async syncSite(id: string): Promise<Site> {
     return this.request(`/sites/${id}/sync`, { method: 'POST', body: '{}' });
   }
+
+  // Discover
+  async discoverServers(apiEndpoint: string): Promise<{ server: Server; imported: number; skipped: number; sites: Site[] }> {
+    return this.request('/servers/discover', {
+      method: 'POST',
+      body: JSON.stringify({ apiEndpoint }),
+    });
+  }
 }

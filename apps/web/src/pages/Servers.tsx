@@ -31,6 +31,8 @@ const columns: Column<Server>[] = [
 export default function Servers() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [discoverOpen, setDiscoverOpen] = useState(false);
+  const [discoverUrl, setDiscoverUrl] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ServerForm>({
@@ -78,6 +80,20 @@ export default function Servers() {
     },
   });
 
+  const discoverMutation = useMutation({
+    mutationFn: (url: string) => api.discoverServers(url),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['servers'] });
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      setDiscoverOpen(false);
+      setDiscoverUrl('');
+      setSnackbar(`Discovered server "${data.server.name}" with ${data.imported} site(s) imported, ${data.skipped} skipped`);
+    },
+    onError: (err: Error) => {
+      setSnackbar(`Discovery failed: ${err.message}`);
+    },
+  });
+
   const [snackbar, setSnackbar] = useState<string | null>(null);
 
   const rows = query.data || [];
@@ -116,9 +132,14 @@ export default function Servers() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">Servers</h4>
-        <button className="btn btn-primary" onClick={() => setDialogOpen(true)}>
-          <i className="bi bi-plus-circle me-1"></i> Add Server
-        </button>
+        <div className="d-flex gap-2">
+          <button className="btn btn-outline-info" onClick={() => setDiscoverOpen(true)}>
+            <i className="bi bi-search me-1"></i> Discover
+          </button>
+          <button className="btn btn-primary" onClick={() => setDialogOpen(true)}>
+            <i className="bi bi-plus-circle me-1"></i> Add Server
+          </button>
+        </div>
       </div>
 
       <DataTable
@@ -171,6 +192,46 @@ export default function Servers() {
                     <button type="submit" className="btn btn-primary">Create</button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Discover Modal */}
+      {discoverOpen && (
+        <>
+          <div className="modal-backdrop fade show" />
+          <div className="modal fade show d-block" tabIndex={-1}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Discover & Import</h5>
+                  <button type="button" className="btn-close" onClick={() => { setDiscoverOpen(false); setDiscoverUrl(''); }} />
+                </div>
+                <div className="modal-body">
+                  <p className="text-muted small">Enter the Caddy admin API endpoint to auto-discover servers and import sites from the config.</p>
+                  <div className="mb-3">
+                    <label className="form-label">API Endpoint</label>
+                    <input
+                      className="form-control"
+                      placeholder="http://localhost:2019"
+                      value={discoverUrl}
+                      onChange={(e) => setDiscoverUrl(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => { setDiscoverOpen(false); setDiscoverUrl(''); }}>Cancel</button>
+                  <button
+                    type="button"
+                    className="btn btn-info"
+                    disabled={!discoverUrl || discoverMutation.isPending}
+                    onClick={() => discoverMutation.mutate(discoverUrl)}
+                  >
+                    {discoverMutation.isPending ? 'Discovering...' : 'Discover & Import'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
