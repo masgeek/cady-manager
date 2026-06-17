@@ -30,6 +30,7 @@ function toSite(row: typeof sites.$inferSelect): Site {
     upstream: row.upstream,
     routeId: row.routeId ?? undefined,
     tlsEnabled: row.tlsEnabled,
+    synced: row.synced,
     status: row.status as Site['status'],
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -90,6 +91,10 @@ class SiteRepository {
       .where(and(eq(sites.domain, domain), eq(sites.serverId, serverId)))
       .limit(1);
     return row ? toSite(row) : undefined;
+  }
+
+  async updateSyncedStatus(id: string, synced: boolean): Promise<void> {
+    await db.update(sites).set({ synced }).where(eq(sites.id, id));
   }
 }
 
