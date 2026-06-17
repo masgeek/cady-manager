@@ -65,7 +65,7 @@ async function pingSite(url: string): Promise<{ alive: boolean; error?: string }
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), PING_TIMEOUT);
     try {
-        const res = await fetch(url, {method: 'HEAD', signal: controller.signal});
+        const res = await fetch(url, {method: 'HEAD', redirect: 'follow', signal: controller.signal});
         return {alive: res.ok};
     } catch (err) {
         return {alive: false, error: String(err)};
