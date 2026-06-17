@@ -80,4 +80,29 @@ export class CaddyProvider {
             return [];
         }
     }
+
+    async getServerNames(): Promise<string[]> {
+        const servers = await this.request<Record<string, unknown>>('/config/apps/http/servers/');
+        return Object.keys(servers);
+    }
+
+    async addRoute(serverName: string, route: Record<string, unknown>): Promise<void> {
+        await this.request(`/config/apps/http/servers/${serverName}/routes`, {
+            method: 'POST',
+            body: JSON.stringify(route),
+        });
+    }
+
+    async updateRouteByID(routeId: string, route: Record<string, unknown>): Promise<void> {
+        await this.request(`/id/${encodeURIComponent(routeId)}`, {
+            method: 'PATCH',
+            body: JSON.stringify(route),
+        });
+    }
+
+    async deleteRouteByID(routeId: string): Promise<void> {
+        await this.request(`/id/${encodeURIComponent(routeId)}`, {
+            method: 'DELETE',
+        });
+    }
 }
