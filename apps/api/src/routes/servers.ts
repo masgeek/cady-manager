@@ -125,8 +125,8 @@ export async function registerServerRoutes(app: FastifyInstance) {
 
       const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
       try {
-        const health = await provider.health();
-        await serverService.updateServerStatus(id, 'online', health.status);
+        await provider.health();
+        await serverService.updateServerStatus(id, 'online', 'online');
         return { status: 'online', server: await serverService.getServer(id) };
       } catch {
         await serverService.updateServerStatus(id, 'offline');

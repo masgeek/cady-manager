@@ -68,8 +68,8 @@ export class CaddyProvider {
         });
     }
 
-    async health(): Promise<{ status: string }> {
-        return this.request('/health');
+    async health(): Promise<void> {
+        await this.request('/config/');
     }
 
     async getLogs(): Promise<string[]> {
