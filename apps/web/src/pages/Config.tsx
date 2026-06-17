@@ -19,16 +19,13 @@ export default function Config() {
 
   const configQuery = useQuery({
     queryKey: ['config', serverId],
-    queryFn: () => {
-      const params = new URLSearchParams({ serverId });
-      return api.getConfig();
-    },
+    queryFn: () => api.getConfig(serverId),
     enabled: !!serverId,
   });
 
   const reloadMutation = useMutation({
     mutationFn: () =>
-      api.reloadConfig(),
+      api.reloadConfig(serverId),
     onSuccess: () => {
       setSnackbar({ open: true, message: 'Configuration reloaded successfully', severity: 'success' });
       queryClient.invalidateQueries({ queryKey: ['config', serverId] });

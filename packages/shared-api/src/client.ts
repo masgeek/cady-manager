@@ -111,12 +111,15 @@ export class ApiClient {
   }
 
   // Config
-  async getConfig(): Promise<Record<string, unknown>> {
-    return this.request('/config');
+  async getConfig(serverId: string): Promise<Record<string, unknown>> {
+    return this.request(`/config?serverId=${encodeURIComponent(serverId)}`);
   }
 
-  async reloadConfig(): Promise<void> {
-    return this.request('/config/reload', { method: 'POST' });
+  async reloadConfig(serverId: string): Promise<void> {
+    return this.request('/config/reload', {
+      method: 'POST',
+      body: JSON.stringify({ serverId }),
+    });
   }
 
   // Health
