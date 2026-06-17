@@ -1,14 +1,13 @@
 import React from 'react';
-import { Chip } from '@mui/material';
 
-const statusColors: Record<string, 'success' | 'warning' | 'error' | 'default'> = {
-  online: 'success',
-  active: 'success',
-  offline: 'error',
-  error: 'error',
-  degraded: 'warning',
-  unknown: 'default',
-  inactive: 'default',
+const statusColors: Record<string, string> = {
+  online: 'bg-success',
+  active: 'bg-success',
+  offline: 'bg-danger',
+  error: 'bg-danger',
+  degraded: 'bg-warning text-dark',
+  unknown: 'bg-secondary',
+  inactive: 'bg-secondary',
 };
 
 interface StatusBadgeProps {
@@ -16,6 +15,6 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  const color = statusColors[status] || 'default';
-  return <Chip label={status} color={color} size="small" variant="outlined" />;
+  const color = statusColors[status] || 'bg-secondary';
+  return <span className={`badge ${color}`}>{status}</span>;
 }

@@ -1,12 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-} from '@mui/material';
-import { Dns as DnsIcon, Article as ArticleIcon } from '@mui/icons-material';
 import { api } from '../api/client';
 
 export default function Dashboard() {
@@ -25,54 +17,50 @@ export default function Dashboard() {
   const onlineServers = servers.filter(s => s.status === 'online').length;
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <DnsIcon color="primary" sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography variant="h5">{servers.length}</Typography>
-                  <Typography color="text.secondary">Total Servers</Typography>
-                </Box>
-              </Box>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {onlineServers} online
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <ArticleIcon color="secondary" sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography variant="h5">{sites.length}</Typography>
-                  <Typography color="text.secondary">Total Sites</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <DnsIcon color="success" sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography variant="h5">{servers.length - onlineServers}</Typography>
-                  <Typography color="text.secondary">Offline Servers</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
+    <div>
+      <h4 className="mb-4">Dashboard</h4>
+      <div className="row g-3">
+        <div className="col-12 col-md-4">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex align-items-center gap-3">
+                <i className="bi bi-hdd-rack text-primary" style={{ fontSize: '2.5rem' }}></i>
+                <div>
+                  <h5 className="mb-0">{servers.length}</h5>
+                  <small className="text-muted">Total Servers</small>
+                </div>
+              </div>
+              <small className="d-block mt-2">{onlineServers} online</small>
+            </div>
+          </div>
+        </div>
+        <div className="col-12 col-md-4">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex align-items-center gap-3">
+                <i className="bi bi-file-text text-secondary" style={{ fontSize: '2.5rem' }}></i>
+                <div>
+                  <h5 className="mb-0">{sites.length}</h5>
+                  <small className="text-muted">Total Sites</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-12 col-md-4">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex align-items-center gap-3">
+                <i className="bi bi-hdd-stack text-danger" style={{ fontSize: '2.5rem' }}></i>
+                <div>
+                  <h5 className="mb-0">{servers.length - onlineServers}</h5>
+                  <small className="text-muted">Offline Servers</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

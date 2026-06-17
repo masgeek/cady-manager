@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Paper, Typography, TextField, Button, Alert } from '@mui/material';
 import { useAuth } from '../api/auth';
 
 export default function Login() {
@@ -32,54 +31,37 @@ export default function Login() {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        bgcolor: 'grey.100',
-      }}
-    >
-      <Paper sx={{ p: 4, maxWidth: 400, width: '100%' }}>
-        <Typography variant="h5" gutterBottom align="center">
-          Caddy Manager
-        </Typography>
-        <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
-          Sign in to continue
-        </Typography>
+    <div className="d-flex justify-content-center align-items-center bg-light" style={{ minHeight: '100vh' }}>
+      <div className="card shadow-sm p-4" style={{ maxWidth: 400, width: '100%' }}>
+        <h4 className="text-center mb-1">Caddy Manager</h4>
+        <p className="text-center text-muted small mb-3">Sign in to continue</p>
 
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && <div className="alert alert-danger py-2 small">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <TextField
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            fullWidth
-            margin="normal"
-            autoFocus
-          />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            size="large"
-            sx={{ mt: 2 }}
-            disabled={loading}
-          >
+          <div className="mb-3">
+            <label className="form-label">Username</label>
+            <input
+              className="form-control"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Password</label>
+            <input
+              className="form-control"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary w-100 btn-lg" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
-          </Button>
+          </button>
         </form>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 }

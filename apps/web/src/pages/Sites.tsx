@@ -1,17 +1,5 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Box,
-  Typography,
-  Button,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { DataTable, StatusBadge, ConfirmDialog } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
@@ -22,6 +10,16 @@ const columns: Column<Site>[] = [
   { field: 'domain', headerName: 'Domain' },
   { field: 'routeId', headerName: '@id' },
   { field: 'upstream', headerName: 'Upstream' },
+  {
+    field: 'synced',
+    headerName: 'In Config',
+    render: (value) =>
+      value ? (
+        <i className="bi bi-check-circle text-success"></i>
+      ) : (
+        <i className="bi bi-x-circle text-danger"></i>
+      ),
+  },
   {
     field: 'tlsEnabled',
     headerName: 'TLS',
@@ -52,39 +50,57 @@ export default function Sites() {
     },
   });
 
+  const syncMutation = useMutation({
+    mutationFn: (id: string) => api.syncSite(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+    },
+  });
+
   const rows = query.data || [];
 
   const actionColumn: Column<Site> = {
     field: 'actions',
     headerName: 'Actions',
     render: (_, row) => (
-      <Box>
-        <Tooltip title="Edit">
-          <IconButton size="small" onClick={() => navigate(`/sites/${row.id}/edit`)}>
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton size="small" onClick={() => setDeleteId(row.id)}>
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      <div className="d-flex gap-1">
+        {!row.synced && (
+          <button
+            className="btn btn-sm btn-outline-success"
+            onClick={() => syncMutation.mutate(row.id)}
+            title="Push to Caddy config"
+          >
+            <i className="bi bi-cloud-upload"></i>
+          </button>
+        )}
+        <button
+          className="btn btn-sm btn-outline-primary"
+          disabled={!row.routeId}
+          onClick={() => navigate(`/sites/${row.id}/edit`)}
+          title={!row.routeId ? 'Sync to Caddy first' : 'Edit'}
+        >
+          <i className="bi bi-pencil"></i>
+        </button>
+        <button
+          className="btn btn-sm btn-outline-danger"
+          disabled={!row.routeId}
+          onClick={() => setDeleteId(row.id)}
+          title={!row.routeId ? 'Sync to Caddy first' : 'Delete'}
+        >
+          <i className="bi bi-trash"></i>
+        </button>
+      </div>
     ),
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h4">Sites</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/sites/new')}
-        >
-          Add Site
-        </Button>
-      </Box>
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4 className="mb-0">Sites</h4>
+        <button className="btn btn-primary" onClick={() => navigate('/sites/new')}>
+          <i className="bi bi-plus-circle me-1"></i> Add Site
+        </button>
+      </div>
 
       <DataTable
         columns={[...columns, actionColumn]}
@@ -100,6 +116,6 @@ export default function Sites() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         onCancel={() => setDeleteId(null)}
       />
-    </Box>
+    </div>
   );
 }

@@ -1,14 +1,4 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TablePagination,
-} from '@mui/material';
 import type { Column } from './types';
 
 interface DataTableProps<T> {
@@ -32,50 +22,61 @@ export function DataTable<T>({
   totalCount,
   onPageChange,
 }: DataTableProps<T>) {
+  const totalPages = totalCount !== undefined ? Math.ceil(totalCount / pageSize) : 0;
+
   return (
-    <TableContainer component={Paper}>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            {columns.map((col) => (
-              <TableCell key={String(col.field)} sx={{ fontWeight: 'bold' }}>
-                {col.headerName}
-              </TableCell>
+    <div>
+      <div className="table-responsive">
+        <table className="table table-sm table-striped">
+          <thead className="table-light">
+            <tr>
+              {columns.map((col) => (
+                <th key={String(col.field)} scope="col">
+                  {col.headerName}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="text-center text-muted py-3">
+                  No data
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => (
+                <tr key={getRowId(row)}>
+                  {columns.map((col) => (
+                    <td key={String(col.field)}>
+                      {col.render
+                        ? col.render(row[col.field as keyof T], row)
+                        : String(row[col.field as keyof T] ?? '')}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      {totalCount !== undefined && onPageChange && totalPages > 1 && (
+        <nav>
+          <ul className="pagination pagination-sm justify-content-center mb-0 mt-2">
+            <li className={`page-item ${page === 0 ? 'disabled' : ''}`}>
+              <button className="page-link" onClick={() => onPageChange(page - 1)}>Previous</button>
+            </li>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li key={i} className={`page-item ${i === page ? 'active' : ''}`}>
+                <button className="page-link" onClick={() => onPageChange(i)}>{i + 1}</button>
+              </li>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} align="center">
-                No data
-              </TableCell>
-            </TableRow>
-          ) : (
-            rows.map((row) => (
-              <TableRow key={getRowId(row)}>
-                {columns.map((col) => (
-                  <TableCell key={String(col.field)}>
-                    {col.render
-                      ? col.render(row[col.field as keyof T], row)
-                      : String(row[col.field as keyof T] ?? '')}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-      {totalCount !== undefined && onPageChange && (
-        <TablePagination
-          component="div"
-          count={totalCount}
-          page={page}
-          onPageChange={(_, p) => onPageChange(p)}
-          rowsPerPage={pageSize}
-          rowsPerPageOptions={[pageSize]}
-        />
+            <li className={`page-item ${page >= totalPages - 1 ? 'disabled' : ''}`}>
+              <button className="page-link" onClick={() => onPageChange(page + 1)}>Next</button>
+            </li>
+          </ul>
+        </nav>
       )}
-    </TableContainer>
+    </div>
   );
 }

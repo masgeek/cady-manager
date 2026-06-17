@@ -1,20 +1,5 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Box,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  IconButton,
-  Tooltip,
-  Snackbar,
-  Alert,
-} from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon, Refresh as RefreshIcon, Download as DownloadIcon } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -101,38 +86,40 @@ export default function Servers() {
     field: 'actions',
     headerName: 'Actions',
     render: (_, row) => (
-      <Box>
-        <Tooltip title="Check health">
-          <IconButton size="small" onClick={() => healthMutation.mutate(row.id)}>
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Import sites from config">
-          <IconButton size="small" onClick={() => importMutation.mutate(row.id)}>
-            <DownloadIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton size="small" onClick={() => setDeleteId(row.id)}>
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      <div className="d-flex gap-1">
+        <button
+          className="btn btn-sm btn-outline-primary"
+          onClick={() => healthMutation.mutate(row.id)}
+          title="Check health"
+        >
+          <i className="bi bi-arrow-clockwise"></i>
+        </button>
+        <button
+          className="btn btn-sm btn-outline-success"
+          onClick={() => importMutation.mutate(row.id)}
+          title="Import sites from config"
+        >
+          <i className="bi bi-download"></i>
+        </button>
+        <button
+          className="btn btn-sm btn-outline-danger"
+          onClick={() => setDeleteId(row.id)}
+          title="Delete"
+        >
+          <i className="bi bi-trash"></i>
+        </button>
+      </div>
     ),
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h4">Servers</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setDialogOpen(true)}
-        >
-          Add Server
-        </Button>
-      </Box>
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4 className="mb-0">Servers</h4>
+        <button className="btn btn-primary" onClick={() => setDialogOpen(true)}>
+          <i className="bi bi-plus-circle me-1"></i> Add Server
+        </button>
+      </div>
 
       <DataTable
         columns={[...columns, actionColumn]}
@@ -140,42 +127,55 @@ export default function Servers() {
         getRowId={(r) => r.id}
       />
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit((data) => createMutation.mutate(data))}>
-          <DialogTitle>Add Server</DialogTitle>
-          <DialogContent>
-            <TextField
-              {...register('name')}
-              label="Name"
-              error={!!errors.name}
-              helperText={errors.name?.message}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              {...register('hostname')}
-              label="Hostname"
-              error={!!errors.hostname}
-              helperText={errors.hostname?.message}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              {...register('apiEndpoint')}
-              label="API Endpoint"
-              error={!!errors.apiEndpoint}
-              helperText={errors.apiEndpoint?.message}
-              fullWidth
-              margin="normal"
-              placeholder="http://localhost:2019"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained">Create</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+      {/* Add Server Modal */}
+      {dialogOpen && (
+        <>
+          <div className="modal-backdrop fade show" />
+          <div className="modal fade show d-block" tabIndex={-1}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <form onSubmit={handleSubmit((data) => createMutation.mutate(data))}>
+                  <div className="modal-header">
+                    <h5 className="modal-title">Add Server</h5>
+                    <button type="button" className="btn-close" onClick={() => setDialogOpen(false)} />
+                  </div>
+                  <div className="modal-body">
+                    <div className="mb-3">
+                      <label className="form-label">Name</label>
+                      <input
+                        {...register('name')}
+                        className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                      />
+                      {errors.name && <div className="invalid-feedback">{errors.name.message}</div>}
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Hostname</label>
+                      <input
+                        {...register('hostname')}
+                        className={`form-control ${errors.hostname ? 'is-invalid' : ''}`}
+                      />
+                      {errors.hostname && <div className="invalid-feedback">{errors.hostname.message}</div>}
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">API Endpoint</label>
+                      <input
+                        {...register('apiEndpoint')}
+                        className={`form-control ${errors.apiEndpoint ? 'is-invalid' : ''}`}
+                        placeholder="http://localhost:2019"
+                      />
+                      {errors.apiEndpoint && <div className="invalid-feedback">{errors.apiEndpoint.message}</div>}
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" onClick={() => setDialogOpen(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Create</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <ConfirmDialog
         open={!!deleteId}
@@ -185,15 +185,14 @@ export default function Servers() {
         onCancel={() => setDeleteId(null)}
       />
 
-      <Snackbar
-        open={!!snackbar}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar(null)}
-      >
-        <Alert severity={importMutation.isError ? 'error' : 'success'} onClose={() => setSnackbar(null)}>
-          {snackbar}
-        </Alert>
-      </Snackbar>
-    </Box>
+      {snackbar && (
+        <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 9999 }}>
+          <div className="alert alert-success alert-dismissible fade show mb-0">
+            {snackbar}
+            <button type="button" className="btn-close" onClick={() => setSnackbar(null)} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

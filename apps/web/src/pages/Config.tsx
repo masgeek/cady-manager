@@ -1,15 +1,5 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  MenuItem,
-  Alert,
-  Snackbar,
-} from '@mui/material';
-import { Refresh as RefreshIcon } from '@mui/icons-material';
 import { JsonViewer } from '@caddy-manager/ui';
 import { api } from '../api/client';
 
@@ -51,49 +41,43 @@ export default function Config() {
   const servers = serversQuery.data || [];
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Configuration
-      </Typography>
+    <div>
+      <h4 className="mb-3">Configuration</h4>
 
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
-        <TextField
-          select
-          label="Server"
+      <div className="d-flex gap-2 mb-3 align-items-center">
+        <select
+          className="form-select"
+          style={{ maxWidth: 250 }}
           value={serverId}
           onChange={(e) => setServerId(e.target.value)}
-          sx={{ minWidth: 250 }}
-          size="small"
         >
+          <option value="">Select a server...</option>
           {servers.map((s) => (
-            <MenuItem key={s.id} value={s.id}>
-              {s.name}
-            </MenuItem>
+            <option key={s.id} value={s.id}>{s.name}</option>
           ))}
-        </TextField>
-        <Button
-          variant="contained"
-          startIcon={<RefreshIcon />}
+        </select>
+        <button
+          className="btn btn-primary"
           onClick={() => reloadMutation.mutate()}
           disabled={!serverId || reloadMutation.isPending}
         >
+          <i className="bi bi-arrow-clockwise me-1"></i>
           Reload Config
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {configQuery.data && (
         <JsonViewer data={configQuery.data} title="Active Configuration" />
       )}
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      {snackbar.open && (
+        <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 9999 }}>
+          <div className={`alert alert-${snackbar.severity === 'error' ? 'danger' : 'success'} alert-dismissible fade show mb-0`}>
+            {snackbar.message}
+            <button type="button" className="btn-close" onClick={() => setSnackbar({ ...snackbar, open: false })} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

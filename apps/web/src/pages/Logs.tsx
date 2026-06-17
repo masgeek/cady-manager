@@ -1,17 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Box,
-  Typography,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from '@mui/material';
 import { api } from '../api/client';
 
 interface LogEntry {
@@ -36,49 +24,45 @@ export default function Logs() {
   const rows = query.data || [];
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Logs
-      </Typography>
+    <div>
+      <h4 className="mb-3">Logs</h4>
 
-      <TextField
-        label="Search logs"
+      <input
+        className="form-control mb-3"
+        style={{ maxWidth: 300 }}
+        placeholder="Search logs"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        size="small"
-        sx={{ mb: 2, width: 300 }}
       />
 
-      <TableContainer component={Paper}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Timestamp</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Level</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Message</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="table-responsive">
+        <table className="table table-sm table-striped">
+          <thead className="table-light">
+            <tr>
+              <th scope="col">Timestamp</th>
+              <th scope="col">Level</th>
+              <th scope="col">Source</th>
+              <th scope="col">Message</th>
+            </tr>
+          </thead>
+          <tbody>
             {rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  No logs
-                </TableCell>
-              </TableRow>
+              <tr>
+                <td colSpan={4} className="text-center text-muted py-3">No logs</td>
+              </tr>
             ) : (
               rows.map((row, i) => (
-                <TableRow key={i}>
-                  <TableCell>{new Date(row.timestamp).toLocaleString()}</TableCell>
-                  <TableCell>{row.level}</TableCell>
-                  <TableCell>{row.source || '-'}</TableCell>
-                  <TableCell>{row.message}</TableCell>
-                </TableRow>
+                <tr key={i}>
+                  <td>{new Date(row.timestamp).toLocaleString()}</td>
+                  <td>{row.level}</td>
+                  <td>{row.source || '-'}</td>
+                  <td>{row.message}</td>
+                </tr>
               ))
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

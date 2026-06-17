@@ -1,11 +1,4 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import { ContentCopy as CopyIcon, Download as DownloadIcon } from '@mui/icons-material';
 
 interface JsonViewerProps {
   data: unknown;
@@ -30,36 +23,24 @@ export function JsonViewer({ data, title }: JsonViewerProps) {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        {title && <Typography variant="subtitle2">{title}</Typography>}
-        <Box sx={{ ml: 'auto' }}>
-          <Tooltip title="Copy">
-            <IconButton size="small" onClick={handleCopy}>
-              <CopyIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Download">
-            <IconButton size="small" onClick={handleDownload}>
-              <DownloadIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
-      <Box
-        component="pre"
-        sx={{
-          backgroundColor: 'grey.100',
-          p: 2,
-          borderRadius: 1,
-          overflow: 'auto',
-          maxHeight: '60vh',
-          fontSize: '0.8rem',
-          fontFamily: 'monospace',
-        }}
+    <div>
+      <div className="d-flex align-items-center gap-2 mb-1">
+        {title && <small className="fw-bold">{title}</small>}
+        <div className="ms-auto">
+          <button className="btn btn-sm btn-outline-secondary me-1" onClick={handleCopy} title="Copy">
+            <i className="bi bi-clipboard"></i>
+          </button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={handleDownload} title="Download">
+            <i className="bi bi-download"></i>
+          </button>
+        </div>
+      </div>
+      <pre
+        className="bg-light p-3 rounded overflow-auto border"
+        style={{ maxHeight: '60vh', fontSize: '0.8rem' }}
       >
         {formatted}
-      </Box>
-    </Box>
+      </pre>
+    </div>
   );
 }
