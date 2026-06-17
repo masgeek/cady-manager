@@ -236,9 +236,8 @@ export function parseServerBlocksFromConfig(config: Record<string, unknown>): Ar
   return blocks;
 }
 
-function extractBaseDomain(domain: string): string {
-  const dot = domain.indexOf('.');
-  return dot > 0 ? domain.slice(dot + 1) : domain;
+function pickApexDomain(domains: string[]): string {
+  return domains.reduce((apex, d) => (d.split('.').length < apex.split('.').length ? d : apex));
 }
 
 export async function discoverAndImport(
@@ -252,9 +251,10 @@ export async function discoverAndImport(
     throw new Error('No server blocks with routes found in Caddy config');
   }
 
-  // use the first server block to create a server entry
+  // use the first server block to create a server entry;
+  // pick the apex domain (fewest parts) as the server hostname
   const block = blocks[0];
-  const hostname = extractBaseDomain(block.domains[0]);
+  const hostname = pickApexDomain(block.domains);
 
   // check if a server with this apiEndpoint already exists
   const allServers = await serverRepo.findAll();
