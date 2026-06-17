@@ -5,6 +5,7 @@ import { CaddyProvider } from '../providers/caddy';
 interface ParsedSite {
   domain: string;
   upstream: string;
+  routeId?: string;
   tlsEnabled: boolean;
 }
 
@@ -88,6 +89,7 @@ export function parseSitesFromConfig(config: Record<string, unknown>): ParsedSit
       if (!dial) continue;
 
       const upstreamUrl = dial.includes('://') ? dial : `http://${dial}`;
+      const routeId = route['@id'] as string | undefined;
 
       for (const domain of hosts) {
         if (seen.has(domain)) continue;
@@ -95,6 +97,7 @@ export function parseSitesFromConfig(config: Record<string, unknown>): ParsedSit
         sites.push({
           domain,
           upstream: upstreamUrl,
+          routeId,
           tlsEnabled: tlsDomains.has(domain),
         });
       }
@@ -129,6 +132,7 @@ export async function importSitesFromConfig(
       serverId: server.id,
       domain: p.domain,
       upstream: p.upstream,
+      routeId: p.routeId,
       tlsEnabled: p.tlsEnabled,
     });
     imported++;
@@ -140,6 +144,7 @@ export async function importSitesFromConfig(
 
 export function buildCaddyConfig(server: Server, sites: Site[]): Record<string, unknown> {
   const serverRoutes = sites.map(site => ({
+    '@id': site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_'),
     match: [{ host: [site.domain] }],
     handle: [
       {
@@ -171,6 +176,23 @@ export function buildCaddyConfig(server: Server, sites: Site[]): Record<string, 
   }
 
   return { apps };
+}
+
+export function buildCaddyRoute(site: {
+  domain: string;
+  upstream: string;
+  routeId?: string;
+}): Record<string, unknown> {
+  return {
+    '@id': site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_'),
+    match: [{ host: [site.domain] }],
+    handle: [
+      {
+        handler: 'reverse_proxy',
+        upstreams: [{ dial: site.upstream.replace(/^https?:\/\//, '') }],
+      },
+    ],
+  };
 }
 
 export async function getServerConfig(provider: CaddyProvider): Promise<Record<string, unknown>> {
