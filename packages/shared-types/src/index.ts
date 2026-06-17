@@ -20,6 +20,7 @@ export interface Site {
   upstream: string;
   routeId?: string;
   tlsEnabled: boolean;
+  synced: boolean;
   status: SiteStatus;
   createdAt: string;
   updatedAt: string;
