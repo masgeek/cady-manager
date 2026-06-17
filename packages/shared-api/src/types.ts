@@ -38,6 +38,8 @@ export interface CreateSiteRequest {
   upstream: string;
   routeId?: string;
   tlsEnabled: boolean;
+  healthEndpoint?: string;
+  healthHeaders?: string;
 }
 
 export interface UpdateSiteRequest {
@@ -45,4 +47,6 @@ export interface UpdateSiteRequest {
   upstream?: string;
   routeId?: string;
   tlsEnabled?: boolean;
+  healthEndpoint?: string;
+  healthHeaders?: string;
 }

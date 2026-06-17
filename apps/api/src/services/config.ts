@@ -245,6 +245,32 @@ function hostnameFromUrl(url: string): string {
   }
 }
 
+function deriveServerName(domains: string[]): string {
+  if (domains.length === 0) return 'unknown';
+  
+  const freq = new Map<string, number>();
+  for (const domain of domains) {
+    const parts = domain.split('.');
+    // For sub.domain.tld, pick parts[parts.length - 3] ?? parts[0]
+    // e.g. "api.munywele.co.ke" → "munywele"
+    //       "akilimo.org" → "akilimo"
+    //       "akilimo-hub.eastus.cloudapp.azure.com" → "eastus"
+    const nameIdx = parts.length >= 3 ? parts.length - 3 : 0;
+    const name = parts[nameIdx];
+    if (name) freq.set(name, (freq.get(name) ?? 0) + 1);
+  }
+  
+  let best = '';
+  let bestCount = 0;
+  for (const [name, count] of freq) {
+    if (count > bestCount || (count === bestCount && name < best)) {
+      best = name;
+      bestCount = count;
+    }
+  }
+  return best || 'unknown';
+}
+
 export async function discoverAndImport(
   apiEndpoint: string,
 ): Promise<{ server: Server; imported: number; skipped: number; sites: Site[] }> {
@@ -256,19 +282,16 @@ export async function discoverAndImport(
     throw new Error('No server blocks with routes found in Caddy config');
   }
 
-  // use the first server block for the server name;
-  // use the API endpoint hostname as the server hostname (avoids
-  // guessing when multiple domains exist across blocks)
   const block = blocks[0];
+  const serverName = deriveServerName(block.domains);
   const hostname = hostnameFromUrl(apiEndpoint);
 
-  // check if a server with this apiEndpoint already exists
   const allServers = await serverRepo.findAll();
   let server = allServers.find((s) => s.apiEndpoint === apiEndpoint);
 
   if (!server) {
     server = await serverRepo.create({
-      name: block.name,
+      name: serverName,
       hostname,
       apiEndpoint,
     });

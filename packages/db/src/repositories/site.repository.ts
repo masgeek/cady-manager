@@ -10,6 +10,8 @@ export const createSiteSchema = z.object({
   upstream: z.string().url(),
   routeId: z.string().max(255).optional(),
   tlsEnabled: z.boolean(),
+  healthEndpoint: z.string().max(500).optional(),
+  healthHeaders: z.string().optional(),
 });
 
 export const updateSiteSchema = z.object({
@@ -17,6 +19,8 @@ export const updateSiteSchema = z.object({
   upstream: z.string().url().optional(),
   routeId: z.string().max(255).optional(),
   tlsEnabled: z.boolean().optional(),
+  healthEndpoint: z.string().max(500).optional(),
+  healthHeaders: z.string().optional(),
 });
 
 export type CreateSiteInput = z.infer<typeof createSiteSchema>;
@@ -32,6 +36,8 @@ function toSite(row: typeof sites.$inferSelect): Site {
     tlsEnabled: row.tlsEnabled,
     synced: row.synced,
     status: row.status as Site['status'],
+    healthEndpoint: row.healthEndpoint ?? undefined,
+    healthHeaders: row.healthHeaders ?? undefined,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -57,6 +63,8 @@ class SiteRepository {
       upstream: data.upstream,
       routeId: data.routeId,
       tlsEnabled: data.tlsEnabled,
+      healthEndpoint: data.healthEndpoint,
+      healthHeaders: data.healthHeaders,
     }).returning();
     return toSite(row);
   }
@@ -67,6 +75,8 @@ class SiteRepository {
     if (data.upstream !== undefined) update.upstream = data.upstream;
     if (data.routeId !== undefined) update.routeId = data.routeId;
     if (data.tlsEnabled !== undefined) update.tlsEnabled = data.tlsEnabled;
+    if (data.healthEndpoint !== undefined) update.healthEndpoint = data.healthEndpoint;
+    if (data.healthHeaders !== undefined) update.healthHeaders = data.healthHeaders;
 
     const [row] = await db.update(sites)
       .set(update)

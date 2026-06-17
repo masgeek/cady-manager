@@ -20,6 +20,8 @@ export async function createSite(data: {
   upstream: string;
   routeId?: string;
   tlsEnabled: boolean;
+  healthEndpoint?: string;
+  healthHeaders?: string;
 }): Promise<Site> {
   const server = await serverRepo.findById(data.serverId);
   if (!server) throw new NotFoundError('Server', data.serverId);
@@ -38,7 +40,7 @@ export async function createSite(data: {
 
 export async function updateSite(
   id: string,
-  data: Partial<{ domain: string; upstream: string; routeId?: string; tlsEnabled: boolean }>,
+  data: Partial<{ domain: string; upstream: string; routeId?: string; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
 ): Promise<Site> {
   const existing = await siteRepo.findById(id);
   if (!existing) throw new NotFoundError('Site', id);

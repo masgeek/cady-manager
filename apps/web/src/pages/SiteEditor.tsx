@@ -13,6 +13,8 @@ const siteSchema = z.object({
   upstream: z.string().url('Must be a valid URL'),
   routeId: z.string().optional(),
   tlsEnabled: z.boolean(),
+  healthEndpoint: z.string().optional(),
+  healthHeaders: z.string().optional(),
 });
 
 type SiteForm = z.infer<typeof siteSchema>;
@@ -55,6 +57,8 @@ export default function SiteEditor() {
       name: '',
       baseDomain: '',
       tlsEnabled: true,
+      healthEndpoint: '',
+      healthHeaders: '',
     },
   });
 
@@ -68,6 +72,8 @@ export default function SiteEditor() {
         upstream: siteQuery.data.upstream,
         routeId: siteQuery.data.routeId ?? '',
         tlsEnabled: siteQuery.data.tlsEnabled,
+        healthEndpoint: siteQuery.data.healthEndpoint ?? '',
+        healthHeaders: siteQuery.data.healthHeaders ?? '',
       });
     }
   }, [siteQuery.data, reset]);
@@ -91,6 +97,8 @@ export default function SiteEditor() {
       upstream: data.upstream,
       routeId: data.routeId || undefined,
       tlsEnabled: data.tlsEnabled,
+      healthEndpoint: data.healthEndpoint || undefined,
+      healthHeaders: data.healthHeaders || undefined,
     }),
     [],
   );
@@ -197,7 +205,39 @@ export default function SiteEditor() {
             <label className="form-check-label" htmlFor="tls-switch">TLS Enabled</label>
           </div>
 
-          <div className="d-flex gap-2">
+          <div className="card mt-3">
+            <div className="card-header">
+              <h6 className="mb-0">Health Check Settings</h6>
+            </div>
+            <div className="card-body">
+              <p className="text-muted small mb-3">
+                Leave blank to use <code>https://{'{domain}'}</code> with no custom headers.
+              </p>
+              <div className="mb-3">
+                <label className="form-label">Health Endpoint URL</label>
+                <input
+                  {...register('healthEndpoint')}
+                  className={`form-control ${errors.healthEndpoint ? 'is-invalid' : ''}`}
+                  placeholder="https://api.example.com/health"
+                />
+                <div className="form-text">Custom URL to ping instead of the site domain.</div>
+                {errors.healthEndpoint && <div className="invalid-feedback">{errors.healthEndpoint.message}</div>}
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Health Check Headers (JSON)</label>
+                <textarea
+                  {...register('healthHeaders')}
+                  className={`form-control font-monospace ${errors.healthHeaders ? 'is-invalid' : ''}`}
+                  rows={3}
+                  placeholder='{"Authorization": "Bearer token123"}'
+                />
+                <div className="form-text">JSON object of headers to include in the health check request.</div>
+                {errors.healthHeaders && <div className="invalid-feedback">{errors.healthHeaders.message}</div>}
+              </div>
+            </div>
+          </div>
+
+          <div className="d-flex gap-2 mt-3">
             <button type="submit" className="btn btn-primary">
               {isEdit ? 'Update' : 'Create'}
             </button>

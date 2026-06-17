@@ -61,11 +61,15 @@ function describeCron(expression: string): string {
     return hasTime ? `Every day at ${timeStr}` : `Every day`;
 }
 
-async function pingSite(url: string): Promise<{ alive: boolean; error?: string }> {
+async function pingSite(url: string, headers?: Record<string, string>): Promise<{ alive: boolean; error?: string }> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), PING_TIMEOUT);
     try {
-        const res = await fetch(url, {method: 'HEAD', redirect: 'follow', signal: controller.signal});
+        const opts: RequestInit = {method: 'HEAD', redirect: 'follow', signal: controller.signal};
+        if (headers && Object.keys(headers).length > 0) {
+            opts.headers = headers;
+        }
+        const res = await fetch(url, opts);
         return {alive: res.ok};
     } catch (err) {
         return {alive: false, error: String(err)};
@@ -79,16 +83,27 @@ export async function checkAllSites(): Promise<void> {
     const allSites = await siteRepo.findAll();
     console.log(`[site-health] checking ${allSites.length} sites`);
     for (const site of allSites) {
-        const url = `https://${site.domain}`;
-        const result = await pingSite(url);
+        const url = site.healthEndpoint || `https://${site.domain}`;
+        const parsedHeaders = site.healthHeaders ? tryParseHeaders(site.healthHeaders) : undefined;
+        const result = await pingSite(url, parsedHeaders);
         if (result.alive) {
-            console.log(`[site-health] ${site.domain} → active`);
+            console.log(`[site-health] ${site.domain} → active (${url})`);
         } else {
-            console.error(`[site-health] ${site.domain} → error: ${result.error}`);
+            console.error(`[site-health] ${site.domain} → error: ${result.error} (${url})`);
         }
         await siteRepo.updateStatus(site.id, result.alive ? 'active' : 'error');
     }
     console.log(`[site-health] completed in ${Date.now() - started}ms`);
+}
+
+function tryParseHeaders(raw: string): Record<string, string> | undefined {
+    try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            return parsed as Record<string, string>;
+        }
+    } catch { /* invalid JSON, ignore */ }
+    return undefined;
 }
 
 export function startSiteHealthJob(): void {

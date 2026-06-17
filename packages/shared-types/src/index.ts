@@ -22,6 +22,8 @@ export interface Site {
   tlsEnabled: boolean;
   synced: boolean;
   status: SiteStatus;
+  healthEndpoint?: string;
+  healthHeaders?: string;
   createdAt: string;
   updatedAt: string;
 }
