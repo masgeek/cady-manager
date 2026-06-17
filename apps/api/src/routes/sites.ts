@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { createSiteSchema, updateSiteSchema, siteParamsSchema, toJsonSchema } from '../lib/schemas';
 import * as siteService from '../services/site';
+import { checkAllSites } from '../jobs/siteHealth.js';
 import { recordAuditEvent } from '../services/audit';
 
 export async function registerSiteRoutes(app: FastifyInstance) {
@@ -131,6 +132,20 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       });
 
       return site;
+    },
+  );
+
+  app.post(
+    '/sites/health-check',
+    {
+      schema: {
+        tags: ['Sites'],
+        summary: 'Manually trigger site health check',
+      },
+    },
+    async () => {
+      await checkAllSites();
+      return { success: true };
     },
   );
 }
