@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1781624284377,
+      "when": 1781710031472,
       "tag": "0000_initial_migration",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1781634135576,
-      "tag": "0001_add_username_column",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1781726400000,
-      "tag": "0002_add_site_route_id",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1781812800000,
-      "tag": "0003_add_site_synced",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1781708476336,
-      "tag": "0004_add_route_id_to_sites_table",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1781708512712,
-      "tag": "0005_add_synced_column_to_sites_table",
       "breakpoints": true
     }
   ]

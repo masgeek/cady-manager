@@ -1,5 +1,5 @@
 {
-  "id": "25707a65-309a-42eb-9ece-c3752fdbe1af",
+  "id": "36ea6fca-8caa-4c91-8a89-72c1bb2e1944",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -160,8 +160,21 @@
           "primaryKey": false,
           "notNull": true
         },
+        "route_id": {
+          "name": "route_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tls_enabled": {
           "name": "tls_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "synced": {
+          "name": "synced",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -173,6 +186,18 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'inactive'"
+        },
+        "health_endpoint": {
+          "name": "health_endpoint",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "health_headers": {
+          "name": "health_headers",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -221,6 +246,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "username": {
+          "name": "username",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "email": {
           "name": "email",
           "type": "varchar(255)",
@@ -252,6 +283,13 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,

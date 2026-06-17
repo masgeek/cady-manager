@@ -1,1 +1,0 @@
-ALTER TABLE "sites" ADD COLUMN "synced" boolean DEFAULT true NOT NULL;
