@@ -109,4 +109,28 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       return reply.status(204).send();
     },
   );
+
+  app.post(
+    '/sites/:id/sync',
+    {
+      schema: {
+        tags: ['Sites'],
+        summary: 'Push site to Caddy config',
+        params: toJsonSchema(siteParamsSchema),
+      },
+    },
+    async (request) => {
+      const { id } = request.params as { id: string };
+      const site = await siteService.syncSite(id);
+
+      await recordAuditEvent({
+        action: 'update',
+        entity: 'site',
+        entityId: id,
+        details: `Synced site ${site.domain} to Caddy config`,
+      });
+
+      return site;
+    },
+  );
 }
