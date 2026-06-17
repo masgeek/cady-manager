@@ -55,6 +55,14 @@ async function seedDemo() {
       upstream: 'http://10.0.2.6:8080',
       tlsEnabled: false,
     }),
+    siteRepo.create({
+      serverId: prodServer.id,
+      domain: `fees.munywele.co.ke ${TAG}`,
+      upstream: 'http://127.0.0.1:9400',
+      tlsEnabled: true,
+      healthEndpoint: 'https://fees.munywele.co.ke/api/health',
+      healthHeaders: JSON.stringify({ 'x-api-key': crypto.randomUUID() }),
+    }),
   ]);
 
   for (const site of sites) {
