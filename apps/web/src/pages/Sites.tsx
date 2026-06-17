@@ -40,6 +40,7 @@ export default function Sites() {
   const query = useQuery({
     queryKey: ['sites'],
     queryFn: () => api.getSites(),
+    refetchInterval: 30_000,
   });
 
   const deleteMutation = useMutation({

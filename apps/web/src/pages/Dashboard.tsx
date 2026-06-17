@@ -5,16 +5,20 @@ export default function Dashboard() {
   const serversQuery = useQuery({
     queryKey: ['servers'],
     queryFn: () => api.getServers(),
+    refetchInterval: 30_000,
   });
 
   const sitesQuery = useQuery({
     queryKey: ['sites'],
     queryFn: () => api.getSites(),
+    refetchInterval: 30_000,
   });
 
   const servers = serversQuery.data || [];
   const sites = sitesQuery.data || [];
   const onlineServers = servers.filter(s => s.status === 'online').length;
+  const activeSites = sites.filter(s => s.status === 'active').length;
+  const errorSites = sites.filter(s => s.status === 'error').length;
 
   return (
     <div>
@@ -27,7 +31,7 @@ export default function Dashboard() {
                 <i className="bi bi-hdd-rack text-primary" style={{ fontSize: '2.5rem' }}></i>
                 <div>
                   <h5 className="mb-0">{servers.length}</h5>
-                  <small className="text-muted">Total Servers</small>
+                  <small className="text-muted">Servers</small>
                 </div>
               </div>
               <small className="d-block mt-2">{onlineServers} online</small>
@@ -38,12 +42,16 @@ export default function Dashboard() {
           <div className="card">
             <div className="card-body">
               <div className="d-flex align-items-center gap-3">
-                <i className="bi bi-file-text text-secondary" style={{ fontSize: '2.5rem' }}></i>
+                <i className="bi bi-globe text-success" style={{ fontSize: '2.5rem' }}></i>
                 <div>
                   <h5 className="mb-0">{sites.length}</h5>
-                  <small className="text-muted">Total Sites</small>
+                  <small className="text-muted">Sites</small>
                 </div>
               </div>
+              <small className="d-block mt-1">
+                <span className="text-success">{activeSites} active</span>
+                {errorSites > 0 && <span className="text-danger ms-2">{errorSites} error</span>}
+              </small>
             </div>
           </div>
         </div>

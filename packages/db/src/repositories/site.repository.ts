@@ -96,6 +96,10 @@ class SiteRepository {
   async updateSyncedStatus(id: string, synced: boolean): Promise<void> {
     await db.update(sites).set({ synced }).where(eq(sites.id, id));
   }
+
+  async updateStatus(id: string, status: string): Promise<void> {
+    await db.update(sites).set({ status }).where(eq(sites.id, id));
+  }
 }
 
 export const siteRepo = new SiteRepository();
