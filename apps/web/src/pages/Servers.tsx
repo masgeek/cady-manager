@@ -182,6 +182,7 @@ export default function Servers() {
                       <input
                         {...register('apiEndpoint')}
                         className={`form-control ${errors.apiEndpoint ? 'is-invalid' : ''}`}
+                        value="http://localhost:2019"
                         placeholder="http://localhost:2019"
                       />
                       {errors.apiEndpoint && <div className="invalid-feedback">{errors.apiEndpoint.message}</div>}
