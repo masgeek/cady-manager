@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +34,7 @@ export default function Servers() {
   const [discoverOpen, setDiscoverOpen] = useState(false);
   const [discoverUrl, setDiscoverUrl] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editServer, setEditServer] = useState<Server | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ServerForm>({
     resolver: zodResolver(serverSchema),
@@ -44,11 +45,33 @@ export default function Servers() {
     queryFn: () => api.getServers(),
   });
 
+  useEffect(() => {
+    if (editServer) {
+      reset({
+        name: editServer.name,
+        hostname: editServer.hostname,
+        apiEndpoint: editServer.apiEndpoint,
+      });
+    } else {
+      reset({ name: '', hostname: '', apiEndpoint: '' });
+    }
+  }, [editServer, reset]);
+
   const createMutation = useMutation({
     mutationFn: (data: ServerForm) => api.createServer(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['servers'] });
       setDialogOpen(false);
+      reset();
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: ServerForm) => api.updateServer(editServer!.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['servers'] });
+      setDialogOpen(false);
+      setEditServer(null);
       reset();
     },
   });
@@ -111,6 +134,13 @@ export default function Servers() {
           <i className="bi bi-arrow-clockwise"></i>
         </button>
         <button
+          className="btn btn-sm btn-outline-secondary"
+          onClick={() => { setEditServer(row); setDialogOpen(true); }}
+          title="Edit"
+        >
+          <i className="bi bi-pencil"></i>
+        </button>
+        <button
           className="btn btn-sm btn-outline-success"
           onClick={() => importMutation.mutate(row.id)}
           title="Import sites from config"
@@ -148,17 +178,19 @@ export default function Servers() {
         getRowId={(r) => r.id}
       />
 
-      {/* Add Server Modal */}
+      {/* Add / Edit Server Modal */}
       {dialogOpen && (
         <>
           <div className="modal-backdrop fade show" />
           <div className="modal fade show d-block" tabIndex={-1}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                <form onSubmit={handleSubmit((data) => createMutation.mutate(data))}>
+                <form onSubmit={handleSubmit((data) =>
+                  editServer ? updateMutation.mutate(data) : createMutation.mutate(data)
+                )}>
                   <div className="modal-header">
-                    <h5 className="modal-title">Add Server</h5>
-                    <button type="button" className="btn-close" onClick={() => setDialogOpen(false)} />
+                    <h5 className="modal-title">{editServer ? 'Edit Server' : 'Add Server'}</h5>
+                    <button type="button" className="btn-close" onClick={() => { setDialogOpen(false); setEditServer(null); }} />
                   </div>
                   <div className="modal-body">
                     <div className="mb-3">
@@ -182,15 +214,14 @@ export default function Servers() {
                       <input
                         {...register('apiEndpoint')}
                         className={`form-control ${errors.apiEndpoint ? 'is-invalid' : ''}`}
-                        value="http://localhost:2019"
                         placeholder="http://localhost:2019"
                       />
                       {errors.apiEndpoint && <div className="invalid-feedback">{errors.apiEndpoint.message}</div>}
                     </div>
                   </div>
                   <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" onClick={() => setDialogOpen(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Create</button>
+                    <button type="button" className="btn btn-secondary" onClick={() => { setDialogOpen(false); setEditServer(null); }}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">{editServer ? 'Update' : 'Create'}</button>
                   </div>
                 </form>
               </div>
