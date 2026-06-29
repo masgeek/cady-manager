@@ -1,19 +1,32 @@
 import { config } from '@caddy-manager/config';
 import type { FastifyInstance } from 'fastify';
+import { loginSchema, loginResponseSchema, toJsonSchema } from '../lib/schemas';
+import { AppError } from '../lib/errors';
 
 export async function registerAuthRoutes(app: FastifyInstance) {
-  app.post('/auth/login', async (request, reply) => {
-    const { username, password } = request.body as Record<string, string | undefined>;
+  app.post(
+    '/auth/login',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Login',
+        description: 'Authenticate with username and password to receive a JWT token',
+        body: {
+          ...toJsonSchema(loginSchema),
+          example: { username: 'admin', password: 'your-password' },
+        },
+        response: { 200: loginResponseSchema },
+      },
+    },
+    async (request, reply) => {
+      const { username, password } = loginSchema.parse(request.body);
 
-    if (!username || !password) {
-      return reply.status(400).send({ statusCode: 400, message: 'Username and password are required' });
-    }
+      if (username !== config.authUsername || password !== config.authPassword) {
+        throw new AppError(401, 'Invalid credentials');
+      }
 
-    if (username !== config.authUsername || password !== config.authPassword) {
-      return reply.status(401).send({ statusCode: 401, message: 'Invalid credentials' });
-    }
-
-    const token = await reply.jwtSign({ username });
-    return { token };
-  });
+      const token = await reply.jwtSign({ username }, { expiresIn: '24h' });
+      return { token, expiresIn: 86400 };
+    },
+  );
 }

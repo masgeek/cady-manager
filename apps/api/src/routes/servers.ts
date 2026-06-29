@@ -1,9 +1,21 @@
-import type { FastifyInstance } from 'fastify';
-import { createServerSchema, updateServerSchema, serverParamsSchema, toJsonSchema } from '../lib/schemas';
+import type {FastifyInstance} from 'fastify';
+import {
+  createServerSchema,
+  discoverBodySchema,
+  importResponseSchema,
+  serverHealthResponseSchema,
+  serverListSchema,
+  serverObjectSchema,
+  serverParamsSchema,
+  successResponseSchema,
+  toJsonSchema,
+  updateServerSchema,
+} from '../lib/schemas';
+import {AppError} from '../lib/errors';
 import * as serverService from '../services/server';
-import { CaddyProvider } from '../providers/caddy';
-import { importSitesFromConfig, discoverAndImport } from '../services/config';
-import { recordAuditEvent } from '../services/audit';
+import {CaddyProvider} from '../providers/caddy';
+import {discoverAndImport, importSitesFromConfig} from '../services/config';
+import {recordAuditEvent} from '../services/audit';
 
 export async function registerServerRoutes(app: FastifyInstance) {
   app.get(
@@ -12,6 +24,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'List all servers',
+        response: { 200: serverListSchema },
       },
     },
     async () => {
@@ -26,6 +39,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         tags: ['Servers'],
         summary: 'Get server by ID',
         params: toJsonSchema(serverParamsSchema),
+        response: { 200: serverObjectSchema },
       },
     },
     async (request) => {
@@ -40,7 +54,15 @@ export async function registerServerRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Servers'],
         summary: 'Create a server',
-        body: toJsonSchema(createServerSchema),
+        body: {
+          ...toJsonSchema(createServerSchema),
+          example: {
+            name: 'prod-web-01',
+            hostname: 'web01.example.com',
+            apiEndpoint: 'http://10.0.0.1:2019',
+          },
+        },
+        response: { 201: serverObjectSchema },
       },
     },
     async (request, reply) => {
@@ -65,7 +87,15 @@ export async function registerServerRoutes(app: FastifyInstance) {
         tags: ['Servers'],
         summary: 'Update a server',
         params: toJsonSchema(serverParamsSchema),
-        body: toJsonSchema(updateServerSchema),
+        body: {
+          ...toJsonSchema(updateServerSchema),
+          example: {
+            name: 'prod-web-01-updated',
+            hostname: 'web01.example.com',
+            apiEndpoint: 'http://10.0.0.2:2019',
+          },
+        },
+        response: { 200: serverObjectSchema },
       },
     },
     async (request) => {
@@ -117,6 +147,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         tags: ['Servers'],
         summary: 'Check server health',
         params: toJsonSchema(serverParamsSchema),
+        response: { 200: serverHealthResponseSchema },
       },
     },
     async (request) => {
@@ -142,6 +173,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         tags: ['Servers'],
         summary: 'Import sites from server config',
         params: toJsonSchema(serverParamsSchema),
+        response: { 200: importResponseSchema },
       },
     },
     async (request, reply) => {
@@ -161,10 +193,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        return reply.status(502).send({
-          statusCode: 502,
-          message: `Failed to import config from ${server.apiEndpoint}: ${message}`,
-        });
+        throw new AppError(502, `Failed to import config from ${server.apiEndpoint}: ${message}`);
       }
     },
   );
@@ -176,23 +205,19 @@ export async function registerServerRoutes(app: FastifyInstance) {
         tags: ['Servers'],
         summary: 'Discover and import from Caddy admin API',
         body: {
-          type: 'object',
-          properties: { apiEndpoint: { type: 'string' } },
-          required: ['apiEndpoint'],
+          ...toJsonSchema(discoverBodySchema),
+          example: { apiEndpoint: 'http://10.0.0.1:2019' },
         },
+        response: { 200: successResponseSchema },
       },
     },
     async (request, reply) => {
-      const { apiEndpoint } = request.body as { apiEndpoint: string };
+      const { apiEndpoint } = discoverBodySchema.parse(request.body);
       try {
-        const result = await discoverAndImport(apiEndpoint);
-        return result;
+        return await discoverAndImport(apiEndpoint);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        return reply.status(502).send({
-          statusCode: 502,
-          message: `Failed to discover from ${apiEndpoint}: ${message}`,
-        });
+        throw new AppError(502, `Failed to discover from ${apiEndpoint}: ${message}`);
       }
     },
   );
