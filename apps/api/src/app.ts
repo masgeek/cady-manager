@@ -20,6 +20,11 @@ export async function buildApp() {
     logger: {
       level: config.logLevel,
     },
+    ajv: {
+      customOptions: {
+        strict: false,
+      },
+    },
   });
 
   app.setErrorHandler(errorHandler);
