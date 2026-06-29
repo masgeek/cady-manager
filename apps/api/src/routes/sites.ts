@@ -1,5 +1,13 @@
 import type { FastifyInstance } from 'fastify';
-import { createSiteSchema, updateSiteSchema, siteParamsSchema, toJsonSchema } from '../lib/schemas';
+import {
+  createSiteSchema,
+  updateSiteSchema,
+  siteParamsSchema,
+  siteObjectSchema,
+  siteListSchema,
+  successResponseSchema,
+  toJsonSchema,
+} from '../lib/schemas';
 import * as siteService from '../services/site';
 import { checkAllSites } from '../jobs/siteHealth.js';
 import { recordAuditEvent } from '../services/audit';
@@ -12,6 +20,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         tags: ['Sites'],
         summary: 'List all sites',
         querystring: { type: 'object', properties: { serverId: { type: 'string' } } },
+        response: { 200: siteListSchema },
       },
     },
     async (request) => {
@@ -27,6 +36,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         tags: ['Sites'],
         summary: 'Get site by ID',
         params: toJsonSchema(siteParamsSchema),
+        response: { 200: siteObjectSchema },
       },
     },
     async (request) => {
@@ -41,7 +51,18 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Sites'],
         summary: 'Create a site',
-        body: toJsonSchema(createSiteSchema),
+        body: {
+          ...toJsonSchema(createSiteSchema),
+          example: {
+            serverId: '3a5c7e8f-1b2d-4f6a-9c8d-7e6f5a4b3c2d',
+            domain: 'example.com',
+            upstream: 'http://localhost:3000',
+            tlsEnabled: true,
+            routeId: 'route-example',
+            healthEndpoint: '/health',
+          },
+        },
+        response: { 201: siteObjectSchema },
       },
     },
     async (request, reply) => {
@@ -66,7 +87,15 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         tags: ['Sites'],
         summary: 'Update a site',
         params: toJsonSchema(siteParamsSchema),
-        body: toJsonSchema(updateSiteSchema),
+        body: {
+          ...toJsonSchema(updateSiteSchema),
+          example: {
+            domain: 'example.com',
+            upstream: 'http://localhost:8080',
+            tlsEnabled: false,
+          },
+        },
+        response: { 200: siteObjectSchema },
       },
     },
     async (request) => {
@@ -118,6 +147,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         tags: ['Sites'],
         summary: 'Push site to Caddy config',
         params: toJsonSchema(siteParamsSchema),
+        response: { 200: siteObjectSchema },
       },
     },
     async (request) => {
@@ -141,6 +171,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Sites'],
         summary: 'Manually trigger site health check',
+        response: { 200: successResponseSchema },
       },
     },
     async () => {

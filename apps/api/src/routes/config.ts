@@ -1,10 +1,16 @@
+import { z } from 'zod';
 import type { FastifyInstance } from 'fastify';
+import { configReloadResponseSchema, toJsonSchema } from '../lib/schemas';
 import { CaddyProvider } from '../providers/caddy';
 import * as serverService from '../services/server';
 import * as siteService from '../services/site';
 import * as configService from '../services/config';
 import { recordAuditEvent } from '../services/audit';
 import { NotFoundError } from '../lib/errors';
+
+const serverIdParam = z.object({ serverId: z.string().min(1) });
+
+const reloadBody = z.object({ serverId: z.string().min(1) });
 
 export async function registerConfigRoutes(app: FastifyInstance) {
   app.get(
@@ -13,16 +19,18 @@ export async function registerConfigRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Config'],
         summary: 'Get active Caddy configuration',
-        querystring: {
-          type: 'object',
-          properties: { serverId: { type: 'string' } },
-          required: ['serverId'],
+        querystring: toJsonSchema(serverIdParam),
+        response: {
+          200: {
+            type: 'object',
+            description: 'Raw Caddy JSON configuration',
+          },
         },
       },
     },
     async (request) => {
-      const query = request.query as { serverId: string };
-      const server = await serverService.getServer(query.serverId);
+      const { serverId } = serverIdParam.parse(request.query);
+      const server = await serverService.getServer(serverId);
       const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
       return configService.getServerConfig(provider);
     },
@@ -35,14 +43,14 @@ export async function registerConfigRoutes(app: FastifyInstance) {
         tags: ['Config'],
         summary: 'Build and reload Caddy configuration',
         body: {
-          type: 'object',
-          properties: { serverId: { type: 'string' } },
-          required: ['serverId'],
+          ...toJsonSchema(reloadBody),
+          example: { serverId: '3a5c7e8f-1b2d-4f6a-9c8d-7e6f5a4b3c2d' },
         },
+        response: { 200: configReloadResponseSchema },
       },
     },
     async (request) => {
-      const { serverId } = request.body as { serverId: string };
+      const { serverId } = reloadBody.parse(request.body);
       const server = await serverService.getServer(serverId);
       const sites = await siteService.getSitesByServer(serverId);
 
@@ -70,16 +78,18 @@ export async function registerConfigRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Config'],
         summary: 'Preview generated configuration without deploying',
-        querystring: {
-          type: 'object',
-          properties: { serverId: { type: 'string' } },
-          required: ['serverId'],
+        querystring: toJsonSchema(serverIdParam),
+        response: {
+          200: {
+            type: 'object',
+            description: 'Generated Caddy JSON configuration',
+          },
         },
       },
     },
     async (request) => {
-      const query = request.query as { serverId: string };
-      const server = await serverService.getServer(query.serverId);
+      const { serverId } = serverIdParam.parse(request.query);
+      const server = await serverService.getServer(serverId);
       const sites = await siteService.getSitesByServer(server.id);
       const config = configService.buildCaddyConfig(server, sites);
       return config;
