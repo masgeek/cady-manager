@@ -11,6 +11,7 @@ export async function registerAuthRoutes(app: FastifyInstance) {
         tags: ['Auth'],
         summary: 'Login',
         description: 'Authenticate with username and password to receive a JWT token',
+        security: [],
         body: {
           ...toJsonSchema(loginSchema),
           example: { username: 'admin', password: 'your-password' },
