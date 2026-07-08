@@ -206,7 +206,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         summary: 'Discover and import from Caddy admin API',
         body: {
           ...toJsonSchema(discoverBodySchema),
-          example: { apiEndpoint: 'http://10.0.0.1:2019' },
+          example: { apiEndpoint: 'http://127.0.0.1:2019' },
         },
         response: { 200: successResponseSchema },
       },
