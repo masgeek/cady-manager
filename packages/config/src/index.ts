@@ -52,8 +52,6 @@ export function buildDatabaseUrl(): string {
 
 export function validate(): void {
   const missing: string[] = [];
-  if (!config.authUsername) missing.push('AUTH_USERNAME');
-  if (!config.authPassword) missing.push('AUTH_PASSWORD');
   if (!config.dbPassword) missing.push('DB_PASSWORD');
   if (!config.seedPassword) missing.push('SEED_PASSWORD');
   if (missing.length > 0) {

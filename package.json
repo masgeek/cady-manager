@@ -16,6 +16,7 @@
     "db:pull": "pnpm --filter @caddy-manager/db db:pull",
     "db:studio": "pnpm --filter @caddy-manager/db db:studio",
     "db:seed": "pnpm --filter @caddy-manager/db db:seed",
+    "seed:admin": "pnpm db:migrate && pnpm --filter @caddy-manager/api seed",
     "db:seed:demo": "pnpm --filter @caddy-manager/db db:seed:demo",
     "db:purge": "pnpm --filter @caddy-manager/db db:purge",
     "db:purge:demo": "pnpm --filter @caddy-manager/db db:purge:demo",

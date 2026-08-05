@@ -48,6 +48,7 @@ export async function registerConfigRoutes(app: FastifyInstance) {
         },
         response: { 200: configReloadResponseSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request) => {
       const { serverId } = reloadBody.parse(request.body);

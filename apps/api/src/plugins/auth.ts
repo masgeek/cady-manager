@@ -1,7 +1,8 @@
 import { config } from '@caddy-manager/config';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import fjwt from '@fastify/jwt';
-import { UnauthorizedError } from '../lib/errors.js';
+import { ForbiddenError, UnauthorizedError } from '../lib/errors.js';
+import type { UserRole } from '@caddy-manager/shared-types';
 
 export async function registerAuth(app: FastifyInstance) {
   await app.register(fjwt, { secret: config.jwtSecret });
@@ -13,16 +14,24 @@ export async function registerAuth(app: FastifyInstance) {
       throw new UnauthorizedError('Invalid or expired token');
     }
   });
+
+  app.decorate('authorize', (roles: UserRole[]) => async (request: FastifyRequest) => {
+    if (!roles.includes(request.user.role)) {
+      throw new ForbiddenError();
+    }
+  });
 }
 
 declare module '@fastify/jwt' {
-  interface FastifyJWT {
-    payload: { username: string };
+interface FastifyJWT {
+    payload: { sub: string; username: string; role: UserRole };
+    user: { sub: string; username: string; role: UserRole };
   }
 }
 
 declare module 'fastify' {
   interface FastifyInstance {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    authorize: (roles: UserRole[]) => (request: FastifyRequest) => Promise<void>;
   }
 }

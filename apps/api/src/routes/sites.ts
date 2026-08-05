@@ -64,6 +64,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         },
         response: { 201: siteObjectSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request, reply) => {
       const data = createSiteSchema.parse(request.body);
@@ -97,6 +98,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         },
         response: { 200: siteObjectSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request) => {
       const { id } = request.params as { id: string };
@@ -123,6 +125,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         params: toJsonSchema(siteParamsSchema),
         response: { 204: { type: 'null' } },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request, reply) => {
       const { id } = request.params as { id: string };
@@ -149,6 +152,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         params: toJsonSchema(siteParamsSchema),
         response: { 200: siteObjectSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request) => {
       const { id } = request.params as { id: string };
@@ -173,6 +177,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         summary: 'Manually trigger site health check',
         response: { 200: successResponseSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async () => {
       await checkAllSites();

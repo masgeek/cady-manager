@@ -29,7 +29,7 @@ async function seed() {
       role,
       passwordHash: hashPassword(password),
     });
-    console.log(`Created admin user: ${email} / ${password}`);
+    console.log(`Created user: ${email}`);
   }
 
   await queryClient.end();

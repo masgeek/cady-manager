@@ -82,6 +82,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         },
         response: { 201: serverObjectSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request, reply) => {
       const data = createServerSchema.parse(request.body);
@@ -115,6 +116,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         },
         response: { 200: serverObjectSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request) => {
       const { id } = request.params as { id: string };
@@ -141,6 +143,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         params: toJsonSchema(serverParamsSchema),
         response: { 204: { type: 'null' } },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request, reply) => {
       const { id } = request.params as { id: string };
@@ -193,6 +196,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         params: toJsonSchema(serverParamsSchema),
         response: { 200: importResponseSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request, reply) => {
       const { id } = request.params as { id: string };
@@ -228,6 +232,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         },
         response: { 200: successResponseSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async (request, reply) => {
       const { apiEndpoint } = discoverBodySchema.parse(request.body);

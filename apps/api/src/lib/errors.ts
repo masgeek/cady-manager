@@ -32,6 +32,13 @@ export class UnauthorizedError extends AppError {
   }
 }
 
+export class ForbiddenError extends AppError {
+  constructor(message = 'Insufficient permissions') {
+    super(403, message);
+    this.name = 'ForbiddenError';
+  }
+}
+
 export interface ApiErrorResponse {
   statusCode: number;
   message: string;

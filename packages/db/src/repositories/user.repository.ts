@@ -29,6 +29,11 @@ class UserRepository {
     return row;
   }
 
+  async findByUsername(username: string): Promise<typeof users.$inferSelect | undefined> {
+    const [row] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return row;
+  }
+
   async findById(id: string): Promise<User | undefined> {
     const [row] = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return row ? toUser(row) : undefined;

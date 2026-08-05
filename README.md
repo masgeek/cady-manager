@@ -78,6 +78,9 @@ pnpm build
 
 # Start development
 pnpm dev
+
+# Migrate the database and create the initial admin user
+pnpm seed:admin
 ```
 
 ## Deployment
