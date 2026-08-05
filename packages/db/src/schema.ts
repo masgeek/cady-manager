@@ -1,5 +1,5 @@
 import {
-    pgTable, text, varchar, boolean, timestamp, integer, uniqueIndex,
+    pgTable, text, varchar, boolean, timestamp, integer, uniqueIndex, jsonb,
 } from 'drizzle-orm/pg-core';
 
 export const servers = pgTable('servers', {
@@ -20,6 +20,7 @@ export const sites = pgTable('sites', {
     upstream: varchar('upstream', {length: 255}).notNull(),
     routeId: varchar('route_id', {length: 255}),
     caddyServerName: varchar('caddy_server_name', {length: 255}),
+    routeConfig: jsonb('route_config'),
     tlsEnabled: boolean('tls_enabled').notNull().default(true),
     synced: boolean('synced').notNull().default(true),
     status: varchar('status', {length: 20}).notNull().default('inactive'),

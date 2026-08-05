@@ -8,6 +8,7 @@ export interface ParsedSite {
   routeId?: string;
   caddyServerName: string;
   tlsEnabled: boolean;
+  routeConfig: Record<string, unknown>;
 }
 
 export interface ImportPreviewSite extends ParsedSite {
@@ -105,6 +106,7 @@ export function parseSitesFromConfig(config: Record<string, unknown>): ParsedSit
           routeId,
           caddyServerName: serverName,
           tlsEnabled: tlsDomains.has(domain),
+          routeConfig: structuredClone(route),
         });
       }
     }
@@ -130,7 +132,8 @@ export async function importSitesFromConfig(
     const existing = await siteRepo.findByDomainAndServer(p.domain, server.id);
     if (existing) {
       skipped++;
-      sites.push(existing);
+      const updated = await siteRepo.update(existing.id, { routeConfig: p.routeConfig });
+      sites.push(updated ?? existing);
       continue;
     }
 
@@ -141,6 +144,7 @@ export async function importSitesFromConfig(
       routeId: p.routeId,
       caddyServerName: p.caddyServerName,
       tlsEnabled: p.tlsEnabled,
+      routeConfig: p.routeConfig,
     });
     imported++;
     sites.push(site);
@@ -161,16 +165,11 @@ export async function previewSitesFromConfig(
 }
 
 export function buildCaddyConfig(server: Server, sites: Site[]): Record<string, unknown> {
-  const serverRoutes = sites.map(site => ({
-    '@id': site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_'),
-    match: [{ host: [site.domain] }],
-    handle: [
-      {
-        handler: 'reverse_proxy',
-        upstreams: [{ dial: site.upstream.replace(/^https?:\/\//, '') }],
-      },
-    ],
-    terminal: true,
+  const serverRoutes = sites.map(site => buildCaddyRoute({
+    domain: site.domain,
+    upstream: site.upstream,
+    routeId: site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_'),
+    routeConfig: site.routeConfig,
   }));
 
   const apps: Record<string, unknown> = {
@@ -200,7 +199,14 @@ export function buildCaddyRoute(site: {
   domain: string;
   upstream: string;
   routeId?: string;
+  routeConfig?: Record<string, unknown>;
 }): Record<string, unknown> {
+  if (site.routeConfig) {
+    const route = structuredClone(site.routeConfig);
+    if (site.routeId) route['@id'] = site.routeId;
+    return route;
+  }
+
   return {
     '@id': site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_'),
     match: [{ host: [site.domain] }],
@@ -325,7 +331,8 @@ export async function discoverAndImport(
     const existing = await siteRepo.findByDomainAndServer(p.domain, server.id);
     if (existing) {
       skipped++;
-      sites.push(existing);
+      const updated = await siteRepo.update(existing.id, { routeConfig: p.routeConfig });
+      sites.push(updated ?? existing);
       continue;
     }
     const site = await siteRepo.create({
@@ -335,6 +342,7 @@ export async function discoverAndImport(
       routeId: p.routeId,
       caddyServerName: p.caddyServerName,
       tlsEnabled: p.tlsEnabled,
+      routeConfig: p.routeConfig,
     });
     imported++;
     sites.push(site);

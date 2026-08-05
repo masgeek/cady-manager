@@ -10,6 +10,7 @@ export const createSiteSchema = z.object({
   upstream: z.string().url(),
   routeId: z.string().max(255).optional(),
   caddyServerName: z.string().max(255).optional(),
+  routeConfig: z.record(z.unknown()).optional(),
   tlsEnabled: z.boolean(),
   healthEndpoint: z.string().max(500).optional(),
   healthHeaders: z.string().optional(),
@@ -20,6 +21,7 @@ export const updateSiteSchema = z.object({
   upstream: z.string().url().optional(),
   routeId: z.string().max(255).optional(),
   caddyServerName: z.string().max(255).optional(),
+  routeConfig: z.record(z.unknown()).optional(),
   tlsEnabled: z.boolean().optional(),
   healthEndpoint: z.string().max(500).optional(),
   healthHeaders: z.string().optional(),
@@ -36,6 +38,7 @@ function toSite(row: typeof sites.$inferSelect): Site {
     upstream: row.upstream,
     routeId: row.routeId ?? undefined,
     caddyServerName: row.caddyServerName ?? undefined,
+    routeConfig: row.routeConfig as Record<string, unknown> | undefined,
     tlsEnabled: row.tlsEnabled,
     synced: row.synced,
     status: row.status as Site['status'],
@@ -70,6 +73,7 @@ class SiteRepository {
       upstream: data.upstream,
       routeId: data.routeId,
       caddyServerName: data.caddyServerName,
+      routeConfig: data.routeConfig,
       tlsEnabled: data.tlsEnabled,
       healthEndpoint: data.healthEndpoint,
       healthHeaders: data.healthHeaders,
@@ -83,6 +87,7 @@ class SiteRepository {
     if (data.upstream !== undefined) update.upstream = data.upstream;
     if (data.routeId !== undefined) update.routeId = data.routeId;
     if (data.caddyServerName !== undefined) update.caddyServerName = data.caddyServerName;
+    if (data.routeConfig !== undefined) update.routeConfig = data.routeConfig;
     if (data.tlsEnabled !== undefined) update.tlsEnabled = data.tlsEnabled;
     if (data.healthEndpoint !== undefined) update.healthEndpoint = data.healthEndpoint;
     if (data.healthHeaders !== undefined) update.healthHeaders = data.healthHeaders;

@@ -20,6 +20,7 @@ export interface Site {
   upstream: string;
   routeId?: string;
   caddyServerName?: string;
+  routeConfig?: Record<string, unknown>;
   tlsEnabled: boolean;
   synced: boolean;
   status: SiteStatus;

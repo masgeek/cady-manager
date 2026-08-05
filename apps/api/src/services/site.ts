@@ -20,6 +20,7 @@ export async function createSite(data: {
   upstream: string;
   routeId?: string;
   caddyServerName?: string;
+  routeConfig?: Record<string, unknown>;
   tlsEnabled: boolean;
   healthEndpoint?: string;
   healthHeaders?: string;
@@ -48,7 +49,7 @@ export async function createSite(data: {
 
 export async function updateSite(
   id: string,
-  data: Partial<{ domain: string; upstream: string; routeId?: string; caddyServerName?: string; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
+  data: Partial<{ domain: string; upstream: string; routeId?: string; caddyServerName?: string; routeConfig?: Record<string, unknown>; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
 ): Promise<Site> {
   const existing = await siteRepo.findById(id);
   if (!existing) throw new NotFoundError('Site', id);
