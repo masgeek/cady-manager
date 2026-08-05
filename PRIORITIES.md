@@ -8,7 +8,7 @@ This roadmap is ordered by production risk first, then reliability, then product
 - [x] Support selecting the correct Caddy HTTP server block.
 - [x] Fix Docker Compose database variables, networks, secrets, and healthchecks.
 - [x] Add graceful shutdown for Fastify, cron jobs, and PostgreSQL.
-- [ ] Add API and Caddy operation integration tests.
+- [x] Add API and Caddy operation integration tests.
 
 ## P1: Identity and Reliability
 
@@ -46,4 +46,4 @@ This roadmap is ordered by production risk first, then reliability, then product
 
 ## Current Implementation
 
-Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, and graceful API/job/database shutdown. The next active item is API and Caddy operation integration tests.
+Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, graceful API/job/database shutdown, and initial API/Caddy integration tests. The next active item is database-backed authentication and authorization.
