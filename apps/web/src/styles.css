@@ -717,6 +717,34 @@ summary:focus-visible {
   .site-editor-modal-body {
     padding: 20px 16px;
   }
+
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-dialog-scrollable .modal-content {
+    max-height: calc(100vh - 1rem);
+  }
+
+  .site-editor-modal .modal-dialog {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+  }
+
+  .site-editor-modal .modal-content {
+    min-height: 100vh;
+    border-radius: 0;
+  }
+
+  .btn:not(.btn-link) {
+    min-height: 40px;
+  }
+
+  .table-responsive {
+    border-radius: 10px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
