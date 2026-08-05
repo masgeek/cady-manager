@@ -39,6 +39,13 @@ export class ForbiddenError extends AppError {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(message: string) {
+    super(409, message);
+    this.name = 'ConflictError';
+  }
+}
+
 export interface ApiErrorResponse {
   statusCode: number;
   message: string;
@@ -71,6 +78,13 @@ export function errorHandler(
 
   if (isAppError(error)) {
     return fastifyReply.status(error.statusCode).send(toApiErrorResponse(error));
+  }
+
+  if ((error as { code?: string }).code === '23505') {
+    return fastifyReply.status(409).send({
+      statusCode: 409,
+      message: 'A record with the same unique values already exists',
+    });
   }
 
   const statusCode = (error as FastifyError).statusCode || 500;

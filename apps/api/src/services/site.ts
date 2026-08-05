@@ -2,7 +2,7 @@ import type { Site } from '@caddy-manager/shared-types';
 import { siteRepo, serverRepo } from '@caddy-manager/db';
 import { CaddyProvider } from '../providers/caddy';
 import { buildCaddyRoute } from './config';
-import { NotFoundError } from '../lib/errors';
+import { ConflictError, NotFoundError } from '../lib/errors';
 
 export async function listSites(serverId?: string): Promise<Site[]> {
   return siteRepo.findAll(serverId);
@@ -26,6 +26,9 @@ export async function createSite(data: {
 }): Promise<Site> {
   const server = await serverRepo.findById(data.serverId);
   if (!server) throw new NotFoundError('Server', data.serverId);
+
+  const existing = await siteRepo.findByDomainAndServer(data.domain, data.serverId);
+  if (existing) throw new ConflictError(`Site '${data.domain}' already exists on this server`);
 
   const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
   const servers = await provider.getServerNames();

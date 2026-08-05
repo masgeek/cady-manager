@@ -1,5 +1,5 @@
 import {
-    pgTable, text, varchar, boolean, timestamp, integer,
+    pgTable, text, varchar, boolean, timestamp, integer, uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const servers = pgTable('servers', {
@@ -31,7 +31,9 @@ export const sites = pgTable('sites', {
     healthHeaders: text('health_headers'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdateFn(() => new Date()),
-});
+}, (table) => [
+    uniqueIndex('sites_server_domain_unique').on(table.serverId, table.domain),
+]);
 
 export const auditEvents = pgTable('audit_events', {
     id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "sites_server_domain_unique" ON "sites" USING btree ("server_id","domain");
