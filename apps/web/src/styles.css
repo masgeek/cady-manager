@@ -402,6 +402,49 @@ summary:focus-visible {
   font-size: 1.2rem;
 }
 
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.live-indicator span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 4px rgba(57, 211, 162, 0.14);
+}
+
+.log-level {
+  display: inline-block;
+  min-width: 58px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.log-level-info { background: #e2f6ef; color: #167d62; }
+.log-level-warn { background: #fff2d7; color: #92620d; }
+.log-level-error { background: #ffebe8; color: #a63d31; }
+
+.log-message {
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.78rem;
+}
+
 .card,
 .modal-content {
   border: 1px solid var(--line);

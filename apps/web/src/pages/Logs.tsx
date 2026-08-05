@@ -23,19 +23,52 @@ export default function Logs() {
 
   const rows = query.data || [];
 
+  const levelClass = (level: string) => {
+    const normalized = level.toLowerCase();
+    if (normalized.includes('error') || normalized.includes('fatal')) return 'log-level log-level-error';
+    if (normalized.includes('warn')) return 'log-level log-level-warn';
+    return 'log-level log-level-info';
+  };
+
   return (
     <div>
-      <h4 className="mb-3">Logs</h4>
+      <div className="page-heading">
+        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+          <div>
+            <div className="page-eyebrow">Runtime signal</div>
+            <h1>Logs</h1>
+            <p className="page-description">A live window into recent Caddy and manager activity.</p>
+          </div>
+          <span className="live-indicator"><span></span>{query.isFetching ? 'Refreshing' : 'Live · 5s'}</span>
+        </div>
+        <div className="signal-strip">
+          <strong>{rows.length} recent entries</strong>
+          <span className="ms-auto">Search the current buffer</span>
+        </div>
+      </div>
 
-      <input
-        className="form-control mb-3"
-        style={{ maxWidth: 300 }}
-        placeholder="Search logs"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="d-flex gap-2 align-items-center mb-3">
+        <div className="input-group" style={{ maxWidth: 440 }}>
+          <span className="input-group-text bg-white border-end-0"><i className="bi bi-search text-muted"></i></span>
+          <input
+            className="form-control border-start-0"
+            placeholder="Search message, level, or source"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {search && <button className="btn btn-sm btn-link text-decoration-none" onClick={() => setSearch('')}>Clear</button>}
+      </div>
 
-      <div className="table-responsive">
+      {query.isLoading && <div className="alert alert-info">Loading runtime logs...</div>}
+      {query.isError && (
+        <div className="alert alert-danger">
+          Failed to load logs: {query.error instanceof Error ? query.error.message : 'Request failed'}
+          <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>Retry</button>
+        </div>
+      )}
+
+      {!query.isLoading && !query.isError && <div className="table-responsive">
         <table className="table table-sm table-striped">
           <thead className="table-light">
             <tr>
@@ -48,21 +81,23 @@ export default function Logs() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center text-muted py-3">No logs</td>
+                <td colSpan={4}>
+                  <div className="empty-panel"><i className="bi bi-terminal"></i><span>{search ? 'No matching log entries.' : 'No log entries yet.'}</span></div>
+                </td>
               </tr>
             ) : (
               rows.map((row, i) => (
                 <tr key={i}>
                   <td>{new Date(row.timestamp).toLocaleString()}</td>
-                  <td>{row.level}</td>
+                  <td><span className={levelClass(row.level)}>{row.level}</span></td>
                   <td>{row.source || '-'}</td>
-                  <td>{row.message}</td>
+                  <td><code className="log-message">{row.message}</code></td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
-      </div>
+      </div>}
     </div>
   );
 }
