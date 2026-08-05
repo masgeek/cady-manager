@@ -5,6 +5,7 @@ import { DataTable, StatusBadge, ConfirmDialog } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 import type { Site } from '@caddy-manager/shared-types';
 import { api } from '../api/client';
+import SiteEditor from './SiteEditor';
 
 const columns: Column<Site>[] = [
   { field: 'domain', headerName: 'Domain' },
@@ -52,6 +53,7 @@ export default function Sites() {
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [editor, setEditor] = useState<{ id?: string } | null>(null);
 
   const query = useQuery({
     queryKey: ['sites'],
@@ -113,7 +115,7 @@ export default function Sites() {
         <button
           className="btn btn-sm btn-outline-primary"
           disabled={!row.routeId}
-          onClick={() => navigate(`/sites/${row.id}/edit`)}
+           onClick={() => setEditor({ id: row.id })}
           title={!row.routeId ? 'Sync to Caddy first' : 'Edit'}
         >
           <i className="bi bi-pencil"></i>
@@ -153,7 +155,7 @@ export default function Sites() {
             <i className="bi bi-arrow-repeat me-1"></i>
             {reconcileMutation.isPending ? 'Reconciling...' : 'Reconcile Routes'}
           </button>
-          <button className="btn btn-primary" onClick={() => navigate('/sites/new')}>
+           <button className="btn btn-primary" onClick={() => setEditor({})}>
             <i className="bi bi-plus-circle me-1"></i> Add Site
           </button>
         </div>
@@ -196,6 +198,8 @@ export default function Sites() {
           </div>
         </details>
       )}
+
+      {editor && <SiteEditor modal siteId={editor.id} onClose={() => setEditor(null)} />}
 
       <ConfirmDialog
         open={!!deleteId}

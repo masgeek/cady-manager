@@ -20,17 +20,24 @@ const siteSchema = z.object({
 
 type SiteForm = z.infer<typeof siteSchema>;
 
+interface SiteEditorProps {
+  modal?: boolean;
+  siteId?: string;
+  onClose?: () => void;
+}
+
 function splitDomain(domain: string): { name: string; baseDomain: string } {
   const dot = domain.indexOf('.');
   if (dot <= 0) return { name: '', baseDomain: domain };
   return { name: domain.slice(0, dot), baseDomain: domain.slice(dot + 1) };
 }
 
-export default function SiteEditor() {
-  const { id } = useParams();
+export default function SiteEditor({ modal = false, siteId, onClose }: SiteEditorProps) {
+  const { id: routeId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const id = siteId ?? routeId;
   const isEdit = !!id;
 
   const serversQuery = useQuery({
@@ -118,7 +125,7 @@ export default function SiteEditor() {
     mutationFn: (data: SiteForm) => api.createSite(toApiPayload(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
-      navigate('/sites');
+      onClose ? onClose() : navigate('/sites');
     },
   });
 
@@ -126,14 +133,17 @@ export default function SiteEditor() {
     mutationFn: (data: SiteForm) => api.updateSite(id!, toApiPayload(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
-      navigate('/sites');
+      onClose ? onClose() : navigate('/sites');
     },
   });
 
-  return (
-    <div>
-      <h4 className="mb-3">{isEdit ? 'Edit Site' : 'New Site'}</h4>
-      <div className="card p-4" style={{ maxWidth: 600 }}>
+  const editor = (
+    <div className={modal ? 'site-editor-modal-body' : undefined}>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4 className="mb-0">{isEdit ? 'Edit Site' : 'New Site'}</h4>
+        {modal && <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />}
+      </div>
+      <div className="card p-4" style={{ maxWidth: modal ? undefined : 600 }}>
         <form
           onSubmit={handleSubmit((data) => {
             return isEdit ? updateMutation.mutate(data) : createMutation.mutate(data);
@@ -270,10 +280,23 @@ export default function SiteEditor() {
             <button type="submit" className="btn btn-primary">
               {isEdit ? 'Update' : 'Create'}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/sites')}>Cancel</button>
+            <button type="button" className="btn btn-secondary" onClick={() => onClose ? onClose() : navigate('/sites')}>Cancel</button>
           </div>
         </form>
       </div>
     </div>
+  );
+
+  if (!modal) return editor;
+
+  return (
+    <>
+      <div className="modal-backdrop fade show" onClick={onClose} />
+      <div className="modal fade show d-block site-editor-modal" tabIndex={-1} role="dialog" aria-modal="true">
+        <div className="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+          <div className="modal-content">{editor}</div>
+        </div>
+      </div>
+    </>
   );
 }

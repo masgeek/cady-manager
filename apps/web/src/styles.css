@@ -478,6 +478,15 @@ summary:focus-visible {
   overflow: hidden;
 }
 
+.site-editor-modal-body {
+  padding: 28px;
+}
+
+.site-editor-modal-body > .card {
+  border: 0;
+  box-shadow: none;
+}
+
 @media (max-width: 767.98px) {
   .app-topbar {
     padding: 0 16px;
@@ -489,6 +498,10 @@ summary:focus-visible {
 
   .page-heading {
     margin-bottom: 22px;
+  }
+
+  .site-editor-modal-body {
+    padding: 20px 16px;
   }
 }
 
