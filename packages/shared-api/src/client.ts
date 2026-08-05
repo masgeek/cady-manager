@@ -199,6 +199,10 @@ export class ApiClient {
     return this.request('/sites/reconcile', { method: 'POST', body: '{}' });
   }
 
+  async checkAllSites(): Promise<void> {
+    return this.request('/sites/health-check', { method: 'POST', body: '{}' });
+  }
+
   // Discover
   async discoverServers(apiEndpoint: string): Promise<{ server: Server; imported: number; skipped: number; sites: Site[] }> {
     return this.request('/servers/discover', {

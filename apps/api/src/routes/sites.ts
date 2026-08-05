@@ -197,6 +197,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
         summary: 'Recreate missing site routes',
         response: { 200: successResponseSchema },
       },
+      preHandler: app.authorize(['admin', 'operator']),
     },
     async () => {
       await reconcileAllSites();

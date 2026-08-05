@@ -84,6 +84,14 @@ export default function Sites() {
     onError: (error) => setFeedback(error instanceof Error ? error.message : 'Failed to reconcile routes'),
   });
 
+  const healthCheckMutation = useMutation({
+    mutationFn: () => api.checkAllSites(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+    },
+    onError: (error) => setFeedback(error instanceof Error ? error.message : 'Failed to check site health'),
+  });
+
   const rows = query.data || [];
   const identifiedRows = rows.filter((row) => row.routeId);
   const unidentifiedRows = rows.filter((row) => !row.routeId);
@@ -127,6 +135,15 @@ export default function Sites() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">Sites</h4>
         <div className="d-flex gap-2">
+          <button
+            className="btn btn-outline-info"
+            onClick={() => healthCheckMutation.mutate()}
+            disabled={healthCheckMutation.isPending}
+            title="Check health for all sites"
+          >
+            <i className="bi bi-heart-pulse me-1"></i>
+            {healthCheckMutation.isPending ? 'Checking...' : 'Check Health'}
+          </button>
           <button
             className="btn btn-outline-success"
             onClick={() => reconcileMutation.mutate()}

@@ -23,8 +23,8 @@ This roadmap is intentionally small and focused on the needs of an internal Cadd
 - [x] Add configuration copy and download actions.
 - [x] Add basic loading, error, and mutation feedback states in the UI.
 - [x] Add a simple import preview before writing sites to the database.
-- [ ] Add bulk reconcile and health-check actions.
+- [x] Add bulk reconcile and health-check actions.
 
 ## Current Implementation
 
-Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, graceful API/job/database shutdown, initial API/Caddy integration tests, database-backed authentication, simple global roles, improved audit/API errors, basic health latency/failure tracking, duplicate-site protection, configuration copy/download actions, basic UI feedback, and simple import preview. The next active item is bulk reconcile and health-check actions.
+Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, graceful API/job/database shutdown, initial API/Caddy integration tests, database-backed authentication, simple global roles, improved audit/API errors, basic health latency/failure tracking, duplicate-site protection, configuration copy/download actions, basic UI feedback, simple import preview, and bulk reconcile/health-check actions. The current internal-tool priority list is complete.
