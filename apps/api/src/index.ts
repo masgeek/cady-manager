@@ -1,7 +1,7 @@
 import { config, validate } from '@caddy-manager/config';
 import { buildApp } from './app.js';
 import { closeDb } from './lib/db.js';
-import { startSiteHealthJob } from './jobs/siteHealth.js';
+import { startSiteHealthJob, stopSiteHealthJob } from './jobs/siteHealth.js';
 
 validate();
 

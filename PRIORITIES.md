@@ -7,7 +7,7 @@ This roadmap is ordered by production risk first, then reliability, then product
 - [x] Prevent SSRF and Caddy-token leakage with outbound endpoint allowlists.
 - [x] Support selecting the correct Caddy HTTP server block.
 - [x] Fix Docker Compose database variables, networks, secrets, and healthchecks.
-- [ ] Add graceful shutdown for Fastify, cron jobs, and PostgreSQL.
+- [x] Add graceful shutdown for Fastify, cron jobs, and PostgreSQL.
 - [ ] Add API and Caddy operation integration tests.
 
 ## P1: Identity and Reliability
@@ -46,4 +46,4 @@ This roadmap is ordered by production risk first, then reliability, then product
 
 ## Current Implementation
 
-Completed: outbound request protection, Caddy server-block targeting, and Docker Compose deployment hardening. The next active item is graceful API and job shutdown.
+Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, and graceful API/job/database shutdown. The next active item is API and Caddy operation integration tests.

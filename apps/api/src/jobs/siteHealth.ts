@@ -9,6 +9,7 @@ const PING_TIMEOUT = 5000;
 
 let task: ScheduledTask | null = null;
 let running = false;
+let activeRun: Promise<void> | null = null;
 
 function describeCron(expression: string): string {
     const parts = expression.trim().split(/\s+/);
@@ -204,19 +205,22 @@ export function startSiteHealthJob(): void {
     task = cron.schedule(expression, () => {
         if (running) return;
         running = true;
-        Promise.resolve()
+        const run = Promise.resolve()
             .then(() => checkAllSites())
             .then(() => reconcileAllSites())
             .catch((err) => console.error('[site-health] job failed', err))
-            .finally(() => {
-                running = false;
-            });
+        activeRun = run;
+        void run.finally(() => {
+            running = false;
+            if (activeRun === run) activeRun = null;
+        });
     });
 }
 
-export function stopSiteHealthJob(): void {
+export async function stopSiteHealthJob(): Promise<void> {
     if (task) {
         task.stop();
         task = null;
     }
+    if (activeRun) await activeRun;
 }
