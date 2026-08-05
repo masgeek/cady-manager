@@ -98,11 +98,19 @@ summary:focus-visible {
   background: var(--paper);
 }
 
-.login-card { width: min(100%, 430px); }
+.login-card {
+  width: min(100%, 430px);
+  color: var(--ink);
+}
+
+.login-card .app-brand {
+  color: var(--ink);
+}
 
 .login-title {
   margin: 0;
   font-family: 'Space Grotesk', 'Avenir Next', sans-serif;
+  color: var(--ink);
   font-size: clamp(2.2rem, 5vw, 3.6rem);
   font-weight: 700;
   letter-spacing: -0.08em;
@@ -205,6 +213,23 @@ summary:focus-visible {
   width: 18px;
   text-align: center;
   font-size: 1rem;
+}
+
+.app-mobile-nav-link {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+
+.app-mobile-nav-link:hover,
+.app-mobile-nav-link.active {
+  background: #e2f6ef;
+  color: var(--mint-dark);
+  font-weight: 700;
 }
 
 .app-main {

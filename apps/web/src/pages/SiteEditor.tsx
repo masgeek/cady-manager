@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
@@ -39,15 +39,22 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
   const queryClient = useQueryClient();
   const id = siteId ?? routeId;
   const isEdit = !!id;
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!modal) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose?.();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    closeButtonRef.current?.focus();
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [modal]);
+  }, [modal, onClose]);
 
   const serversQuery = useQuery({
     queryKey: ['servers'],
@@ -150,7 +157,7 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
     <div className={modal ? 'site-editor-modal-body' : undefined}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">{isEdit ? 'Edit Site' : 'New Site'}</h4>
-        {modal && <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />}
+        {modal && <button ref={closeButtonRef} type="button" className="btn-close" aria-label="Close" onClick={onClose} />}
       </div>
       <div className="card p-4" style={{ maxWidth: modal ? undefined : 600 }}>
         <form

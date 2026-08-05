@@ -73,7 +73,7 @@ export function Layout({ children, onLogout }: LayoutProps) {
         {/* Top navbar */}
         <nav className="navbar navbar-dark bg-primary d-md-none">
           <div className="container-fluid">
-            <button className="navbar-toggler" type="button" onClick={() => setMobileOpen(true)}>
+            <button className="navbar-toggler" type="button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
               <span className="navbar-toggler-icon"></span>
             </button>
             <span className="navbar-brand">Caddy Manager</span>
