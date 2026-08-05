@@ -20,11 +20,11 @@ This roadmap is intentionally small and focused on the needs of an internal Cadd
 
 ## P2: Operator Experience
 
-- [ ] Add configuration copy and download actions.
-- [ ] Add basic loading, error, and mutation feedback states in the UI.
+- [x] Add configuration copy and download actions.
+- [x] Add basic loading, error, and mutation feedback states in the UI.
 - [ ] Add a simple import preview before writing sites to the database.
 - [ ] Add bulk reconcile and health-check actions.
 
 ## Current Implementation
 
-Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, graceful API/job/database shutdown, initial API/Caddy integration tests, database-backed authentication, simple global roles, improved audit/API errors, basic health latency/failure tracking, and duplicate-site protection. The next active item is configuration copy/download actions.
+Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, graceful API/job/database shutdown, initial API/Caddy integration tests, database-backed authentication, simple global roles, improved audit/API errors, basic health latency/failure tracking, duplicate-site protection, configuration copy/download actions, and basic UI feedback. The next active item is a simple import preview.

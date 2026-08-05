@@ -51,6 +51,7 @@ export default function Sites() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   const query = useQuery({
     queryKey: ['sites'],
@@ -64,6 +65,7 @@ export default function Sites() {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       setDeleteId(null);
     },
+    onError: (error) => setFeedback(error instanceof Error ? error.message : 'Failed to delete site'),
   });
 
   const syncMutation = useMutation({
@@ -71,6 +73,7 @@ export default function Sites() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
     },
+    onError: (error) => setFeedback(error instanceof Error ? error.message : 'Failed to sync site'),
   });
 
   const reconcileMutation = useMutation({
@@ -78,6 +81,7 @@ export default function Sites() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
     },
+    onError: (error) => setFeedback(error instanceof Error ? error.message : 'Failed to reconcile routes'),
   });
 
   const rows = query.data || [];
@@ -138,13 +142,30 @@ export default function Sites() {
         </div>
       </div>
 
-      <DataTable
+      {feedback && (
+        <div className="alert alert-danger alert-dismissible fade show" role="alert">
+          {feedback}
+          <button type="button" className="btn-close" onClick={() => setFeedback(null)} />
+        </div>
+      )}
+
+      {query.isLoading && <div className="alert alert-info">Loading sites...</div>}
+      {query.isError && (
+        <div className="alert alert-danger">
+          Failed to load sites: {query.error instanceof Error ? query.error.message : 'Request failed'}
+          <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!query.isError && !query.isLoading && <DataTable
         columns={[...columns, actionColumn]}
         rows={identifiedRows}
         getRowId={(r) => r.id}
-      />
+      />}
 
-      {unidentifiedRows.length > 0 && (
+      {!query.isError && !query.isLoading && unidentifiedRows.length > 0 && (
         <details className="mt-3">
           <summary className="text-muted" style={{ cursor: 'pointer' }}>
             Sites without @id ({unidentifiedRows.length})

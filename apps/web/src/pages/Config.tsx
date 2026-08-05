@@ -12,6 +12,8 @@ export default function Config() {
     severity: 'success',
   });
 
+  const errorMessage = (error: unknown) => error instanceof Error ? error.message : 'Request failed';
+
   const serversQuery = useQuery({
     queryKey: ['servers'],
     queryFn: () => api.getServers(),
@@ -30,8 +32,8 @@ export default function Config() {
       setSnackbar({ open: true, message: 'Configuration reloaded successfully', severity: 'success' });
       queryClient.invalidateQueries({ queryKey: ['config', serverId] });
     },
-    onError: () => {
-      setSnackbar({ open: true, message: 'Failed to reload configuration', severity: 'error' });
+     onError: (error) => {
+       setSnackbar({ open: true, message: errorMessage(error), severity: 'error' });
     },
   });
 
@@ -63,7 +65,18 @@ export default function Config() {
         </button>
       </div>
 
-      {configQuery.data && (
+      {configQuery.isLoading && <div className="alert alert-info">Loading configuration...</div>}
+
+      {configQuery.isError && (
+        <div className="alert alert-danger">
+          Failed to load configuration: {errorMessage(configQuery.error)}
+          <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => configQuery.refetch()}>
+            Retry
+          </button>
+        </div>
+      )}
+
+      {configQuery.data && !configQuery.isLoading && (
         <JsonViewer data={configQuery.data} title="Active Configuration" />
       )}
 
