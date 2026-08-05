@@ -35,8 +35,8 @@ and safely take the next action.**
 - [x] Keep long Site forms internally scrollable.
 - [x] Keep Caddyfile-managed sites read-only in the UI.
 - [x] Move Server Add/Edit, Discover, and Import Preview onto the shared `Modal` primitive.
-- [ ] Add focus trapping to the shared `Modal` primitive.
-- [ ] Add unsaved-change protection to long forms.
+- [x] Add focus trapping to the shared `Modal` primitive.
+- [x] Add unsaved-change protection to long forms.
 
 ### Responsive and Accessibility Polish
 
