@@ -48,6 +48,24 @@ export async function registerServerRoutes(app: FastifyInstance) {
     },
   );
 
+  app.get(
+    '/servers/:id/blocks',
+    {
+      schema: {
+        tags: ['Servers'],
+        summary: 'List Caddy HTTP server blocks',
+        params: toJsonSchema(serverParamsSchema),
+        response: { 200: { type: 'array', items: { type: 'string' } } },
+      },
+    },
+    async (request) => {
+      const { id } = request.params as { id: string };
+      const server = await serverService.getServer(id);
+      const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
+      return provider.getServerNames();
+    },
+  );
+
   app.post(
     '/servers',
     {

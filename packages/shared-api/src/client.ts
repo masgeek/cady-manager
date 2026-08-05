@@ -65,6 +65,10 @@ export class ApiClient {
     return this.request(`/servers/${id}`);
   }
 
+  async getServerBlocks(id: string): Promise<string[]> {
+    return this.request(`/servers/${id}/blocks`);
+  }
+
   async createServer(data: CreateServerRequest): Promise<Server> {
     return this.request('/servers', {
       method: 'POST',

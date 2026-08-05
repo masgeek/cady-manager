@@ -65,6 +65,7 @@ const siteResponseZod = z.object({
   domain: z.string().describe('Site domain name'),
   upstream: z.string().url().describe('Upstream target URL'),
   routeId: z.string().optional().describe('Caddy route ID'),
+  caddyServerName: z.string().optional().describe('Caddy HTTP server block name'),
   tlsEnabled: z.boolean().describe('Whether TLS is enabled'),
   synced: z.boolean().describe('Whether config is synced to Caddy'),
   status: z

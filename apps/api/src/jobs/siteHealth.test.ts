@@ -53,4 +53,20 @@ describe('configContainsSite', () => {
       ),
     ).toBe(false);
   });
+
+  it('can restrict route detection to the selected server block', () => {
+    const config = {
+      apps: {
+        http: {
+          servers: {
+            public: { routes: [{ match: [{ host: ['example.com'] }] }] },
+            internal: { routes: [] },
+          },
+        },
+      },
+    };
+
+    expect(configContainsSite(config, { domain: 'example.com' }, 'internal')).toBe(false);
+    expect(configContainsSite(config, { domain: 'example.com' }, 'public')).toBe(true);
+  });
 });

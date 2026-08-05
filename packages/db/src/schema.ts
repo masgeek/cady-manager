@@ -19,6 +19,7 @@ export const sites = pgTable('sites', {
     domain: varchar('domain', {length: 255}).notNull(),
     upstream: varchar('upstream', {length: 255}).notNull(),
     routeId: varchar('route_id', {length: 255}),
+    caddyServerName: varchar('caddy_server_name', {length: 255}),
     tlsEnabled: boolean('tls_enabled').notNull().default(true),
     synced: boolean('synced').notNull().default(true),
     status: varchar('status', {length: 20}).notNull().default('inactive'),

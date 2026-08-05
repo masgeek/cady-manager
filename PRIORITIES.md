@@ -4,8 +4,8 @@ This roadmap is ordered by production risk first, then reliability, then product
 
 ## P0: Production Safety
 
-- [ ] Prevent SSRF and Caddy-token leakage with outbound endpoint allowlists.
-- [ ] Support selecting the correct Caddy HTTP server block.
+- [x] Prevent SSRF and Caddy-token leakage with outbound endpoint allowlists.
+- [x] Support selecting the correct Caddy HTTP server block.
 - [ ] Fix Docker Compose database variables, networks, secrets, and healthchecks.
 - [ ] Add graceful shutdown for Fastify, cron jobs, and PostgreSQL.
 - [ ] Add API and Caddy operation integration tests.
@@ -46,4 +46,4 @@ This roadmap is ordered by production risk first, then reliability, then product
 
 ## Current Implementation
 
-The first item being implemented is outbound request protection. It covers Caddy admin endpoint allowlisting and private-network protection for site health checks.
+Completed: outbound request protection and Caddy server-block targeting. The next active item is Docker Compose deployment hardening.

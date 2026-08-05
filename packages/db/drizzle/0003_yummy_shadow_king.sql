@@ -1,0 +1,1 @@
+ALTER TABLE "sites" ADD COLUMN "caddy_server_name" varchar(255);

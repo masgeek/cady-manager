@@ -6,6 +6,7 @@ interface ParsedSite {
   domain: string;
   upstream: string;
   routeId?: string;
+  caddyServerName: string;
   tlsEnabled: boolean;
 }
 
@@ -98,6 +99,7 @@ export function parseSitesFromConfig(config: Record<string, unknown>): ParsedSit
           domain,
           upstream: upstreamUrl,
           routeId,
+          caddyServerName: serverName,
           tlsEnabled: tlsDomains.has(domain),
         });
       }
@@ -133,6 +135,7 @@ export async function importSitesFromConfig(
       domain: p.domain,
       upstream: p.upstream,
       routeId: p.routeId,
+      caddyServerName: p.caddyServerName,
       tlsEnabled: p.tlsEnabled,
     });
     imported++;
@@ -315,6 +318,7 @@ export async function discoverAndImport(
       domain: p.domain,
       upstream: p.upstream,
       routeId: p.routeId,
+      caddyServerName: p.caddyServerName,
       tlsEnabled: p.tlsEnabled,
     });
     imported++;

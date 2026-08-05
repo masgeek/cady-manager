@@ -19,6 +19,7 @@ export async function createSite(data: {
   domain: string;
   upstream: string;
   routeId?: string;
+  caddyServerName?: string;
   tlsEnabled: boolean;
   healthEndpoint?: string;
   healthHeaders?: string;
@@ -28,7 +29,11 @@ export async function createSite(data: {
 
   const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
   const servers = await provider.getServerNames();
-  const serverName = servers[0];
+  const serverName = data.caddyServerName ?? servers[0];
+
+  if (serverName && !servers.includes(serverName)) {
+    throw new Error(`Caddy server block not found: ${serverName}`);
+  }
 
   if (serverName) {
     const route = buildCaddyRoute(data);
@@ -40,7 +45,7 @@ export async function createSite(data: {
 
 export async function updateSite(
   id: string,
-  data: Partial<{ domain: string; upstream: string; routeId?: string; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
+  data: Partial<{ domain: string; upstream: string; routeId?: string; caddyServerName?: string; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
 ): Promise<Site> {
   const existing = await siteRepo.findById(id);
   if (!existing) throw new NotFoundError('Site', id);
@@ -95,8 +100,9 @@ export async function syncSite(id: string): Promise<Site> {
 
   const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
   const servers = await provider.getServerNames();
-  const serverName = servers[0];
+  const serverName = site.caddyServerName ?? servers[0];
   if (!serverName) throw new Error('No Caddy servers found');
+  if (!servers.includes(serverName)) throw new Error(`Caddy server block not found: ${serverName}`);
 
   const routeId = site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_');
   const route = buildCaddyRoute({ ...site, routeId });

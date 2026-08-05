@@ -19,6 +19,7 @@ export interface Site {
   domain: string;
   upstream: string;
   routeId?: string;
+  caddyServerName?: string;
   tlsEnabled: boolean;
   synced: boolean;
   status: SiteStatus;

@@ -12,6 +12,7 @@ const siteSchema = z.object({
   baseDomain: z.string().min(1, 'Domain is required'),
   upstream: z.string().url('Must be a valid URL'),
   routeId: z.string().optional(),
+  caddyServerName: z.string().optional(),
   tlsEnabled: z.boolean(),
   healthEndpoint: z.string().optional(),
   healthHeaders: z.string().optional(),
@@ -49,6 +50,7 @@ export default function SiteEditor() {
     reset,
     setValue,
     control,
+    watch,
     formState: { errors },
   } = useForm<SiteForm>({
     resolver: zodResolver(siteSchema),
@@ -56,10 +58,18 @@ export default function SiteEditor() {
       serverId: isEdit ? '' : (searchParams.get('serverId') ?? ''),
       name: '',
       baseDomain: '',
+      caddyServerName: '',
       tlsEnabled: true,
       healthEndpoint: '',
       healthHeaders: '',
     },
+  });
+
+  const selectedServerId = watch('serverId');
+  const blocksQuery = useQuery({
+    queryKey: ['server-blocks', selectedServerId],
+    queryFn: () => api.getServerBlocks(selectedServerId),
+    enabled: !!selectedServerId,
   });
 
   useEffect(() => {
@@ -71,13 +81,13 @@ export default function SiteEditor() {
         baseDomain,
         upstream: siteQuery.data.upstream,
         routeId: siteQuery.data.routeId ?? '',
+        caddyServerName: siteQuery.data.caddyServerName ?? '',
         tlsEnabled: siteQuery.data.tlsEnabled,
         healthEndpoint: siteQuery.data.healthEndpoint ?? '',
         healthHeaders: siteQuery.data.healthHeaders ?? '',
       });
     }
   }, [siteQuery.data, reset]);
-
   const servers = serversQuery.data || [];
 
   const onServerChange = useCallback(
@@ -96,6 +106,7 @@ export default function SiteEditor() {
       domain: data.name ? `${data.name}.${data.baseDomain}` : data.baseDomain,
       upstream: data.upstream,
       routeId: data.routeId || undefined,
+      caddyServerName: data.caddyServerName || undefined,
       tlsEnabled: data.tlsEnabled,
       healthEndpoint: data.healthEndpoint || undefined,
       healthHeaders: data.healthHeaders || undefined,
@@ -144,6 +155,24 @@ export default function SiteEditor() {
               ))}
             </select>
             {errors.serverId && <div className="invalid-feedback">{errors.serverId.message}</div>}
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Caddy HTTP Server Block</label>
+            <select
+              {...register('caddyServerName')}
+              className={`form-select ${errors.caddyServerName ? 'is-invalid' : ''}`}
+              disabled={!selectedServerId || blocksQuery.isLoading}
+            >
+              <option value="">
+                {blocksQuery.isLoading ? 'Loading server blocks...' : 'Select a server block...'}
+              </option>
+              {(blocksQuery.data || []).map((block) => (
+                <option key={block} value={block}>{block}</option>
+              ))}
+            </select>
+            <div className="form-text">Routes are added to the selected Caddy HTTP server block.</div>
+            {errors.caddyServerName && <div className="invalid-feedback">{errors.caddyServerName.message}</div>}
           </div>
 
           <div className="row">

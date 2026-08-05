@@ -129,13 +129,18 @@ function routeContainsSite(route: Record<string, unknown>, site: {domain: string
     return nestedRoutes.some((nestedRoute) => routeContainsSite(nestedRoute, site));
 }
 
-export function configContainsSite(configData: Record<string, unknown>, site: {domain: string; routeId?: string}): boolean {
+export function configContainsSite(
+    configData: Record<string, unknown>,
+    site: {domain: string; routeId?: string},
+    serverName?: string,
+): boolean {
     const apps = configData.apps as Record<string, unknown> | undefined;
     const http = apps?.http as Record<string, unknown> | undefined;
     const servers = http?.servers as Record<string, unknown> | undefined;
     if (!servers) return false;
 
-    return Object.values(servers).some((server) => {
+    return Object.entries(servers).some(([name, server]) => {
+        if (serverName && name !== serverName) return false;
         const routes = (server as Record<string, unknown>).routes as Array<Record<string, unknown>> | undefined;
         return routes?.some((route) => routeContainsSite(route, site)) ?? false;
     });
@@ -152,16 +157,23 @@ export async function reconcileAllSites(): Promise<void> {
                 provider.getConfig(),
                 provider.getServerNames(),
             ]);
-            const serverName = serverNames[0];
-            if (!serverName) continue;
-
             const sites = await siteRepo.findAll(server.id);
             for (const site of sites) {
-                if (configContainsSite(config, site)) continue;
+                const serverName = site.caddyServerName ?? serverNames[0];
+                if (!serverName) continue;
+                if (!serverNames.includes(serverName)) {
+                    console.error(`[site-sync] Caddy server block not found: ${serverName} (${server.name})`);
+                    continue;
+                }
+                if (configContainsSite(config, site, serverName)) continue;
 
                 const routeId = site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_');
                 await provider.addRoute(serverName, buildCaddyRoute({...site, routeId}));
-                if (!site.routeId) await siteRepo.update(site.id, {routeId});
+                const updates = {
+                    ...(site.routeId ? {} : {routeId}),
+                    ...(site.caddyServerName ? {} : {caddyServerName: serverName}),
+                };
+                if (Object.keys(updates).length > 0) await siteRepo.update(site.id, updates);
                 await siteRepo.updateSyncedStatus(site.id, true);
                 repaired++;
                 console.log(`[site-sync] recreated missing route for ${site.domain}`);
