@@ -89,6 +89,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       const server = await serverService.createServer(data);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'create',
         entity: 'server',
         entityId: server.id,
@@ -124,6 +125,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       const server = await serverService.updateServer(id, data);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'update',
         entity: 'server',
         entityId: server.id,
@@ -151,6 +153,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
       await serverService.deleteServer(id);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'delete',
         entity: 'server',
         entityId: id,
@@ -207,6 +210,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
         const result = await importSitesFromConfig(server, provider);
 
         await recordAuditEvent({
+          userId: request.user.sub,
           action: 'create',
           entity: 'site',
           details: `Imported ${result.imported} sites from ${server.name} config (${result.skipped} skipped)`,

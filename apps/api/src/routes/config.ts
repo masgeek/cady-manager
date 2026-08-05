@@ -63,6 +63,7 @@ export async function registerConfigRoutes(app: FastifyInstance) {
       await configService.reloadServerConfig(provider, server, sites);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'reload',
         entity: 'config',
         entityId: serverId,

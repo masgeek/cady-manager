@@ -71,6 +71,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       const site = await siteService.createSite(data);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'create',
         entity: 'site',
         entityId: site.id,
@@ -106,6 +107,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       const site = await siteService.updateSite(id, data);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'update',
         entity: 'site',
         entityId: site.id,
@@ -133,6 +135,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       await siteService.deleteSite(id);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'delete',
         entity: 'site',
         entityId: id,
@@ -159,6 +162,7 @@ export async function registerSiteRoutes(app: FastifyInstance) {
       const site = await siteService.syncSite(id);
 
       await recordAuditEvent({
+        userId: request.user.sub,
         action: 'update',
         entity: 'site',
         entityId: id,

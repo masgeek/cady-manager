@@ -32,7 +32,7 @@ export const sites = pgTable('sites', {
 
 export const auditEvents = pgTable('audit_events', {
     id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-    userId: varchar('user_id', {length: 30}).notNull().default('admin'),
+    userId: varchar('user_id', {length: 36}).notNull().default('admin'),
     action: varchar('action', {length: 20}).notNull(),
     entity: varchar('entity', {length: 20}).notNull(),
     entityId: text('entity_id'),

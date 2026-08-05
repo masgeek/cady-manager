@@ -12,6 +12,17 @@ import type {
   UpdateSiteRequest,
 } from './types.js';
 
+export class ApiClientError extends Error {
+  constructor(
+    public statusCode: number,
+    message: string,
+    public details?: unknown,
+  ) {
+    super(message);
+    this.name = 'ApiClientError';
+  }
+}
+
 export class ApiClient {
   private baseUrl: string;
   private token: string = '';
@@ -46,7 +57,15 @@ export class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+      const body = await response.json().catch(() => undefined) as {
+        message?: string;
+        details?: unknown;
+      } | undefined;
+      throw new ApiClientError(
+        response.status,
+        body?.message ?? `API error: ${response.status} ${response.statusText}`,
+        body?.details,
+      );
     }
 
     if (response.status === 204) {
