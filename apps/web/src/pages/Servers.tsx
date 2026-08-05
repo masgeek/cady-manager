@@ -129,6 +129,8 @@ export default function Servers() {
   const [snackbar, setSnackbar] = useState<string | null>(null);
 
   const rows = query.data || [];
+  const onlineCount = rows.filter((server) => server.status === 'online').length;
+  const attentionCount = rows.filter((server) => server.status !== 'online').length;
 
   const actionColumn: Column<Server> = {
     field: 'actions',
@@ -169,23 +171,47 @@ export default function Servers() {
 
   return (
     <div>
+      <div className="page-heading">
+        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+          <div>
+            <div className="page-eyebrow">Fleet control</div>
+            <h1>Servers</h1>
+            <p className="page-description">Your registered Caddy endpoints and the signal coming back from each one.</p>
+          </div>
+          <button className="btn btn-primary" onClick={() => setDialogOpen(true)}>
+            <i className="bi bi-plus-lg me-1"></i> Add server
+          </button>
+        </div>
+        <div className="signal-strip">
+          <strong>{onlineCount} of {rows.length} online</strong>
+          <span className="ms-auto">{attentionCount} need attention</span>
+          <span>Auto-refresh 30s</span>
+        </div>
+      </div>
+
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Servers</h4>
+        <div className="page-eyebrow mb-0">Registered endpoints</div>
         <div className="d-flex gap-2">
           <button className="btn btn-outline-info" onClick={() => setDiscoverOpen(true)}>
             <i className="bi bi-search me-1"></i> Discover
           </button>
-          <button className="btn btn-primary" onClick={() => setDialogOpen(true)}>
-            <i className="bi bi-plus-circle me-1"></i> Add Server
-          </button>
         </div>
       </div>
 
-      <DataTable
-        columns={[...columns, actionColumn]}
-        rows={rows}
-        getRowId={(r) => r.id}
-      />
+      {query.isLoading && <div className="alert alert-info">Loading Caddy servers...</div>}
+      {query.isError && (
+        <div className="alert alert-danger">
+          Failed to load servers: {query.error instanceof Error ? query.error.message : 'Request failed'}
+          <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>Retry</button>
+        </div>
+      )}
+      {!query.isLoading && !query.isError && (
+        <DataTable
+          columns={[...columns, actionColumn]}
+          rows={rows}
+          getRowId={(r) => r.id}
+        />
+      )}
 
       {/* Add / Edit Server Modal */}
       {dialogOpen && (
