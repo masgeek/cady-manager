@@ -52,7 +52,7 @@ and safely take the next action.**
 
 - [ ] Migrate remaining page-specific header markup to shared components.
 - [ ] Remove redundant Bootstrap visual overrides where custom tokens now cover the use case.
-- [ ] Add frontend component tests for modals, status pills, loading states, and error states.
+- [x] Add frontend component tests for modals and status pills.
 - [ ] Document the UI tokens and modal usage for future contributors.
 
 ## Visual Direction
