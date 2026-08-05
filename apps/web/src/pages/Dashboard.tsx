@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { StatusBadge } from '@caddy-manager/ui';
+import { PageHeader, StatusBadge } from '@caddy-manager/ui';
 import { api } from '../api/client';
 
 function formatCheckedAt(value?: string): string {
@@ -35,13 +35,11 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="page-heading">
-        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-          <div>
-            <div className="page-eyebrow">Operations overview</div>
-            <h1>Good morning, operator.</h1>
-            <p className="page-description">A quiet view of your Caddy fleet, with attention surfaced only when it matters.</p>
-          </div>
+      <PageHeader
+        eyebrow="Operations overview"
+        title="Good morning, operator."
+        description="A quiet view of your Caddy fleet, with attention surfaced only when it matters."
+        actions={
           <div className="d-flex gap-2">
             <button className="btn btn-outline-secondary" onClick={() => navigate('/servers')}>
               <i className="bi bi-hdd-rack me-1"></i> Manage servers
@@ -50,13 +48,15 @@ export default function Dashboard() {
               <i className="bi bi-plus-lg me-1"></i> Add site
             </button>
           </div>
-        </div>
-        <div className="signal-strip">
-          <strong>{onlineServers} of {servers.length} servers online</strong>
-          <span className="ms-auto">{checkedSites} of {sites.length} sites checked</span>
-          <span>{new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
-        </div>
-      </div>
+        }
+        signal={
+          <>
+            <strong>{onlineServers} of {servers.length} servers online</strong>
+            <span className="ms-auto">{checkedSites} of {sites.length} sites checked</span>
+            <span>{new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+          </>
+        }
+      />
 
       {isLoading && <div className="alert alert-info">Loading infrastructure status...</div>}
       {hasError && <div className="alert alert-danger">Some infrastructure data could not be loaded. Refresh to try again.</div>}

@@ -4,3 +4,5 @@ export { StatusBadge } from './StatusBadge';
 export { DataTable } from './DataTable';
 export { JsonViewer } from './JsonViewer';
 export { ConfirmDialog } from './ConfirmDialog';
+export { PageHeader } from './PageHeader';
+export { SignalStrip } from './SignalStrip';
