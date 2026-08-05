@@ -28,9 +28,9 @@ export default function Audit() {
         }
       />
 
-      {query.isLoading && <div className="alert alert-info">Loading audit events...</div>}
+      {query.isLoading && <div className="alert alert-info" role="status" aria-live="polite">Loading audit events...</div>}
       {query.isError && (
-        <div className="alert alert-danger">
+        <div className="alert alert-danger" role="alert">
           Failed to load audit events: {query.error instanceof Error ? query.error.message : 'Request failed'}
           <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>Retry</button>
         </div>

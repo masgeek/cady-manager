@@ -204,9 +204,9 @@ export default function Servers() {
         </div>
       </div>
 
-      {query.isLoading && <div className="alert alert-info">Loading Caddy servers...</div>}
+      {query.isLoading && <div className="alert alert-info" role="status" aria-live="polite">Loading Caddy servers...</div>}
       {query.isError && (
-        <div className="alert alert-danger">
+        <div className="alert alert-danger" role="alert">
           Failed to load servers: {query.error instanceof Error ? query.error.message : 'Request failed'}
           <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>Retry</button>
         </div>

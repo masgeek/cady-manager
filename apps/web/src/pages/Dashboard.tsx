@@ -58,8 +58,8 @@ export default function Dashboard() {
         }
       />
 
-      {isLoading && <div className="alert alert-info">Loading infrastructure status...</div>}
-      {hasError && <div className="alert alert-danger">Some infrastructure data could not be loaded. Refresh to try again.</div>}
+      {isLoading && <div className="alert alert-info" role="status" aria-live="polite">Loading infrastructure status...</div>}
+      {hasError && <div className="alert alert-danger" role="alert">Some infrastructure data could not be loaded. Refresh to try again.</div>}
 
       {!isLoading && (
         <>

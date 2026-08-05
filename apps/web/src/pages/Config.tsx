@@ -88,10 +88,10 @@ export default function Config() {
         </button>
       </div>
 
-      {displayedQuery.isLoading && <div className="alert alert-info">Loading {view} configuration...</div>}
+      {displayedQuery.isLoading && <div className="alert alert-info" role="status" aria-live="polite">Loading {view} configuration...</div>}
 
       {displayedQuery.isError && (
-        <div className="alert alert-danger">
+        <div className="alert alert-danger" role="alert">
           Failed to load configuration: {errorMessage(displayedQuery.error)}
           <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => displayedQuery.refetch()}>
             Retry

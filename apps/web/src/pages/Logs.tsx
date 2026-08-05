@@ -37,7 +37,7 @@ export default function Logs() {
         eyebrow="Runtime signal"
         title="Logs"
         description="A live window into recent Caddy and manager activity."
-        actions={<span className="live-indicator"><span></span>{query.isFetching ? 'Refreshing' : 'Live · 5s'}</span>}
+        actions={<span className="live-indicator" role="status" aria-live="polite"><span></span>{query.isFetching ? 'Refreshing' : 'Live · 5s'}</span>}
         signal={
           <>
           <strong>{rows.length} recent entries</strong>
@@ -59,9 +59,9 @@ export default function Logs() {
         {search && <button className="btn btn-sm btn-link text-decoration-none" onClick={() => setSearch('')}>Clear</button>}
       </div>
 
-      {query.isLoading && <div className="alert alert-info">Loading runtime logs...</div>}
+      {query.isLoading && <div className="alert alert-info" role="status" aria-live="polite">Loading runtime logs...</div>}
       {query.isError && (
-        <div className="alert alert-danger">
+        <div className="alert alert-danger" role="alert">
           Failed to load logs: {query.error instanceof Error ? query.error.message : 'Request failed'}
           <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>Retry</button>
         </div>

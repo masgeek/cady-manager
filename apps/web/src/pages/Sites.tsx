@@ -188,9 +188,9 @@ export default function Sites() {
         </div>
       )}
 
-      {query.isLoading && <div className="alert alert-info">Loading sites...</div>}
+      {query.isLoading && <div className="alert alert-info" role="status" aria-live="polite">Loading sites...</div>}
       {query.isError && (
-        <div className="alert alert-danger">
+        <div className="alert alert-danger" role="alert">
           Failed to load sites: {query.error instanceof Error ? query.error.message : 'Request failed'}
           <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>
             Retry
