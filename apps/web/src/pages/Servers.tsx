@@ -38,6 +38,16 @@ export default function Servers() {
   const [editServer, setEditServer] = useState<Server | null>(null);
   const [importPreview, setImportPreview] = useState<{ server: Server; sites: ImportPreviewSite[] } | null>(null);
 
+  useEffect(() => {
+    const modalOpen = dialogOpen || discoverOpen || !!importPreview || !!deleteId;
+    if (!modalOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [dialogOpen, discoverOpen, importPreview, deleteId]);
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ServerForm>({
     resolver: zodResolver(serverSchema),
   });
