@@ -86,6 +86,11 @@ pnpm dev
 docker compose up -d
 ```
 
+Set `CADDY_ALLOWED_HOSTS` in `.env` before starting. If Caddy runs in another
+container, attach it to the generated `caddy-manager_internal` network so the
+API can reach it. The API is intentionally not published directly; access it
+through the web container on `WEB_PORT`.
+
 See `docker/` for configuration details.
 
 ## Documentation
