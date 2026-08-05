@@ -74,7 +74,7 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
     setValue,
     control,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<SiteForm>({
     resolver: zodResolver(siteSchema),
     defaultValues: {
@@ -112,6 +112,21 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
     }
   }, [siteQuery.data, reset]);
   const servers = serversQuery.data || [];
+
+  const handleClose = useCallback(() => {
+    if (isDirty && !window.confirm('Discard unsaved site changes?')) return;
+    onClose ? onClose() : navigate('/sites');
+  }, [isDirty, navigate, onClose]);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
 
   const onServerChange = useCallback(
     (serverId: string) => {
@@ -157,7 +172,7 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
     <div className={modal ? 'site-editor-modal-body' : undefined}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">{isEdit ? 'Edit Site' : 'New Site'}</h4>
-        {modal && <button ref={closeButtonRef} type="button" className="btn-close" aria-label="Close" onClick={onClose} />}
+        {modal && <button ref={closeButtonRef} type="button" className="btn-close" aria-label="Close" onClick={handleClose} />}
       </div>
       <div className="card p-4" style={{ maxWidth: modal ? undefined : 600 }}>
         <form
@@ -296,7 +311,7 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
             <button type="submit" className="btn btn-primary">
               {isEdit ? 'Update' : 'Create'}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => onClose ? onClose() : navigate('/sites')}>Cancel</button>
+            <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
           </div>
         </form>
       </div>
@@ -307,7 +322,7 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
 
   return (
     <>
-      <div className="modal-backdrop fade show" onClick={onClose} />
+      <div className="modal-backdrop fade show" onClick={handleClose} />
       <div className="modal fade show d-block site-editor-modal" tabIndex={-1} role="dialog" aria-modal="true">
         <div className="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
           <div className="modal-content">
