@@ -50,10 +50,10 @@ and safely take the next action.**
 
 ### Final Cleanup
 
-- [ ] Migrate remaining page-specific header markup to shared components.
+- [x] Migrate remaining page-specific header markup to shared components.
 - [ ] Remove redundant Bootstrap visual overrides where custom tokens now cover the use case.
 - [x] Add frontend component tests for modals and status pills.
-- [ ] Document the UI tokens and modal usage for future contributors.
+- [x] Document the UI tokens and modal usage for future contributors.
 
 ## Visual Direction
 
