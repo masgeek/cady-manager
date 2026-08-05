@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { DataTable, StatusBadge, ConfirmDialog } from '@caddy-manager/ui';
+import { DataTable, StatusBadge, ConfirmDialog, PageHeader } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 import type { Site } from '@caddy-manager/shared-types';
 import { api } from '../api/client';
@@ -143,23 +143,19 @@ export default function Sites() {
 
   return (
     <div>
-      <div className="page-heading">
-        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-          <div>
-            <div className="page-eyebrow">Routing inventory</div>
-            <h1>Sites</h1>
-            <p className="page-description">Managed domains, upstream targets, and the health signal behind each route.</p>
-          </div>
-          <button className="btn btn-primary" onClick={() => setEditor({})}>
-            <i className="bi bi-plus-lg me-1"></i> Add site
-          </button>
-        </div>
-        <div className="signal-strip">
+      <PageHeader
+        eyebrow="Routing inventory"
+        title="Sites"
+        description="Managed domains, upstream targets, and the health signal behind each route."
+        actions={<button className="btn btn-primary" onClick={() => setEditor({})}><i className="bi bi-plus-lg me-1"></i> Add site</button>}
+        signal={
+          <>
           <strong>{activeCount} of {rows.length} healthy</strong>
-          <span className="ms-auto">{syncedCount} synced to Caddy</span>
-          <span className={errorCount ? 'text-danger' : 'text-success'}>{errorCount ? `${errorCount} errors` : 'No errors'}</span>
-        </div>
-      </div>
+            <span className="ms-auto">{syncedCount} synced to Caddy</span>
+            <span className={errorCount ? 'text-danger' : 'text-success'}>{errorCount ? `${errorCount} errors` : 'No errors'}</span>
+          </>
+        }
+      />
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div className="page-eyebrow mb-0">Managed routes</div>

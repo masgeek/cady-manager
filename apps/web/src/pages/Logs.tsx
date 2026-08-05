@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { PageHeader } from '@caddy-manager/ui';
 
 interface LogEntry {
   timestamp: string;
@@ -32,20 +33,18 @@ export default function Logs() {
 
   return (
     <div>
-      <div className="page-heading">
-        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-          <div>
-            <div className="page-eyebrow">Runtime signal</div>
-            <h1>Logs</h1>
-            <p className="page-description">A live window into recent Caddy and manager activity.</p>
-          </div>
-          <span className="live-indicator"><span></span>{query.isFetching ? 'Refreshing' : 'Live · 5s'}</span>
-        </div>
-        <div className="signal-strip">
+      <PageHeader
+        eyebrow="Runtime signal"
+        title="Logs"
+        description="A live window into recent Caddy and manager activity."
+        actions={<span className="live-indicator"><span></span>{query.isFetching ? 'Refreshing' : 'Live · 5s'}</span>}
+        signal={
+          <>
           <strong>{rows.length} recent entries</strong>
-          <span className="ms-auto">Search the current buffer</span>
-        </div>
-      </div>
+            <span className="ms-auto">Search the current buffer</span>
+          </>
+        }
+      />
 
       <div className="d-flex gap-2 align-items-center mb-3">
         <div className="input-group" style={{ maxWidth: 440 }}>

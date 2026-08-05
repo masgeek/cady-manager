@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { JsonViewer } from '@caddy-manager/ui';
+import { JsonViewer, PageHeader } from '@caddy-manager/ui';
 import { api } from '../api/client';
 
 export default function Config() {
@@ -50,19 +50,17 @@ export default function Config() {
 
   return (
     <div>
-      <div className="page-heading">
-        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-          <div>
-            <div className="page-eyebrow">Caddy state</div>
-            <h1>Configuration</h1>
-            <p className="page-description">Inspect the active document, compare it with the manager-generated view, and reload deliberately.</p>
-          </div>
-        </div>
-        <div className="signal-strip">
+      <PageHeader
+        eyebrow="Caddy state"
+        title="Configuration"
+        description="Inspect the active document, compare it with the manager-generated view, and reload deliberately."
+        signal={
+          <>
           <strong>{serverId ? (view === 'active' ? 'Active document' : 'Generated preview') : 'Select a server to begin'}</strong>
-          <span className="ms-auto">JSON / Admin API</span>
-        </div>
-      </div>
+            <span className="ms-auto">JSON / Admin API</span>
+          </>
+        }
+      />
 
       <div className="d-flex gap-2 mb-3 align-items-center flex-wrap">
         <select

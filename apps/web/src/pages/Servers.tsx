@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { DataTable, StatusBadge, ConfirmDialog } from '@caddy-manager/ui';
+import { DataTable, StatusBadge, ConfirmDialog, PageHeader } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 import type { Server } from '@caddy-manager/shared-types';
 import type { ImportPreviewSite } from '@caddy-manager/shared-api';
@@ -181,23 +181,19 @@ export default function Servers() {
 
   return (
     <div>
-      <div className="page-heading">
-        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-          <div>
-            <div className="page-eyebrow">Fleet control</div>
-            <h1>Servers</h1>
-            <p className="page-description">Your registered Caddy endpoints and the signal coming back from each one.</p>
-          </div>
-          <button className="btn btn-primary" onClick={() => setDialogOpen(true)}>
-            <i className="bi bi-plus-lg me-1"></i> Add server
-          </button>
-        </div>
-        <div className="signal-strip">
+      <PageHeader
+        eyebrow="Fleet control"
+        title="Servers"
+        description="Your registered Caddy endpoints and the signal coming back from each one."
+        actions={<button className="btn btn-primary" onClick={() => setDialogOpen(true)}><i className="bi bi-plus-lg me-1"></i> Add server</button>}
+        signal={
+          <>
           <strong>{onlineCount} of {rows.length} online</strong>
-          <span className="ms-auto">{attentionCount} need attention</span>
-          <span>Auto-refresh 30s</span>
-        </div>
-      </div>
+            <span className="ms-auto">{attentionCount} need attention</span>
+            <span>Auto-refresh 30s</span>
+          </>
+        }
+      />
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div className="page-eyebrow mb-0">Registered endpoints</div>

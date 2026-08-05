@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type { AuditEvent } from '@caddy-manager/shared-types';
+import { PageHeader } from '@caddy-manager/ui';
 
 export default function Audit() {
   const query = useQuery({
@@ -14,18 +15,18 @@ export default function Audit() {
 
   return (
     <div>
-      <div className="page-heading">
-        <div>
-          <div className="page-eyebrow">Accountability</div>
-          <h1>Audit trail</h1>
-          <p className="page-description">A quiet record of who changed infrastructure and what happened next.</p>
-        </div>
-        <div className="signal-strip">
+      <PageHeader
+        eyebrow="Accountability"
+        title="Audit trail"
+        description="A quiet record of who changed infrastructure and what happened next."
+        signal={
+          <>
           <strong>{successes} successful actions</strong>
-          <span className="ms-auto">{failures ? `${failures} failed` : 'No failures recorded'}</span>
-          <span>Latest 100 events</span>
-        </div>
-      </div>
+            <span className="ms-auto">{failures ? `${failures} failed` : 'No failures recorded'}</span>
+            <span>Latest 100 events</span>
+          </>
+        }
+      />
 
       {query.isLoading && <div className="alert alert-info">Loading audit events...</div>}
       {query.isError && (
