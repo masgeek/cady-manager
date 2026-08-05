@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { DataTable, StatusBadge, ConfirmDialog } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 import type { Server } from '@caddy-manager/shared-types';
+import type { ImportPreviewSite } from '@caddy-manager/shared-api';
 import { api } from '../api/client';
 
 const serverSchema = z.object({
@@ -35,6 +36,7 @@ export default function Servers() {
   const [discoverUrl, setDiscoverUrl] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editServer, setEditServer] = useState<Server | null>(null);
+  const [importPreview, setImportPreview] = useState<{ server: Server; sites: ImportPreviewSite[] } | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ServerForm>({
     resolver: zodResolver(serverSchema),
@@ -97,10 +99,17 @@ export default function Servers() {
       queryClient.invalidateQueries({ queryKey: ['servers'] });
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       setSnackbar(`${data.imported} site(s) imported, ${data.skipped} skipped`);
+      setImportPreview(null);
     },
     onError: () => {
       setSnackbar('Failed to import sites');
     },
+  });
+
+  const previewImportMutation = useMutation({
+    mutationFn: (server: Server) => api.previewServerSites(server.id),
+    onSuccess: (sites, server) => setImportPreview({ server, sites }),
+    onError: (error: Error) => setSnackbar(`Import preview failed: ${error.message}`),
   });
 
   const discoverMutation = useMutation({
@@ -142,7 +151,7 @@ export default function Servers() {
         </button>
         <button
           className="btn btn-sm btn-outline-success"
-          onClick={() => importMutation.mutate(row.id)}
+           onClick={() => previewImportMutation.mutate(row)}
           title="Import sites from config"
         >
           <i className="bi bi-download"></i>
@@ -262,6 +271,57 @@ export default function Servers() {
                     onClick={() => discoverMutation.mutate(discoverUrl)}
                   >
                     {discoverMutation.isPending ? 'Discovering...' : 'Discover & Import'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Import Preview Modal */}
+      {importPreview && (
+        <>
+          <div className="modal-backdrop fade show" />
+          <div className="modal fade show d-block" tabIndex={-1}>
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Import Sites from {importPreview.server.name}</h5>
+                  <button type="button" className="btn-close" onClick={() => setImportPreview(null)} />
+                </div>
+                <div className="modal-body">
+                  {importPreview.sites.length === 0 ? (
+                    <p className="text-muted mb-0">No reverse-proxy sites were found in the active Caddy configuration.</p>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-sm">
+                        <thead>
+                          <tr><th>Domain</th><th>Upstream</th><th>Server Block</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                          {importPreview.sites.map((site) => (
+                            <tr key={`${site.caddyServerName}:${site.domain}`}>
+                              <td>{site.domain}</td>
+                              <td>{site.upstream}</td>
+                              <td>{site.caddyServerName}</td>
+                              <td>{site.alreadyImported ? 'Already imported' : 'New'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setImportPreview(null)}>Cancel</button>
+                  <button
+                    type="button"
+                    className="btn btn-success"
+                    disabled={importPreview.sites.length === 0 || importMutation.isPending}
+                    onClick={() => importMutation.mutate(importPreview.server.id)}
+                  >
+                    {importMutation.isPending ? 'Importing...' : 'Import Sites'}
                   </button>
                 </div>
               </div>

@@ -14,7 +14,7 @@ import {
 import {AppError} from '../lib/errors';
 import * as serverService from '../services/server';
 import {CaddyProvider} from '../providers/caddy';
-import {discoverAndImport, importSitesFromConfig} from '../services/config';
+import {discoverAndImport, importSitesFromConfig, previewSitesFromConfig} from '../services/config';
 import {recordAuditEvent} from '../services/audit';
 
 export async function registerServerRoutes(app: FastifyInstance) {
@@ -221,6 +221,40 @@ export async function registerServerRoutes(app: FastifyInstance) {
         const message = err instanceof Error ? err.message : String(err);
         throw new AppError(502, `Failed to import config from ${server.apiEndpoint}: ${message}`);
       }
+    },
+  );
+
+  app.get(
+    '/servers/:id/import/preview',
+    {
+      schema: {
+        tags: ['Servers'],
+        summary: 'Preview sites available for import',
+        params: toJsonSchema(serverParamsSchema),
+        response: {
+          200: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                domain: {type: 'string'},
+                upstream: {type: 'string'},
+                routeId: {type: 'string'},
+                caddyServerName: {type: 'string'},
+                tlsEnabled: {type: 'boolean'},
+                alreadyImported: {type: 'boolean'},
+              },
+              required: ['domain', 'upstream', 'caddyServerName', 'tlsEnabled', 'alreadyImported'],
+            },
+          },
+        },
+      },
+    },
+    async (request) => {
+      const { id } = request.params as { id: string };
+      const server = await serverService.getServer(id);
+      const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
+      return previewSitesFromConfig(server, provider);
     },
   );
 

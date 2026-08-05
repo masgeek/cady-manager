@@ -2,12 +2,16 @@ import type { Server, Site } from '@caddy-manager/shared-types';
 import { siteRepo, serverRepo } from '@caddy-manager/db';
 import { CaddyProvider } from '../providers/caddy';
 
-interface ParsedSite {
+export interface ParsedSite {
   domain: string;
   upstream: string;
   routeId?: string;
   caddyServerName: string;
   tlsEnabled: boolean;
+}
+
+export interface ImportPreviewSite extends ParsedSite {
+  alreadyImported: boolean;
 }
 
 function findReverseProxyDial(handles: Array<Record<string, unknown>> | undefined): string | undefined {
@@ -143,6 +147,17 @@ export async function importSitesFromConfig(
   }
 
   return { imported, skipped, sites };
+}
+
+export async function previewSitesFromConfig(
+  server: Server,
+  provider: CaddyProvider,
+): Promise<ImportPreviewSite[]> {
+  const parsed = parseSitesFromConfig(await provider.getConfig());
+  return Promise.all(parsed.map(async (site) => ({
+    ...site,
+    alreadyImported: !!await siteRepo.findByDomainAndServer(site.domain, server.id),
+  })));
 }
 
 export function buildCaddyConfig(server: Server, sites: Site[]): Record<string, unknown> {

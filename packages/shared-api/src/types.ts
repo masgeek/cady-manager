@@ -52,3 +52,12 @@ export interface UpdateSiteRequest {
   healthEndpoint?: string;
   healthHeaders?: string;
 }
+
+export interface ImportPreviewSite {
+  domain: string;
+  upstream: string;
+  routeId?: string;
+  caddyServerName: string;
+  tlsEnabled: boolean;
+  alreadyImported: boolean;
+}

@@ -10,6 +10,7 @@ import type {
   UpdateServerRequest,
   CreateSiteRequest,
   UpdateSiteRequest,
+  ImportPreviewSite,
 } from './types.js';
 
 export class ApiClientError extends Error {
@@ -183,6 +184,10 @@ export class ApiClient {
       method: 'POST',
       body: '{}',
     });
+  }
+
+  async previewServerSites(id: string): Promise<ImportPreviewSite[]> {
+    return this.request(`/servers/${id}/import/preview`);
   }
 
   // Sync
