@@ -31,36 +31,53 @@ export default function Login() {
   }
 
   return (
-    <div className="d-flex justify-content-center align-items-center bg-light" style={{ minHeight: '100vh' }}>
-      <div className="card shadow-sm p-4" style={{ maxWidth: 400, width: '100%' }}>
-        <h4 className="text-center mb-1">Caddy Manager</h4>
-        <p className="text-center text-muted small mb-3">Sign in to continue</p>
-
-        {error && <div className="alert alert-danger py-2 small">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Username</label>
-            <input
-              className="form-control"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoFocus
-            />
+    <div className="login-shell">
+      <div className="login-atmosphere" aria-hidden="true">
+        <div className="login-grid"></div>
+        <div className="login-orbit login-orbit-one"></div>
+        <div className="login-orbit login-orbit-two"></div>
+      </div>
+      <div className="login-panel">
+        <div className="login-card">
+          <div className="app-brand justify-content-center p-0 mb-5">
+            <span className="app-brand-mark"><i className="bi bi-diagram-3"></i></span>
+            Caddy Manager
           </div>
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input
-              className="form-control"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <button type="submit" className="btn btn-primary w-100 btn-lg" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+          <div className="page-eyebrow">Internal control room</div>
+          <h1 className="login-title">Welcome back.</h1>
+          <p className="login-subtitle">Sign in to manage routes, inspect health, and keep your edge quiet.</p>
+
+          {error && <div className="alert alert-danger py-2 small" role="alert">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label" htmlFor="login-username">Username</label>
+              <input
+                id="login-username"
+                className="form-control form-control-lg"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoFocus
+                autoComplete="username"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="form-label" htmlFor="login-password">Password</label>
+              <input
+                id="login-password"
+                className="form-control form-control-lg"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+            </div>
+            <button type="submit" className="btn btn-primary w-100 btn-lg" disabled={loading}>
+              {loading ? <><span className="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Signing in...</> : <>Enter control room <i className="bi bi-arrow-right ms-1"></i></>}
+            </button>
+          </form>
+          <div className="login-footer"><span className="status-dot status-dot-success"></span> Private infrastructure workspace</div>
+        </div>
       </div>
     </div>
   );

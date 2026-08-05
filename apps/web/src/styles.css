@@ -55,6 +55,81 @@ summary:focus-visible {
   background: var(--paper);
 }
 
+.login-shell {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--graphite);
+}
+
+.login-atmosphere {
+  position: relative;
+  display: flex;
+  width: 54%;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  background: #101a20;
+}
+
+.login-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(57, 211, 162, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(57, 211, 162, 0.07) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(135deg, black, transparent 80%);
+}
+
+.login-orbit {
+  position: absolute;
+  border: 1px solid rgba(57, 211, 162, 0.2);
+  border-radius: 50%;
+}
+
+.login-orbit-one { width: 560px; height: 560px; transform: rotate(-24deg) scaleY(0.44); }
+.login-orbit-two { width: 780px; height: 780px; transform: rotate(28deg) scaleY(0.42); border-color: rgba(242, 184, 75, 0.15); }
+
+.login-panel {
+  display: flex;
+  width: 46%;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--paper);
+}
+
+.login-card { width: min(100%, 430px); }
+
+.login-title {
+  margin: 0;
+  font-family: 'Space Grotesk', 'Avenir Next', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 1;
+}
+
+.login-subtitle {
+  max-width: 360px;
+  margin: 14px 0 32px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.login-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .login-atmosphere { display: none; }
+  .login-panel { width: 100%; padding: 24px; }
+}
+
 .app-sidebar {
   width: 248px;
   min-height: 100vh;
