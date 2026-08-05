@@ -580,6 +580,34 @@ summary:focus-visible {
   line-height: 1.45;
 }
 
+.json-viewer-toolbar {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid #2d4249;
+  border-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--graphite);
+}
+
+.json-viewer-title {
+  color: #dbe9e5;
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.json-viewer-code {
+  margin: 0;
+  overflow: auto;
+  border: 1px solid #2d4249;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: #101a20;
+  color: #d6e6e1;
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  line-height: 1.6;
+}
+
 .card,
 .modal-content {
   border: 1px solid var(--line);
