@@ -1,0 +1,56 @@
+import { describe, expect, it } from 'vitest';
+import { configContainsSite } from './siteHealth';
+
+describe('configContainsSite', () => {
+  it('finds a route by its persisted route id', () => {
+    expect(
+      configContainsSite(
+        {
+          apps: {
+            http: {
+              servers: {
+                proxy: { routes: [{ '@id': 'imported-route' }] },
+              },
+            },
+          },
+        },
+        { domain: 'example.com', routeId: 'imported-route' },
+      ),
+    ).toBe(true);
+  });
+
+  it('finds imported routes without an id by their host', () => {
+    expect(
+      configContainsSite(
+        {
+          apps: {
+            http: {
+              servers: {
+                proxy: {
+                  routes: [
+                    {
+                      handle: [{ routes: [{ match: [{ host: ['example.com'] }] }] }],
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        { domain: 'example.com' },
+      ),
+    ).toBe(true);
+  });
+
+  it('returns false when the site route is missing', () => {
+    expect(
+      configContainsSite(
+        { apps: { http: { servers: { proxy: { routes: [] } } } } },
+        {
+          domain: 'missing.example.com',
+          routeId: 'missing-route',
+        },
+      ),
+    ).toBe(false);
+  });
+});

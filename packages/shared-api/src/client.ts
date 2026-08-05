@@ -167,6 +167,10 @@ export class ApiClient {
     return this.request(`/sites/${id}/sync`, { method: 'POST', body: '{}' });
   }
 
+  async reconcileSites(): Promise<void> {
+    return this.request('/sites/reconcile', { method: 'POST', body: '{}' });
+  }
+
   // Discover
   async discoverServers(apiEndpoint: string): Promise<{ server: Server; imported: number; skipped: number; sites: Site[] }> {
     return this.request('/servers/discover', {

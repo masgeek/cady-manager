@@ -1,4 +1,5 @@
 import {config} from '@caddy-manager/config';
+import {assertAllowedCaddyEndpoint} from '../lib/outbound.js';
 
 export interface ProviderConfig {
     apiEndpoint: string;
@@ -11,7 +12,7 @@ export class CaddyProvider {
     private token: string;
 
     constructor(configOverride: ProviderConfig) {
-        this.apiEndpoint = configOverride.apiEndpoint.replace(/\/+$/, '');
+        this.apiEndpoint = assertAllowedCaddyEndpoint(configOverride.apiEndpoint);
         this.timeout = configOverride.timeout ?? 5000;
         this.token = config.caddyAdminToken;
     }

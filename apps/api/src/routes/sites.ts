@@ -9,7 +9,7 @@ import {
   toJsonSchema,
 } from '../lib/schemas';
 import * as siteService from '../services/site';
-import { checkAllSites } from '../jobs/siteHealth.js';
+import { checkAllSites, reconcileAllSites } from '../jobs/siteHealth.js';
 import { recordAuditEvent } from '../services/audit';
 
 export async function registerSiteRoutes(app: FastifyInstance) {
@@ -176,6 +176,21 @@ export async function registerSiteRoutes(app: FastifyInstance) {
     },
     async () => {
       await checkAllSites();
+      return { success: true };
+    },
+  );
+
+  app.post(
+    '/sites/reconcile',
+    {
+      schema: {
+        tags: ['Sites'],
+        summary: 'Recreate missing site routes',
+        response: { 200: successResponseSchema },
+      },
+    },
+    async () => {
+      await reconcileAllSites();
       return { success: true };
     },
   );

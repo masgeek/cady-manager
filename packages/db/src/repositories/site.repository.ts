@@ -36,6 +36,7 @@ function toSite(row: typeof sites.$inferSelect): Site {
     tlsEnabled: row.tlsEnabled,
     synced: row.synced,
     status: row.status as Site['status'],
+    statusDetail: row.statusDetail ?? undefined,
     healthEndpoint: row.healthEndpoint ?? undefined,
     healthHeaders: row.healthHeaders ?? undefined,
     createdAt: row.createdAt.toISOString(),
@@ -107,8 +108,10 @@ class SiteRepository {
     await db.update(sites).set({ synced }).where(eq(sites.id, id));
   }
 
-  async updateStatus(id: string, status: string): Promise<void> {
-    await db.update(sites).set({ status }).where(eq(sites.id, id));
+  async updateStatus(id: string, status: string, statusDetail?: string): Promise<void> {
+    await db.update(sites)
+      .set({ status, statusDetail: statusDetail ?? null })
+      .where(eq(sites.id, id));
   }
 }
 

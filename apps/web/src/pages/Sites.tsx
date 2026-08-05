@@ -28,7 +28,16 @@ const columns: Column<Site>[] = [
   {
     field: 'status',
     headerName: 'Status',
-    render: (value) => <StatusBadge status={String(value)} />,
+    render: (value, row) => (
+      <div>
+        <StatusBadge status={String(value)} />
+        {row.statusDetail && (
+          <div className="small text-muted text-truncate" style={{ maxWidth: 220 }} title={row.statusDetail}>
+            {row.statusDetail}
+          </div>
+        )}
+      </div>
+    ),
   },
 ];
 
@@ -58,7 +67,16 @@ export default function Sites() {
     },
   });
 
+  const reconcileMutation = useMutation({
+    mutationFn: () => api.reconcileSites(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+    },
+  });
+
   const rows = query.data || [];
+  const identifiedRows = rows.filter((row) => row.routeId);
+  const unidentifiedRows = rows.filter((row) => !row.routeId);
 
   const actionColumn: Column<Site> = {
     field: 'actions',
@@ -98,16 +116,42 @@ export default function Sites() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">Sites</h4>
-        <button className="btn btn-primary" onClick={() => navigate('/sites/new')}>
-          <i className="bi bi-plus-circle me-1"></i> Add Site
-        </button>
+        <div className="d-flex gap-2">
+          <button
+            className="btn btn-outline-success"
+            onClick={() => reconcileMutation.mutate()}
+            disabled={reconcileMutation.isPending}
+            title="Recreate missing routes in Caddy"
+          >
+            <i className="bi bi-arrow-repeat me-1"></i>
+            {reconcileMutation.isPending ? 'Reconciling...' : 'Reconcile Routes'}
+          </button>
+          <button className="btn btn-primary" onClick={() => navigate('/sites/new')}>
+            <i className="bi bi-plus-circle me-1"></i> Add Site
+          </button>
+        </div>
       </div>
 
       <DataTable
         columns={[...columns, actionColumn]}
-        rows={rows}
+        rows={identifiedRows}
         getRowId={(r) => r.id}
       />
+
+      {unidentifiedRows.length > 0 && (
+        <details className="mt-3">
+          <summary className="text-muted" style={{ cursor: 'pointer' }}>
+            Sites without @id ({unidentifiedRows.length})
+          </summary>
+          <div className="mt-2">
+            <DataTable
+              columns={[...columns, actionColumn]}
+              rows={unidentifiedRows}
+              getRowId={(r) => r.id}
+            />
+          </div>
+        </details>
+      )}
 
       <ConfirmDialog
         open={!!deleteId}

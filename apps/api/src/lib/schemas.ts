@@ -70,6 +70,7 @@ const siteResponseZod = z.object({
   status: z
     .enum(['active', 'inactive', 'error'])
     .describe('Site status'),
+  statusDetail: z.string().optional().describe('Detailed health-check result or error'),
   healthEndpoint: z.string().optional().describe('Health check endpoint path'),
   healthHeaders: z.string().optional().describe('Health check headers as JSON string'),
   createdAt: z.string().describe('Creation timestamp'),

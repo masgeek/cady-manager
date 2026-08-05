@@ -1,9 +1,14 @@
 import cron, {type ScheduledTask} from 'node-cron';
-import {siteRepo} from '@caddy-manager/db';
+import {serverRepo, siteRepo} from '@caddy-manager/db';
+import {config} from '@caddy-manager/config';
+import {CaddyProvider} from '../providers/caddy.js';
+import {buildCaddyRoute} from '../services/config.js';
+import {assertSafeHealthUrl} from '../lib/outbound.js';
 
 const PING_TIMEOUT = 5000;
 
 let task: ScheduledTask | null = null;
+let running = false;
 
 function describeCron(expression: string): string {
     const parts = expression.trim().split(/\s+/);
@@ -61,7 +66,7 @@ function describeCron(expression: string): string {
     return hasTime ? `Every day at ${timeStr}` : `Every day`;
 }
 
-async function pingSite(url: string, headers?: Record<string, string>): Promise<{ alive: boolean; error?: string }> {
+async function pingSite(url: string, headers?: Record<string, string>): Promise<{ alive: boolean; detail: string }> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), PING_TIMEOUT);
     try {
@@ -70,9 +75,13 @@ async function pingSite(url: string, headers?: Record<string, string>): Promise<
             opts.headers = headers;
         }
         const res = await fetch(url, opts);
-        return {alive: res.ok};
+        return {
+            alive: res.ok,
+            detail: `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ''}`,
+        };
     } catch (err) {
-        return {alive: false, error: String(err)};
+        const detail = err instanceof Error ? err.message : String(err);
+        return {alive: false, detail: detail || 'Request failed'};
     } finally {
         clearTimeout(id);
     }
@@ -85,15 +94,84 @@ export async function checkAllSites(): Promise<void> {
     for (const site of allSites) {
         const url = site.healthEndpoint || `https://${site.domain}`;
         const parsedHeaders = site.healthHeaders ? tryParseHeaders(site.healthHeaders) : undefined;
-        const result = await pingSite(url, parsedHeaders);
+        let result: {alive: boolean; detail: string};
+        try {
+            await assertSafeHealthUrl(url);
+            result = await pingSite(url, parsedHeaders);
+        } catch (err) {
+            result = {
+                alive: false,
+                detail: err instanceof Error ? err.message : String(err),
+            };
+        }
         if (result.alive) {
             console.log(`[site-health] ${site.domain} → active (${url})`);
         } else {
-            console.error(`[site-health] ${site.domain} → error: ${result.error} (${url})`);
+            console.error(`[site-health] ${site.domain} → error: ${result.detail} (${url})`);
         }
-        await siteRepo.updateStatus(site.id, result.alive ? 'active' : 'error');
+        await siteRepo.updateStatus(site.id, result.alive ? 'active' : 'error', result.detail);
     }
     console.log(`[site-health] completed in ${Date.now() - started}ms`);
+}
+
+function routeContainsSite(route: Record<string, unknown>, site: {domain: string; routeId?: string}): boolean {
+    if (site.routeId && route['@id'] === site.routeId) return true;
+
+    const match = (route.match as Array<Record<string, unknown>> | undefined)?.[0];
+    const hosts = match?.host as string[] | undefined;
+    if (hosts?.includes(site.domain)) return true;
+
+    const nestedRoutes = [
+        ...(route.routes as Array<Record<string, unknown>> | undefined ?? []),
+        ...((route.handle as Array<Record<string, unknown>> | undefined ?? [])
+            .flatMap((handler) => handler.routes as Array<Record<string, unknown>> | undefined ?? [])),
+    ];
+    return nestedRoutes.some((nestedRoute) => routeContainsSite(nestedRoute, site));
+}
+
+export function configContainsSite(configData: Record<string, unknown>, site: {domain: string; routeId?: string}): boolean {
+    const apps = configData.apps as Record<string, unknown> | undefined;
+    const http = apps?.http as Record<string, unknown> | undefined;
+    const servers = http?.servers as Record<string, unknown> | undefined;
+    if (!servers) return false;
+
+    return Object.values(servers).some((server) => {
+        const routes = (server as Record<string, unknown>).routes as Array<Record<string, unknown>> | undefined;
+        return routes?.some((route) => routeContainsSite(route, site)) ?? false;
+    });
+}
+
+export async function reconcileAllSites(): Promise<void> {
+    const servers = await serverRepo.findAll();
+    let repaired = 0;
+
+    for (const server of servers) {
+        try {
+            const provider = new CaddyProvider({apiEndpoint: server.apiEndpoint});
+            const [config, serverNames] = await Promise.all([
+                provider.getConfig(),
+                provider.getServerNames(),
+            ]);
+            const serverName = serverNames[0];
+            if (!serverName) continue;
+
+            const sites = await siteRepo.findAll(server.id);
+            for (const site of sites) {
+                if (configContainsSite(config, site)) continue;
+
+                const routeId = site.routeId || site.domain.replace(/[^a-zA-Z0-9_-]/g, '_');
+                await provider.addRoute(serverName, buildCaddyRoute({...site, routeId}));
+                if (!site.routeId) await siteRepo.update(site.id, {routeId});
+                await siteRepo.updateSyncedStatus(site.id, true);
+                repaired++;
+                console.log(`[site-sync] recreated missing route for ${site.domain}`);
+            }
+        } catch (err) {
+            console.error(`[site-sync] failed for server ${server.name}`, err);
+        }
+    }
+
+    console.log(`[site-sync] checked ${servers.length} servers, recreated ${repaired} routes`);
 }
 
 function tryParseHeaders(raw: string): Record<string, string> | undefined {
@@ -109,10 +187,18 @@ function tryParseHeaders(raw: string): Record<string, string> | undefined {
 export function startSiteHealthJob(): void {
     if (task) return;
 
-    const expression = '*/5 * * * *'
+    const expression = config.siteCheckCron;
     console.log(`[site-health] starting scheduled job (${describeCron(expression)})`);
     task = cron.schedule(expression, () => {
-        checkAllSites().catch((err) => console.error('[site-health] job failed', err));
+        if (running) return;
+        running = true;
+        Promise.resolve()
+            .then(() => checkAllSites())
+            .then(() => reconcileAllSites())
+            .catch((err) => console.error('[site-health] job failed', err))
+            .finally(() => {
+                running = false;
+            });
     });
 }
 

@@ -22,6 +22,7 @@ export const sites = pgTable('sites', {
     tlsEnabled: boolean('tls_enabled').notNull().default(true),
     synced: boolean('synced').notNull().default(true),
     status: varchar('status', {length: 20}).notNull().default('inactive'),
+    statusDetail: text('status_detail'),
     healthEndpoint: varchar('health_endpoint', {length: 150}),
     healthHeaders: text('health_headers'),
     createdAt: timestamp('created_at').defaultNow().notNull(),

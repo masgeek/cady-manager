@@ -21,12 +21,18 @@ dotenv.config({ path: findRootEnv(__dirname) });
 export const config = {
   port: Number(process.env.PORT ?? '3500'),
   logLevel: process.env.LOG_LEVEL ?? 'info',
+  siteCheckCron: process.env.SITE_CHECK_CRON ?? '*/5 * * * *',
 
   authUsername: process.env.AUTH_USERNAME ?? '',
   authPassword: process.env.AUTH_PASSWORD,
   jwtSecret: process.env.JWT_SECRET ?? 'dev-secret-change-in-production',
 
   caddyAdminToken: process.env.CADDY_ADMIN_TOKEN ?? '',
+  caddyAllowedHosts: (process.env.CADDY_ALLOWED_HOSTS ?? '')
+    .split(',')
+    .map((host) => host.trim().toLowerCase())
+    .filter(Boolean),
+  allowPrivateOutbound: process.env.ALLOW_PRIVATE_OUTBOUND === 'true',
 
   dbHost: process.env.DB_HOST ?? 'localhost',
   dbPort: Number(process.env.DB_PORT ?? '5432'),
