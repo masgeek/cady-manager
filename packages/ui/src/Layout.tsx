@@ -21,9 +21,9 @@ export function Layout({ children, onLogout }: LayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="d-flex" style={{ minHeight: '100vh' }}>
+    <div className="d-flex app-shell">
       {/* Mobile offcanvas sidebar */}
-      <div className={`offcanvas offcanvas-start d-md-none ${mobileOpen ? 'show' : ''}`} tabIndex={-1} style={{ width: 240 }}>
+      <div className={`offcanvas offcanvas-start d-md-none ${mobileOpen ? 'show' : ''}`} tabIndex={-1} style={{ width: 280 }}>
         <div className="offcanvas-header">
           <h5 className="offcanvas-title">Caddy Manager</h5>
           <button type="button" className="btn-close" onClick={() => setMobileOpen(false)} />
@@ -47,26 +47,29 @@ export function Layout({ children, onLogout }: LayoutProps) {
       {mobileOpen && <div className="offcanvas-backdrop fade show" onClick={() => setMobileOpen(false)} />}
 
       {/* Desktop sidebar */}
-      <div className="d-none d-md-flex flex-column bg-dark text-white" style={{ width: 240, minHeight: '100vh' }}>
-        <div className="p-3 fs-5 fw-bold">Caddy Manager</div>
-        <ul className="nav flex-column">
+      <aside className="d-none d-md-flex flex-column app-sidebar">
+        <div className="app-brand">
+          <span className="app-brand-mark"><i className="bi bi-diagram-3"></i></span>
+          Caddy Manager
+        </div>
+        <div className="app-environment">INTERNAL / CONTROL ROOM</div>
+        <ul className="nav flex-column app-nav">
           {navItems.map((item) => (
             <li className="nav-item" key={item.path}>
-              <a
-                className={`nav-link ${location.pathname === item.path ? 'active text-white bg-primary' : 'text-secondary'}`}
-                href="#"
-                onClick={(e) => { e.preventDefault(); navigate(item.path); }}
+              <button
+                className={`app-nav-link ${location.pathname === item.path ? 'active' : ''}`}
+                onClick={() => navigate(item.path)}
               >
                 <i className={`bi ${item.icon} me-2`}></i>
                 {item.label}
-              </a>
+              </button>
             </li>
           ))}
         </ul>
-      </div>
+      </aside>
 
       {/* Main content area */}
-      <div className="d-flex flex-column flex-grow-1">
+      <div className="d-flex flex-column flex-grow-1 app-main">
         {/* Top navbar */}
         <nav className="navbar navbar-dark bg-primary d-md-none">
           <div className="container-fluid">
@@ -82,14 +85,15 @@ export function Layout({ children, onLogout }: LayoutProps) {
           </div>
         </nav>
         {/* Desktop top bar */}
-        <div className="d-none d-md-flex justify-content-end p-2">
+        <div className="d-none d-md-flex justify-content-between align-items-center app-topbar">
+          <span className="app-topbar-label">Infrastructure / Operations</span>
           {onLogout && (
             <button className="btn btn-sm btn-outline-secondary" onClick={onLogout}>
               <i className="bi bi-box-arrow-right me-1"></i> Logout
             </button>
           )}
         </div>
-        <div className="p-3 flex-grow-1">
+        <div className="app-content flex-grow-1">
           {children}
         </div>
       </div>
