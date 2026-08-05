@@ -17,6 +17,7 @@ export const createSiteSchema = z.object({
 });
 
 export const updateSiteSchema = z.object({
+  serverId: z.string().uuid().optional(),
   domain: z.string().min(1).max(255).optional(),
   upstream: z.string().url().optional(),
   routeId: z.string().max(255).optional(),
@@ -83,6 +84,7 @@ class SiteRepository {
 
   async update(id: string, data: UpdateSiteInput): Promise<Site | undefined> {
     const update: Partial<typeof sites.$inferSelect> = {};
+    if (data.serverId !== undefined) update.serverId = data.serverId;
     if (data.domain !== undefined) update.domain = data.domain;
     if (data.upstream !== undefined) update.upstream = data.upstream;
     if (data.routeId !== undefined) update.routeId = data.routeId;

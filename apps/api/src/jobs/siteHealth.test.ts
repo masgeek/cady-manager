@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { configContainsSite } from './siteHealth';
+import { classifyHttpStatus, configContainsSite } from './siteHealth';
+
+describe('classifyHttpStatus', () => {
+  it('treats 4xx responses as warnings', () => {
+    expect(classifyHttpStatus(404)).toBe('warning');
+  });
+
+  it('treats 5xx responses as errors', () => {
+    expect(classifyHttpStatus(503)).toBe('error');
+  });
+
+  it('treats successful responses as active', () => {
+    expect(classifyHttpStatus(200)).toBe('active');
+  });
+});
 
 describe('configContainsSite', () => {
   it('finds a route by its persisted route id', () => {

@@ -28,7 +28,7 @@ export default function Dashboard() {
   const sites = sitesQuery.data || [];
   const onlineServers = servers.filter((server) => server.status === 'online').length;
   const activeSites = sites.filter((site) => site.status === 'active').length;
-  const attentionSites = sites.filter((site) => site.status === 'error' || site.consecutiveFailures > 0);
+  const attentionSites = sites.filter((site) => site.status === 'warning' || site.status === 'error' || site.consecutiveFailures > 0);
   const checkedSites = sites.filter((site) => site.lastCheckedAt).length;
   const isLoading = serversQuery.isLoading || sitesQuery.isLoading;
   const hasError = serversQuery.isError || sitesQuery.isError;

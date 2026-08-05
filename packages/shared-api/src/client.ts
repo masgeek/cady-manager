@@ -208,7 +208,7 @@ export class ApiClient {
   }
 
   // Discover
-  async discoverServers(apiEndpoint: string): Promise<{ server: Server; imported: number; skipped: number; sites: Site[] }> {
+  async discoverServers(apiEndpoint: string): Promise<{ servers: Server[]; imported: number; skipped: number; sites: Site[] }> {
     return this.request('/servers/discover', {
       method: 'POST',
       body: JSON.stringify({ apiEndpoint }),

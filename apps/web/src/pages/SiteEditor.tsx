@@ -168,8 +168,15 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
     },
   });
 
+  const mutationError = createMutation.error ?? updateMutation.error;
+
   const editor = (
     <div className={modal ? 'site-editor-modal-body' : undefined}>
+      {mutationError && (
+        <div className="alert alert-danger" role="alert">
+          {mutationError instanceof Error ? mutationError.message : 'Failed to save site changes'}
+        </div>
+      )}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">{isEdit ? 'Edit Site' : 'New Site'}</h4>
         {modal && <button ref={closeButtonRef} type="button" className="btn-close" aria-label="Close" onClick={handleClose} />}

@@ -2,6 +2,7 @@ import type {FastifyInstance} from 'fastify';
 import {
   createServerSchema,
   discoverBodySchema,
+  discoverResponseSchema,
   importResponseSchema,
   serverHealthResponseSchema,
   serverListSchema,
@@ -268,7 +269,7 @@ export async function registerServerRoutes(app: FastifyInstance) {
           ...toJsonSchema(discoverBodySchema),
           example: { apiEndpoint: 'http://127.0.0.1:2019' },
         },
-        response: { 200: successResponseSchema },
+         response: { 200: discoverResponseSchema },
       },
       preHandler: app.authorize(['admin', 'operator']),
     },

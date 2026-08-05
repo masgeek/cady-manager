@@ -203,6 +203,10 @@ export function buildCaddyRoute(site: {
 }): Record<string, unknown> {
   if (site.routeConfig) {
     const route = structuredClone(site.routeConfig);
+    const matches = route.match as Array<Record<string, unknown>> | undefined;
+    if (matches?.length) {
+      route.match = matches.map((match, index) => index === 0 ? {...match, host: [site.domain]} : match);
+    }
     if (site.routeId) route['@id'] = site.routeId;
     return route;
   }
@@ -269,65 +273,52 @@ function hostnameFromUrl(url: string): string {
   }
 }
 
-function deriveServerName(domains: string[]): string {
-  if (domains.length === 0) return 'unknown';
-  
-  const freq = new Map<string, number>();
-  for (const domain of domains) {
-    const parts = domain.split('.');
-    // For sub.domain.tld, pick parts[parts.length - 3] ?? parts[0]
-    // e.g. "api.munywele.co.ke" → "munywele"
-    //       "akilimo.org" → "akilimo"
-    //       "akilimo-hub.eastus.cloudapp.azure.com" → "eastus"
-    const nameIdx = parts.length >= 3 ? parts.length - 3 : 0;
-    const name = parts[nameIdx];
-    if (name) freq.set(name, (freq.get(name) ?? 0) + 1);
-  }
-  
-  let best = '';
-  let bestCount = 0;
-  for (const [name, count] of freq) {
-    if (count > bestCount || (count === bestCount && name < best)) {
-      best = name;
-      bestCount = count;
-    }
-  }
-  return best || 'unknown';
+const MULTI_LABEL_PUBLIC_SUFFIXES = new Set([
+  'ac.ke', 'ci.ke', 'co.ke', 'go.ke', 'me.ke', 'ne.ke', 'or.ke', 'sc.ke',
+  'co.uk', 'org.uk', 'com.au', 'co.nz', 'co.za', 'com.br', 'com.cn',
+]);
+
+export function deriveBaseDomain(domain: string): string {
+  const hostname = domain.trim().toLowerCase().replace(/^\*\./, '');
+  const labels = hostname.split('.').filter(Boolean);
+  if (labels.length <= 2) return labels.join('.') || 'unknown';
+
+  const suffix = labels.slice(-2).join('.');
+  return labels.slice(-(MULTI_LABEL_PUBLIC_SUFFIXES.has(suffix) ? 3 : 2)).join('.');
 }
 
 export async function discoverAndImport(
   apiEndpoint: string,
-): Promise<{ server: Server; imported: number; skipped: number; sites: Site[] }> {
+): Promise<{ servers: Server[]; imported: number; skipped: number; sites: Site[] }> {
   const provider = new CaddyProvider({ apiEndpoint });
   const config = await provider.getConfig();
-  const blocks = parseServerBlocksFromConfig(config);
+  const parsed = parseSitesFromConfig(config);
+  if (parsed.length === 0) throw new Error('No sites found in Caddy config');
 
-  if (blocks.length === 0) {
-    throw new Error('No server blocks with routes found in Caddy config');
-  }
-
-  const block = blocks[0];
-  const serverName = deriveServerName(block.domains);
   const hostname = hostnameFromUrl(apiEndpoint);
 
   const allServers = await serverRepo.findAll();
-  let server = allServers.find((s) => s.apiEndpoint === apiEndpoint);
+  const servers = new Map<string, Server>();
+  const getServer = async (name: string): Promise<Server> => {
+    const existing = servers.get(name);
+    if (existing) return existing;
 
-  if (!server) {
-    server = await serverRepo.create({
-      name: serverName,
-      hostname,
-      apiEndpoint,
-    });
-  }
+    const found = allServers.find((s) => s.apiEndpoint === apiEndpoint && s.name === name);
+    const server = found
+      ? (found.hostname === name
+        ? found
+        : await serverRepo.update(found.id, {hostname: name}) ?? found)
+      : await serverRepo.create({name, hostname: name, apiEndpoint});
+    servers.set(name, server);
+    return server;
+  };
 
-  // import sites for this server
-  const parsed = parseSitesFromConfig(config);
   let imported = 0;
   let skipped = 0;
   const sites: Site[] = [];
 
   for (const p of parsed) {
+    const server = await getServer(deriveBaseDomain(p.domain));
     const existing = await siteRepo.findByDomainAndServer(p.domain, server.id);
     if (existing) {
       skipped++;
@@ -348,7 +339,7 @@ export async function discoverAndImport(
     sites.push(site);
   }
 
-  return { server, imported, skipped, sites };
+  return { servers: [...servers.values()], imported, skipped, sites };
 }
 
 export async function getServerConfig(provider: CaddyProvider): Promise<Record<string, unknown>> {

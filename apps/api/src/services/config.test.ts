@@ -5,9 +5,17 @@ vi.mock('@caddy-manager/db', () => ({
   siteRepo: {},
 }));
 
-import {buildCaddyConfig, buildCaddyRoute, parseSitesFromConfig} from './config';
+import {buildCaddyConfig, buildCaddyRoute, deriveBaseDomain, parseSitesFromConfig} from './config';
 
 describe('site config preservation', () => {
+  it.each([
+    ['dashboard.agwise.org', 'agwise.org'],
+    ['api.munywele.ci.ke', 'munywele.ci.ke'],
+    ['example.com', 'example.com'],
+  ])('derives %s as %s', (domain, expected) => {
+    expect(deriveBaseDomain(domain)).toBe(expected);
+  });
+
   it('keeps the complete route, including path matchers and handlers', () => {
     const route = {
       '@id': 'api-route',
@@ -53,6 +61,22 @@ describe('site config preservation', () => {
       handle: routeConfig.handle,
     });
     expect(routeConfig).not.toHaveProperty('@id');
+  });
+
+  it('updates the host while preserving imported path matchers', () => {
+    const route = buildCaddyRoute({
+      domain: 'new.example.com',
+      upstream: 'http://unused:8080',
+      routeConfig: {
+        '@id': 'api-route',
+        match: [{host: ['old.example.com'], path: ['/api/*']}],
+        handle: [{handler: 'reverse_proxy', upstreams: [{dial: 'backend:8080'}]}],
+      },
+    });
+
+    expect(route).toMatchObject({
+      match: [{host: ['new.example.com'], path: ['/api/*']}],
+    });
   });
 
   it('preserves imported routes when generating the full server config', () => {

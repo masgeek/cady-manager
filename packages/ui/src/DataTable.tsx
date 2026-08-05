@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Column } from './types';
+import { Pagination } from './Pagination';
 
 interface DataTableProps<T> {
   columns: Column<T>[];
@@ -22,8 +23,6 @@ export function DataTable<T>({
   totalCount,
   onPageChange,
 }: DataTableProps<T>) {
-  const totalPages = totalCount !== undefined ? Math.ceil(totalCount / pageSize) : 0;
-
   return (
     <div>
       <div className="table-responsive">
@@ -60,22 +59,8 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
-      {totalCount !== undefined && onPageChange && totalPages > 1 && (
-        <nav>
-          <ul className="pagination pagination-sm justify-content-center mb-0 mt-2">
-            <li className={`page-item ${page === 0 ? 'disabled' : ''}`}>
-              <button className="page-link" aria-label="Previous page" onClick={() => onPageChange(page - 1)}>Previous</button>
-            </li>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <li key={i} className={`page-item ${i === page ? 'active' : ''}`}>
-                <button className="page-link" aria-label={`Page ${i + 1}`} onClick={() => onPageChange(i)}>{i + 1}</button>
-              </li>
-            ))}
-            <li className={`page-item ${page >= totalPages - 1 ? 'disabled' : ''}`}>
-              <button className="page-link" aria-label="Next page" onClick={() => onPageChange(page + 1)}>Next</button>
-            </li>
-          </ul>
-        </nav>
+      {totalCount !== undefined && onPageChange && (
+        <Pagination page={page} pageSize={pageSize} totalCount={totalCount} onPageChange={onPageChange} />
       )}
     </div>
   );

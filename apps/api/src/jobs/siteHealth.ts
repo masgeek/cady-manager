@@ -67,7 +67,13 @@ function describeCron(expression: string): string {
     return hasTime ? `Every day at ${timeStr}` : `Every day`;
 }
 
-async function pingSite(url: string, headers?: Record<string, string>): Promise<{ alive: boolean; detail: string }> {
+export function classifyHttpStatus(status: number): 'active' | 'warning' | 'error' {
+    if (status >= 400 && status < 500) return 'warning';
+    if (status >= 500) return 'error';
+    return 'active';
+}
+
+async function pingSite(url: string, headers?: Record<string, string>): Promise<{ status: 'active' | 'warning' | 'error'; detail: string }> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), PING_TIMEOUT);
     try {
@@ -77,12 +83,12 @@ async function pingSite(url: string, headers?: Record<string, string>): Promise<
         }
         const res = await fetch(url, opts);
         return {
-            alive: res.ok,
+            status: classifyHttpStatus(res.status),
             detail: `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ''}`,
         };
     } catch (err) {
         const detail = err instanceof Error ? err.message : String(err);
-        return {alive: false, detail: detail || 'Request failed'};
+        return {status: 'error', detail: detail || 'Request failed'};
     } finally {
         clearTimeout(id);
     }
@@ -97,28 +103,30 @@ export async function checkAllSites(): Promise<void> {
         const checkStarted = Date.now();
         const url = site.healthEndpoint || `https://${site.domain}`;
         const parsedHeaders = site.healthHeaders ? tryParseHeaders(site.healthHeaders) : undefined;
-        let result: {alive: boolean; detail: string};
+        let result: {status: 'active' | 'warning' | 'error'; detail: string};
         try {
             await assertSafeHealthUrl(url);
             result = await pingSite(url, parsedHeaders);
         } catch (err) {
             result = {
-                alive: false,
+                status: 'error',
                 detail: err instanceof Error ? err.message : String(err),
             };
         }
-        if (result.alive) {
+        if (result.status === 'active') {
             console.log(`[site-health] ${site.domain} → active (${url})`);
+        } else if (result.status === 'warning') {
+            console.warn(`[site-health] ${site.domain} → warning: ${result.detail} (${url})`);
         } else {
             console.error(`[site-health] ${site.domain} → error: ${result.detail} (${url})`);
         }
         await siteRepo.updateHealth(
             site.id,
-            result.alive ? 'active' : 'error',
+            result.status,
             result.detail,
             Date.now() - checkStarted,
             checkedAt,
-            result.alive ? 0 : site.consecutiveFailures + 1,
+            result.status === 'error' ? site.consecutiveFailures + 1 : 0,
         );
     }
     console.log(`[site-health] completed in ${Date.now() - started}ms`);

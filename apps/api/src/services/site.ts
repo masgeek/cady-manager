@@ -49,22 +49,43 @@ export async function createSite(data: {
 
 export async function updateSite(
   id: string,
-  data: Partial<{ domain: string; upstream: string; routeId?: string; caddyServerName?: string; routeConfig?: Record<string, unknown>; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
+  data: Partial<{ serverId: string; domain: string; upstream: string; routeId?: string; caddyServerName?: string; routeConfig?: Record<string, unknown>; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
 ): Promise<Site> {
   const existing = await siteRepo.findById(id);
   if (!existing) throw new NotFoundError('Site', id);
 
   const merged = { ...existing, ...data };
 
-  if (existing.routeId || data.routeId) {
-    const server = await serverRepo.findById(merged.serverId);
-    if (server) {
-      const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
-      const route = buildCaddyRoute(merged);
-      delete route['@id'];
-      const routeId = data.routeId ?? existing.routeId!;
-      await provider.updateRouteByID(routeId, route);
+  if (existing.routeId) {
+    const oldServer = await serverRepo.findById(existing.serverId);
+    const newServer = await serverRepo.findById(merged.serverId);
+    if (!oldServer || !newServer) throw new NotFoundError('Server', merged.serverId);
+
+    const oldRouteId = existing.routeId;
+    const newRouteId = data.routeId ?? oldRouteId;
+    const route = buildCaddyRoute({...merged, routeId: newRouteId});
+    const serverBlockChanged = existing.serverId !== merged.serverId
+      || (data.caddyServerName !== undefined && data.caddyServerName !== existing.caddyServerName);
+    const routeIdChanged = newRouteId !== oldRouteId;
+
+    const oldProvider = new CaddyProvider({ apiEndpoint: oldServer.apiEndpoint });
+    const newProvider = new CaddyProvider({ apiEndpoint: newServer.apiEndpoint });
+
+    if (serverBlockChanged || routeIdChanged) {
+      await oldProvider.deleteRouteByID(oldRouteId);
+      const serverNames = await newProvider.getServerNames();
+      const serverName = merged.caddyServerName ?? serverNames[0];
+      if (!serverName || !serverNames.includes(serverName)) {
+        throw new Error(`Caddy server block not found: ${serverName ?? '(none)'}`);
+      }
+      await newProvider.addRoute(serverName, route);
+    } else {
+      const patch = structuredClone(route);
+      delete patch['@id'];
+      await oldProvider.updateRouteByID(oldRouteId, patch);
     }
+
+    data = {...data, routeId: newRouteId, routeConfig: route};
   }
 
   const site = await siteRepo.update(id, data);

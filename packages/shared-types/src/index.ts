@@ -34,9 +34,9 @@ export interface Site {
   updatedAt: string;
 }
 
-export type SiteStatus = 'active' | 'inactive' | 'error';
+export type SiteStatus = 'active' | 'inactive' | 'warning' | 'error';
 
-export const SITE_STATUSES: SiteStatus[] = ['active', 'inactive', 'error'];
+export const SITE_STATUSES: SiteStatus[] = ['active', 'inactive', 'warning', 'error'];
 
 export interface Route {
   id: string;

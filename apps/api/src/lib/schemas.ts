@@ -70,7 +70,7 @@ const siteResponseZod = z.object({
   tlsEnabled: z.boolean().describe('Whether TLS is enabled'),
   synced: z.boolean().describe('Whether config is synced to Caddy'),
   status: z
-    .enum(['active', 'inactive', 'error'])
+    .enum(['active', 'inactive', 'warning', 'error'])
     .describe('Site status'),
   statusDetail: z.string().optional().describe('Detailed health-check result or error'),
   lastCheckedAt: z.string().optional().describe('Timestamp of the most recent health check'),
@@ -128,6 +128,13 @@ const importResponseZod = z.object({
   skipped: z.number().int().describe('Number of sites skipped'),
 });
 
+const discoverResponseZod = z.object({
+  servers: z.array(serverResponseZod).describe('Servers created or reused for discovered base domains'),
+  imported: z.number().int().describe('Number of sites imported'),
+  skipped: z.number().int().describe('Number of sites already present'),
+  sites: z.array(siteResponseZod).describe('Sites mapped to their discovered servers'),
+});
+
 const configReloadZod = z.object({
   success: z.literal(true).describe('Whether the reload succeeded'),
   message: z.string().describe('Status message'),
@@ -170,6 +177,7 @@ export const healthResponseSchema = toResponseSchema(healthResponseZod);
 export const loginResponseSchema = toResponseSchema(loginResponseZod);
 export const serverHealthResponseSchema = toResponseSchema(serverHealthZod);
 export const importResponseSchema = toResponseSchema(importResponseZod);
+export const discoverResponseSchema = toResponseSchema(discoverResponseZod);
 export const configReloadResponseSchema = toResponseSchema(configReloadZod);
 
 export const errorResponseSchema = {

@@ -1,7 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type { AuditEvent } from '@caddy-manager/shared-types';
-import { PageHeader } from '@caddy-manager/ui';
+import { DataTable, PageHeader } from '@caddy-manager/ui';
+import type { Column } from '@caddy-manager/ui';
+
+const auditColumns: Column<AuditEvent>[] = [
+  {field: 'timestamp', headerName: 'Timestamp', render: (value) => new Date(String(value)).toLocaleString()},
+  {field: 'userId', headerName: 'User', render: (value) => <code>{String(value)}</code>},
+  {field: 'action', headerName: 'Action', render: (value) => <span className={`audit-action ${String(value)}`}>{String(value)}</span>},
+  {field: 'entity', headerName: 'Entity'},
+  {field: 'details', headerName: 'Details', render: (value) => value ? <details className="audit-details"><summary>View details</summary><div>{String(value)}</div></details> : <span className="text-muted">-</span>},
+  {field: 'result', headerName: 'Result', render: (value) => <span className={`audit-result ${String(value)}`}>{String(value)}</span>},
+];
 
 export default function Audit() {
   const query = useQuery({
@@ -36,47 +46,7 @@ export default function Audit() {
         </div>
       )}
 
-      {!query.isLoading && !query.isError && <div className="table-responsive">
-        <table className="table table-sm table-striped">
-          <thead className="table-light">
-            <tr>
-              <th scope="col">Timestamp</th>
-              <th scope="col">User</th>
-              <th scope="col">Action</th>
-              <th scope="col">Entity</th>
-              <th scope="col">Details</th>
-              <th scope="col">Result</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan={6}>
-                  <div className="empty-panel"><i className="bi bi-clock-history"></i><span>No audit events recorded yet.</span></div>
-                </td>
-              </tr>
-            ) : (
-              rows.map((row: AuditEvent) => (
-                <tr key={row.id}>
-                  <td>{new Date(row.timestamp).toLocaleString()}</td>
-                  <td><code>{row.userId}</code></td>
-                  <td><span className={`audit-action ${row.action}`}>{row.action}</span></td>
-                  <td>{row.entity}</td>
-                  <td>
-                    {row.details ? (
-                      <details className="audit-details">
-                        <summary>View details</summary>
-                        <div>{row.details}</div>
-                      </details>
-                    ) : <span className="text-muted">-</span>}
-                  </td>
-                  <td><span className={`audit-result ${row.result}`}>{row.result}</span></td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>}
+      {!query.isLoading && !query.isError && <DataTable columns={auditColumns} rows={rows} getRowId={(row) => row.id} />}
     </div>
   );
 }

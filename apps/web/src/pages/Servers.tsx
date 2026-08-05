@@ -17,6 +17,8 @@ const serverSchema = z.object({
 
 type ServerForm = z.infer<typeof serverSchema>;
 
+const DEFAULT_CADDY_ENDPOINT = 'http://localhost:2019';
+
 const columns: Column<Server>[] = [
   { field: 'name', headerName: 'Name' },
   { field: 'hostname', headerName: 'Hostname' },
@@ -33,7 +35,7 @@ export default function Servers() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [discoverOpen, setDiscoverOpen] = useState(false);
-  const [discoverUrl, setDiscoverUrl] = useState('');
+  const [discoverUrl, setDiscoverUrl] = useState(DEFAULT_CADDY_ENDPOINT);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editServer, setEditServer] = useState<Server | null>(null);
   const [importPreview, setImportPreview] = useState<{ server: Server; sites: ImportPreviewSite[] } | null>(null);
@@ -128,8 +130,8 @@ export default function Servers() {
       queryClient.invalidateQueries({ queryKey: ['servers'] });
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       setDiscoverOpen(false);
-      setDiscoverUrl('');
-      setSnackbar(`Discovered server "${data.server.name}" with ${data.imported} site(s) imported, ${data.skipped} skipped`);
+       setDiscoverUrl(DEFAULT_CADDY_ENDPOINT);
+       setSnackbar(`Mapped ${data.sites.length} site(s) across ${data.servers.length} server(s): ${data.imported} imported, ${data.skipped} skipped`);
     },
     onError: (err: Error) => {
       setSnackbar(`Discovery failed: ${err.message}`);
@@ -270,10 +272,10 @@ export default function Servers() {
         <Modal
           open
           title="Discover & Import"
-          onClose={() => { setDiscoverOpen(false); setDiscoverUrl(''); }}
+           onClose={() => { setDiscoverOpen(false); setDiscoverUrl(DEFAULT_CADDY_ENDPOINT); }}
           footer={
             <>
-              <button type="button" className="btn btn-secondary" onClick={() => { setDiscoverOpen(false); setDiscoverUrl(''); }}>Cancel</button>
+               <button type="button" className="btn btn-secondary" onClick={() => { setDiscoverOpen(false); setDiscoverUrl(DEFAULT_CADDY_ENDPOINT); }}>Cancel</button>
               <button
                 type="button"
                 className="btn btn-info"
@@ -322,23 +324,16 @@ export default function Servers() {
                   {importPreview.sites.length === 0 ? (
                     <p className="text-muted mb-0">No reverse-proxy sites were found in the active Caddy configuration.</p>
                   ) : (
-                    <div className="table-responsive">
-                      <table className="table table-sm">
-                        <thead>
-                          <tr><th>Domain</th><th>Upstream</th><th>Server Block</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                          {importPreview.sites.map((site) => (
-                            <tr key={`${site.caddyServerName}:${site.domain}`}>
-                              <td>{site.domain}</td>
-                              <td>{site.upstream}</td>
-                              <td>{site.caddyServerName}</td>
-                              <td>{site.alreadyImported ? 'Already imported' : 'New'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <DataTable
+                      columns={[
+                        {field: 'domain', headerName: 'Domain'},
+                        {field: 'upstream', headerName: 'Upstream'},
+                        {field: 'caddyServerName', headerName: 'Server Block'},
+                        {field: 'alreadyImported', headerName: 'Status', render: (value) => value ? 'Already imported' : 'New'},
+                      ]}
+                      rows={importPreview.sites}
+                      getRowId={(site) => `${site.caddyServerName}:${site.domain}`}
+                    />
                   )}
         </Modal>
       )}

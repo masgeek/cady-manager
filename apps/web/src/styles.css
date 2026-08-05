@@ -51,6 +51,7 @@ summary:focus-visible {
 }
 
 .app-shell {
+  width: 100%;
   min-height: 100vh;
   background: var(--paper);
 }
@@ -140,8 +141,12 @@ summary:focus-visible {
 
 .app-sidebar {
   width: 248px;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   flex: 0 0 248px;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
   padding: 22px 14px;
   background: var(--graphite);
   color: #eaf2ef;
@@ -233,10 +238,22 @@ summary:focus-visible {
 }
 
 .app-main {
+  min-height: 100vh;
   min-width: 0;
 }
 
+.app-main > .navbar {
+  flex: 0 0 auto;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
 .app-topbar {
+  flex: 0 0 60px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
   min-height: 60px;
   padding: 0 30px;
   border-bottom: 1px solid var(--line);
@@ -254,6 +271,8 @@ summary:focus-visible {
 
 .app-content {
   width: min(1440px, 100%);
+  min-width: 0;
+  overflow-x: hidden;
   margin: 0 auto;
   padding: 34px 38px 48px;
 }
@@ -664,6 +683,7 @@ summary:focus-visible {
 .status-pill-offline,
 .status-pill-error { background: #ffebe8; color: #a63d31; }
 .status-pill-degraded { background: #fff2d7; color: #92620d; }
+.status-pill-warning { background: #fff2d7; color: #92620d; }
 .status-pill-unknown,
 .status-pill-inactive { background: #edf1ef; color: #53646a; }
 
@@ -684,6 +704,77 @@ summary:focus-visible {
   border-radius: var(--radius);
   background: var(--panel);
   box-shadow: var(--shadow);
+}
+
+.sites-table-scroll .table {
+  min-width: 1050px;
+}
+
+.sites-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sites-table-scroll > .table-responsive {
+  min-width: 1050px;
+  overflow-x: visible;
+}
+
+.sites-filter-controls {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.sites-filter-controls .form-select {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  flex: 0 0 auto;
+}
+
+.sites-toolbar > .page-eyebrow {
+  flex: 0 0 auto;
+  margin-right: 16px;
+}
+
+.site-view-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.site-view-tabs button {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.site-view-tabs button:hover,
+.site-view-tabs button.active {
+  border-bottom-color: var(--mint);
+  color: var(--ink);
+}
+
+.site-view-tabs span {
+  display: inline-flex;
+  min-width: 22px;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 0.72rem;
 }
 
 .table {

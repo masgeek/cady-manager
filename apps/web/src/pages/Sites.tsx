@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { DataTable, StatusBadge, ConfirmDialog, PageHeader } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 import type { Site } from '@caddy-manager/shared-types';
 import { api } from '../api/client';
 import SiteEditor from './SiteEditor';
+import SiteFilters from '../components/SiteFilters';
 
 const columns: Column<Site>[] = [
   { field: 'domain', headerName: 'Domain' },
@@ -54,17 +55,37 @@ const columns: Column<Site>[] = [
   },
 ];
 
+const SITE_PAGE_SIZE = 20;
+
 export default function Sites() {
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [editor, setEditor] = useState<{ id?: string } | null>(null);
+  const [domainFilter, setDomainFilter] = useState('');
+  const [serverIdFilter, setServerIdFilter] = useState('');
+  const [serverFilter, setServerFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sitePage, setSitePage] = useState(0);
+  const siteView = searchParams.get('view') === 'caddy' ? 'caddy' : 'api';
+
+  const changeSiteView = (view: 'api' | 'caddy') => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('view', view);
+    setSearchParams(nextParams);
+    setSitePage(0);
+  };
 
   const query = useQuery({
     queryKey: ['sites'],
     queryFn: () => api.getSites(),
     refetchInterval: 30_000,
+  });
+
+  const serversQuery = useQuery({
+    queryKey: ['servers'],
+    queryFn: () => api.getServers(),
   });
 
   const deleteMutation = useMutation({
@@ -101,9 +122,25 @@ export default function Sites() {
   });
 
   const rows = query.data || [];
-  const identifiedRows = rows.filter((row) => row.routeId);
-  const unidentifiedRows = rows.filter((row) => !row.routeId);
+  const viewRows = rows.filter((row) => siteView === 'api' ? row.routeId : !row.routeId);
+  const servers = serversQuery.data || [];
+  const serverNames = new Map(servers.map((server) => [server.id, server.name]));
+  const domainOptions = [...new Set(viewRows.map((row) => row.domain))].sort();
+  const serverIdOptions = [...new Set(viewRows.map((row) => row.serverId))]
+    .sort((a, b) => (serverNames.get(a) ?? a).localeCompare(serverNames.get(b) ?? b));
+  const serverOptions = [...new Set(viewRows.map((row) => row.caddyServerName).filter((value): value is string => Boolean(value)))].sort();
+  const statusOptions = [...new Set(viewRows.map((row) => row.status))].sort();
+  const filteredRows = viewRows.filter((row) => {
+    return (!domainFilter || row.domain === domainFilter)
+      && (!serverIdFilter || row.serverId === serverIdFilter)
+      && (!serverFilter || row.caddyServerName === serverFilter)
+      && (!statusFilter || row.status === statusFilter);
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / SITE_PAGE_SIZE));
+  const currentPage = Math.min(sitePage, totalPages - 1);
+  const pageRows = filteredRows.slice(currentPage * SITE_PAGE_SIZE, (currentPage + 1) * SITE_PAGE_SIZE);
   const activeCount = rows.filter((row) => row.status === 'active').length;
+  const warningCount = rows.filter((row) => row.status === 'warning').length;
   const errorCount = rows.filter((row) => row.status === 'error').length;
   const syncedCount = rows.filter((row) => row.synced).length;
 
@@ -141,24 +178,69 @@ export default function Sites() {
     ),
   };
 
+  const serverColumn: Column<Site> = {
+    field: 'serverId',
+    headerName: 'Server',
+    render: (value) => serverNames.get(String(value)) ?? 'Unknown server',
+  };
+
   return (
     <div>
       <PageHeader
         eyebrow="Routing inventory"
-        title="Sites"
-        description="Managed domains, upstream targets, and the health signal behind each route."
+        title={siteView === 'api' ? 'API-managed sites' : 'Caddyfile-managed sites'}
+        description={siteView === 'api'
+          ? 'Routes managed by Caddy Manager through the admin API.'
+          : 'Routes discovered from Caddyfile configuration and kept read-only here.'}
         actions={<button className="btn btn-primary" onClick={() => setEditor({})}><i className="bi bi-plus-lg me-1"></i> Add site</button>}
         signal={
           <>
           <strong>{activeCount} of {rows.length} healthy</strong>
             <span className="ms-auto">{syncedCount} synced to Caddy</span>
-            <span className={errorCount ? 'text-danger' : 'text-success'}>{errorCount ? `${errorCount} errors` : 'No errors'}</span>
+            <span className={errorCount ? 'text-danger' : warningCount ? 'text-warning' : 'text-success'}>
+              {errorCount ? `${errorCount} errors` : warningCount ? `${warningCount} warnings` : 'No errors'}
+            </span>
           </>
         }
       />
 
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <nav className="site-view-tabs mb-3" aria-label="Site management views">
+        <button
+          type="button"
+          className={siteView === 'api' ? 'active' : ''}
+          onClick={() => changeSiteView('api')}
+          aria-current={siteView === 'api' ? 'page' : undefined}
+        >
+          <i className="bi bi-cloud-check me-2"></i>
+          API-managed <span>{rows.filter((row) => row.routeId).length}</span>
+        </button>
+        <button
+          type="button"
+          className={siteView === 'caddy' ? 'active' : ''}
+          onClick={() => changeSiteView('caddy')}
+          aria-current={siteView === 'caddy' ? 'page' : undefined}
+        >
+          <i className="bi bi-file-earmark-code me-2"></i>
+          Caddyfile-managed <span>{rows.filter((row) => !row.routeId).length}</span>
+        </button>
+      </nav>
+
+      <div className="sites-toolbar d-flex justify-content-between align-items-center mb-3">
         <div className="page-eyebrow mb-0">Managed routes</div>
+        <SiteFilters
+          domains={domainOptions}
+          servers={serverIdOptions.map((serverId) => ({value: serverId, label: serverNames.get(serverId) ?? serverId}))}
+          serverBlocks={serverOptions}
+          statuses={statusOptions}
+          values={{domain: domainFilter, serverId: serverIdFilter, serverBlock: serverFilter, status: statusFilter}}
+          onChange={(filter, value) => {
+            if (filter === 'domain') setDomainFilter(value);
+            if (filter === 'serverId') setServerIdFilter(value);
+            if (filter === 'serverBlock') setServerFilter(value);
+            if (filter === 'status') setStatusFilter(value);
+            setSitePage(0);
+          }}
+        />
         <div className="d-flex gap-2">
           <button
             className="btn btn-outline-info"
@@ -198,25 +280,25 @@ export default function Sites() {
         </div>
       )}
 
-      {!query.isError && !query.isLoading && <DataTable
-        columns={[...columns, actionColumn]}
-        rows={identifiedRows}
-        getRowId={(r) => r.id}
-      />}
+      {!query.isError && !query.isLoading && (
+        <div className="sites-table-scroll">
+          <DataTable
+            columns={[serverColumn, ...columns, actionColumn]}
+            rows={pageRows}
+            getRowId={(r) => r.id}
+            totalCount={filteredRows.length}
+            page={currentPage}
+            pageSize={SITE_PAGE_SIZE}
+            onPageChange={setSitePage}
+          />
+        </div>
+      )}
 
-      {!query.isError && !query.isLoading && unidentifiedRows.length > 0 && (
-        <details className="mt-3">
-          <summary className="text-muted" style={{ cursor: 'pointer' }}>
-            Caddyfile-managed sites without @id ({unidentifiedRows.length})
-          </summary>
-          <div className="mt-2">
-            <DataTable
-              columns={[...columns, actionColumn]}
-              rows={unidentifiedRows}
-              getRowId={(r) => r.id}
-            />
-          </div>
-        </details>
+      {!query.isError && !query.isLoading && filteredRows.length > 0 && (
+        <div className="d-flex justify-content-between align-items-center mt-2 small text-muted">
+          <span>Showing {currentPage * SITE_PAGE_SIZE + 1}-{Math.min((currentPage + 1) * SITE_PAGE_SIZE, filteredRows.length)} of {filteredRows.length} sites</span>
+          <span>Page {currentPage + 1} of {totalPages}</span>
+        </div>
       )}
 
       {editor && <SiteEditor modal siteId={editor.id} onClose={() => setEditor(null)} />}
