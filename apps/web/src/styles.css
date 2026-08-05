@@ -611,6 +611,34 @@ summary:focus-visible {
   color: var(--ink);
 }
 
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.status-pill::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
+.status-pill-online,
+.status-pill-active { background: #e2f6ef; color: #167d62; }
+.status-pill-offline,
+.status-pill-error { background: #ffebe8; color: #a63d31; }
+.status-pill-degraded { background: #fff2d7; color: #92620d; }
+.status-pill-unknown,
+.status-pill-inactive { background: #edf1ef; color: #53646a; }
+
 .form-control,
 .form-select {
   border-color: var(--line);
