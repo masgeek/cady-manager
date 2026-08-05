@@ -2,15 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type { AuditEvent } from '@caddy-manager/shared-types';
 
-const actionColors: Record<string, string> = {
-  create: 'bg-success',
-  update: 'bg-info',
-  delete: 'bg-danger',
-  reload: 'bg-warning text-dark',
-  login: 'bg-secondary',
-  logout: 'bg-secondary',
-};
-
 export default function Audit() {
   const query = useQuery({
     queryKey: ['audit'],
@@ -18,12 +9,33 @@ export default function Audit() {
   });
 
   const rows = query.data || [];
+  const failures = rows.filter((row) => row.result === 'failure').length;
+  const successes = rows.length - failures;
 
   return (
     <div>
-      <h4 className="mb-3">Audit Trail</h4>
+      <div className="page-heading">
+        <div>
+          <div className="page-eyebrow">Accountability</div>
+          <h1>Audit trail</h1>
+          <p className="page-description">A quiet record of who changed infrastructure and what happened next.</p>
+        </div>
+        <div className="signal-strip">
+          <strong>{successes} successful actions</strong>
+          <span className="ms-auto">{failures ? `${failures} failed` : 'No failures recorded'}</span>
+          <span>Latest 100 events</span>
+        </div>
+      </div>
 
-      <div className="table-responsive">
+      {query.isLoading && <div className="alert alert-info">Loading audit events...</div>}
+      {query.isError && (
+        <div className="alert alert-danger">
+          Failed to load audit events: {query.error instanceof Error ? query.error.message : 'Request failed'}
+          <button className="btn btn-sm btn-outline-danger ms-2" onClick={() => query.refetch()}>Retry</button>
+        </div>
+      )}
+
+      {!query.isLoading && !query.isError && <div className="table-responsive">
         <table className="table table-sm table-striped">
           <thead className="table-light">
             <tr>
@@ -38,31 +50,32 @@ export default function Audit() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center text-muted py-3">No audit events</td>
+                <td colSpan={6}>
+                  <div className="empty-panel"><i className="bi bi-clock-history"></i><span>No audit events recorded yet.</span></div>
+                </td>
               </tr>
             ) : (
               rows.map((row: AuditEvent) => (
                 <tr key={row.id}>
                   <td>{new Date(row.timestamp).toLocaleString()}</td>
-                  <td>{row.userId}</td>
-                  <td>
-                    <span className={`badge ${actionColors[row.action] || 'bg-secondary'}`}>
-                      {row.action}
-                    </span>
-                  </td>
+                  <td><code>{row.userId}</code></td>
+                  <td><span className={`audit-action ${row.action}`}>{row.action}</span></td>
                   <td>{row.entity}</td>
-                  <td>{row.details || '-'}</td>
                   <td>
-                    <span className={`badge ${row.result === 'success' ? 'bg-success' : 'bg-danger'}`}>
-                      {row.result}
-                    </span>
+                    {row.details ? (
+                      <details className="audit-details">
+                        <summary>View details</summary>
+                        <div>{row.details}</div>
+                      </details>
+                    ) : <span className="text-muted">-</span>}
                   </td>
+                  <td><span className={`audit-result ${row.result}`}>{row.result}</span></td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
-      </div>
+      </div>}
     </div>
   );
 }

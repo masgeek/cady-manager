@@ -445,6 +445,41 @@ summary:focus-visible {
   font-size: 0.78rem;
 }
 
+.audit-action,
+.audit-result {
+  display: inline-block;
+  padding: 4px 7px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.audit-action.create { background: #e2f6ef; color: #167d62; }
+.audit-action.update { background: #e6f0ff; color: #3267a8; }
+.audit-action.delete { background: #ffebe8; color: #a63d31; }
+.audit-action.reload { background: #fff2d7; color: #92620d; }
+.audit-action.login,
+.audit-action.logout { background: #edf1ef; color: #53646a; }
+.audit-result.success { background: #e2f6ef; color: #167d62; }
+.audit-result.failure { background: #ffebe8; color: #a63d31; }
+
+.audit-details summary {
+  cursor: pointer;
+  color: var(--mint-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.audit-details div {
+  max-width: 420px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 .card,
 .modal-content {
   border: 1px solid var(--line);
