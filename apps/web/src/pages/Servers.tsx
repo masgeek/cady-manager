@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { DataTable, StatusBadge, ConfirmDialog, PageHeader } from '@caddy-manager/ui';
+import { DataTable, StatusBadge, ConfirmDialog, PageHeader, Modal } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 import type { Server } from '@caddy-manager/shared-types';
 import type { ImportPreviewSite } from '@caddy-manager/shared-api';
@@ -221,19 +221,21 @@ export default function Servers() {
 
       {/* Add / Edit Server Modal */}
       {dialogOpen && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div className="modal fade show d-block" tabIndex={-1}>
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <form onSubmit={handleSubmit((data) =>
-                  editServer ? updateMutation.mutate(data) : createMutation.mutate(data)
-                )}>
-                  <div className="modal-header">
-                    <h5 className="modal-title">{editServer ? 'Edit Server' : 'Add Server'}</h5>
-                    <button type="button" className="btn-close" onClick={() => { setDialogOpen(false); setEditServer(null); }} />
-                  </div>
-                  <div className="modal-body">
+        <Modal
+          open
+          title={editServer ? 'Edit Server' : 'Add Server'}
+          size="lg"
+          onClose={() => { setDialogOpen(false); setEditServer(null); }}
+          footer={
+            <>
+              <button type="button" className="btn btn-secondary" onClick={() => { setDialogOpen(false); setEditServer(null); }}>Cancel</button>
+              <button type="submit" form="server-form" className="btn btn-primary">{editServer ? 'Update' : 'Create'}</button>
+            </>
+          }
+        >
+          <form id="server-form" onSubmit={handleSubmit((data) =>
+            editServer ? updateMutation.mutate(data) : createMutation.mutate(data)
+          )}>
                     <div className="mb-3">
                       <label className="form-label">Name</label>
                       <input
@@ -259,30 +261,30 @@ export default function Servers() {
                       />
                       {errors.apiEndpoint && <div className="invalid-feedback">{errors.apiEndpoint.message}</div>}
                     </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" onClick={() => { setDialogOpen(false); setEditServer(null); }}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{editServer ? 'Update' : 'Create'}</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </>
+          </form>
+        </Modal>
       )}
 
       {/* Discover Modal */}
       {discoverOpen && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div className="modal fade show d-block" tabIndex={-1}>
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Discover & Import</h5>
-                  <button type="button" className="btn-close" onClick={() => { setDiscoverOpen(false); setDiscoverUrl(''); }} />
-                </div>
-                <div className="modal-body">
+        <Modal
+          open
+          title="Discover & Import"
+          onClose={() => { setDiscoverOpen(false); setDiscoverUrl(''); }}
+          footer={
+            <>
+              <button type="button" className="btn btn-secondary" onClick={() => { setDiscoverOpen(false); setDiscoverUrl(''); }}>Cancel</button>
+              <button
+                type="button"
+                className="btn btn-info"
+                disabled={!discoverUrl || discoverMutation.isPending}
+                onClick={() => discoverMutation.mutate(discoverUrl)}
+              >
+                {discoverMutation.isPending ? 'Discovering...' : 'Discover & Import'}
+              </button>
+            </>
+          }
+        >
                   <p className="text-muted small">Enter the Caddy admin API endpoint to auto-discover servers and import sites from the config.</p>
                   <div className="mb-3">
                     <label className="form-label">API Endpoint</label>
@@ -293,36 +295,30 @@ export default function Servers() {
                       onChange={(e) => setDiscoverUrl(e.target.value)}
                     />
                   </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => { setDiscoverOpen(false); setDiscoverUrl(''); }}>Cancel</button>
-                  <button
-                    type="button"
-                    className="btn btn-info"
-                    disabled={!discoverUrl || discoverMutation.isPending}
-                    onClick={() => discoverMutation.mutate(discoverUrl)}
-                  >
-                    {discoverMutation.isPending ? 'Discovering...' : 'Discover & Import'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+        </Modal>
       )}
 
       {/* Import Preview Modal */}
       {importPreview && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div className="modal fade show d-block" tabIndex={-1}>
-            <div className="modal-dialog modal-lg modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Import Sites from {importPreview.server.name}</h5>
-                  <button type="button" className="btn-close" onClick={() => setImportPreview(null)} />
-                </div>
-                <div className="modal-body">
+        <Modal
+          open
+          title={`Import Sites from ${importPreview.server.name}`}
+          size="lg"
+          onClose={() => setImportPreview(null)}
+          footer={
+            <>
+              <button type="button" className="btn btn-secondary" onClick={() => setImportPreview(null)}>Cancel</button>
+              <button
+                type="button"
+                className="btn btn-success"
+                disabled={importPreview.sites.length === 0 || importMutation.isPending}
+                onClick={() => importMutation.mutate(importPreview.server.id)}
+              >
+                {importMutation.isPending ? 'Importing...' : 'Import Sites'}
+              </button>
+            </>
+          }
+        >
                   {importPreview.sites.length === 0 ? (
                     <p className="text-muted mb-0">No reverse-proxy sites were found in the active Caddy configuration.</p>
                   ) : (
@@ -344,22 +340,7 @@ export default function Servers() {
                       </table>
                     </div>
                   )}
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setImportPreview(null)}>Cancel</button>
-                  <button
-                    type="button"
-                    className="btn btn-success"
-                    disabled={importPreview.sites.length === 0 || importMutation.isPending}
-                    onClick={() => importMutation.mutate(importPreview.server.id)}
-                  >
-                    {importMutation.isPending ? 'Importing...' : 'Import Sites'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+        </Modal>
       )}
 
       <ConfirmDialog
