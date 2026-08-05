@@ -1,6 +1,6 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Modal, StatusBadge} from '@caddy-manager/ui';
+import {DataTable, Modal, PageHeader, StatusBadge} from '@caddy-manager/ui';
 
 describe('shared UI primitives', () => {
   it('renders a semantic status pill', () => {
@@ -30,5 +30,36 @@ describe('shared UI primitives', () => {
 
     fireEvent.keyDown(document, {key: 'Escape'});
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('renders shared page hierarchy and signal content', () => {
+    render(
+      <PageHeader
+        eyebrow="Operations"
+        title="Servers"
+        description="Registered endpoints"
+        signal={<strong>3 online</strong>}
+      />,
+    );
+
+    expect(screen.getByRole('heading', {name: 'Servers'})).toBeTruthy();
+    expect(screen.getByText('3 online')).toBeTruthy();
+  });
+
+  it('labels table pagination controls for keyboard users', () => {
+    const onPageChange = vi.fn();
+    render(
+      <DataTable
+        columns={[{field: 'name', headerName: 'Name'}]}
+        rows={[{id: 'one', name: 'One'}]}
+        getRowId={(row) => row.id}
+        totalCount={21}
+        pageSize={20}
+        onPageChange={onPageChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Next page'}));
+    expect(onPageChange).toHaveBeenCalledWith(1);
   });
 });
