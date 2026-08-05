@@ -40,6 +40,15 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
   const id = siteId ?? routeId;
   const isEdit = !!id;
 
+  useEffect(() => {
+    if (!modal) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [modal]);
+
   const serversQuery = useQuery({
     queryKey: ['servers'],
     queryFn: () => api.getServers(),
@@ -294,7 +303,9 @@ export default function SiteEditor({ modal = false, siteId, onClose }: SiteEdito
       <div className="modal-backdrop fade show" onClick={onClose} />
       <div className="modal fade show d-block site-editor-modal" tabIndex={-1} role="dialog" aria-modal="true">
         <div className="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
-          <div className="modal-content">{editor}</div>
+          <div className="modal-content">
+            <div className="modal-body p-0">{editor}</div>
+          </div>
         </div>
       </div>
     </>

@@ -9,7 +9,13 @@ import SiteEditor from './SiteEditor';
 
 const columns: Column<Site>[] = [
   { field: 'domain', headerName: 'Domain' },
-  { field: 'routeId', headerName: '@id' },
+  {
+    field: 'routeId',
+    headerName: '@id',
+    render: (value) => value
+      ? <code>{String(value)}</code>
+      : <span className="small text-muted" title="Managed directly in the Caddyfile"><i className="bi bi-file-earmark-code me-1"></i>Caddyfile-managed</span>,
+  },
   { field: 'upstream', headerName: 'Upstream' },
   {
     field: 'synced',
@@ -97,13 +103,18 @@ export default function Sites() {
   const rows = query.data || [];
   const identifiedRows = rows.filter((row) => row.routeId);
   const unidentifiedRows = rows.filter((row) => !row.routeId);
+  const activeCount = rows.filter((row) => row.status === 'active').length;
+  const errorCount = rows.filter((row) => row.status === 'error').length;
+  const syncedCount = rows.filter((row) => row.synced).length;
 
   const actionColumn: Column<Site> = {
     field: 'actions',
     headerName: 'Actions',
-    render: (_, row) => (
+    render: (_, row) => !row.routeId ? (
+      <span className="small text-muted">Managed in Caddyfile</span>
+    ) : (
       <div className="d-flex gap-1">
-        {!row.synced && (
+        {!row.synced && row.routeId && (
           <button
             className="btn btn-sm btn-outline-success"
             onClick={() => syncMutation.mutate(row.id)}
@@ -114,17 +125,15 @@ export default function Sites() {
         )}
         <button
           className="btn btn-sm btn-outline-primary"
-          disabled={!row.routeId}
-           onClick={() => setEditor({ id: row.id })}
-          title={!row.routeId ? 'Sync to Caddy first' : 'Edit'}
+          onClick={() => setEditor({ id: row.id })}
+          title="Edit site"
         >
           <i className="bi bi-pencil"></i>
         </button>
         <button
           className="btn btn-sm btn-outline-danger"
-          disabled={!row.routeId}
           onClick={() => setDeleteId(row.id)}
-          title={!row.routeId ? 'Sync to Caddy first' : 'Delete'}
+          title="Delete site"
         >
           <i className="bi bi-trash"></i>
         </button>
@@ -134,8 +143,26 @@ export default function Sites() {
 
   return (
     <div>
+      <div className="page-heading">
+        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+          <div>
+            <div className="page-eyebrow">Routing inventory</div>
+            <h1>Sites</h1>
+            <p className="page-description">Managed domains, upstream targets, and the health signal behind each route.</p>
+          </div>
+          <button className="btn btn-primary" onClick={() => setEditor({})}>
+            <i className="bi bi-plus-lg me-1"></i> Add site
+          </button>
+        </div>
+        <div className="signal-strip">
+          <strong>{activeCount} of {rows.length} healthy</strong>
+          <span className="ms-auto">{syncedCount} synced to Caddy</span>
+          <span className={errorCount ? 'text-danger' : 'text-success'}>{errorCount ? `${errorCount} errors` : 'No errors'}</span>
+        </div>
+      </div>
+
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Sites</h4>
+        <div className="page-eyebrow mb-0">Managed routes</div>
         <div className="d-flex gap-2">
           <button
             className="btn btn-outline-info"
@@ -154,9 +181,6 @@ export default function Sites() {
           >
             <i className="bi bi-arrow-repeat me-1"></i>
             {reconcileMutation.isPending ? 'Reconciling...' : 'Reconcile Routes'}
-          </button>
-           <button className="btn btn-primary" onClick={() => setEditor({})}>
-            <i className="bi bi-plus-circle me-1"></i> Add Site
           </button>
         </div>
       </div>
@@ -187,7 +211,7 @@ export default function Sites() {
       {!query.isError && !query.isLoading && unidentifiedRows.length > 0 && (
         <details className="mt-3">
           <summary className="text-muted" style={{ cursor: 'pointer' }}>
-            Sites without @id ({unidentifiedRows.length})
+            Caddyfile-managed sites without @id ({unidentifiedRows.length})
           </summary>
           <div className="mt-2">
             <DataTable

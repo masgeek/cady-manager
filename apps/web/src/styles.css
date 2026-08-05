@@ -482,6 +482,14 @@ summary:focus-visible {
   padding: 28px;
 }
 
+.site-editor-modal .modal-dialog {
+  max-height: calc(100vh - 2rem);
+}
+
+.site-editor-modal .modal-body {
+  overflow-y: auto;
+}
+
 .site-editor-modal-body > .card {
   border: 0;
   box-shadow: none;
