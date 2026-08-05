@@ -11,13 +11,33 @@ interface ModalProps {
 
 export function Modal({open, title, children, footer, onClose, size = 'md'}: ModalProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab' || !modalRef.current) return;
+
+      const focusable = Array.from(modalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     closeRef.current?.focus();
@@ -32,7 +52,7 @@ export function Modal({open, title, children, footer, onClose, size = 'md'}: Mod
   return (
     <>
       <div className="modal-backdrop fade show" onClick={onClose} />
-      <div className="modal fade show d-block app-modal" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+      <div ref={modalRef} className="modal fade show d-block app-modal" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
         <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${size === 'md' ? '' : `modal-${size}`}`}>
           <div className="modal-content">
             <div className="modal-header">
