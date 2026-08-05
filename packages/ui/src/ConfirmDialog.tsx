@@ -24,12 +24,12 @@ export function ConfirmDialog({
   return (
     <>
       <div className="modal-backdrop fade show" />
-      <div className="modal fade show d-block" tabIndex={-1} role="dialog">
+      <div className="modal fade show d-block" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
         <div className="modal-dialog modal-dialog-centered" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">{title}</h5>
-              <button type="button" className="btn-close" onClick={onCancel} />
+              <h5 id="confirm-dialog-title" className="modal-title">{title}</h5>
+              <button type="button" className="btn-close" aria-label="Close dialog" onClick={onCancel} />
             </div>
             <div className="modal-body">
               <p>{message}</p>

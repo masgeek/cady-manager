@@ -26,7 +26,7 @@ export function Layout({ children, onLogout }: LayoutProps) {
       <div className={`offcanvas offcanvas-start d-md-none ${mobileOpen ? 'show' : ''}`} tabIndex={-1} style={{ width: 280 }}>
         <div className="offcanvas-header">
           <h5 className="offcanvas-title">Caddy Manager</h5>
-          <button type="button" className="btn-close" onClick={() => setMobileOpen(false)} />
+          <button type="button" className="btn-close" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />
         </div>
         <div className="offcanvas-body p-0">
           <ul className="list-group list-group-flush">

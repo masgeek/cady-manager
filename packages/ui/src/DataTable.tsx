@@ -64,15 +64,15 @@ export function DataTable<T>({
         <nav>
           <ul className="pagination pagination-sm justify-content-center mb-0 mt-2">
             <li className={`page-item ${page === 0 ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => onPageChange(page - 1)}>Previous</button>
+              <button className="page-link" aria-label="Previous page" onClick={() => onPageChange(page - 1)}>Previous</button>
             </li>
             {Array.from({ length: totalPages }, (_, i) => (
               <li key={i} className={`page-item ${i === page ? 'active' : ''}`}>
-                <button className="page-link" onClick={() => onPageChange(i)}>{i + 1}</button>
+                <button className="page-link" aria-label={`Page ${i + 1}`} onClick={() => onPageChange(i)}>{i + 1}</button>
               </li>
             ))}
             <li className={`page-item ${page >= totalPages - 1 ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => onPageChange(page + 1)}>Next</button>
+              <button className="page-link" aria-label="Next page" onClick={() => onPageChange(page + 1)}>Next</button>
             </li>
           </ul>
         </nav>

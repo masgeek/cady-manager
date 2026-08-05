@@ -27,10 +27,10 @@ export function JsonViewer({ data, title }: JsonViewerProps) {
       <div className="d-flex align-items-center gap-2 mb-1">
         {title && <small className="fw-bold">{title}</small>}
         <div className="ms-auto">
-          <button className="btn btn-sm btn-outline-secondary me-1" onClick={handleCopy} title="Copy">
+          <button className="btn btn-sm btn-outline-secondary me-1" onClick={handleCopy} title="Copy" aria-label="Copy configuration">
             <i className="bi bi-clipboard"></i>
           </button>
-          <button className="btn btn-sm btn-outline-secondary" onClick={handleDownload} title="Download">
+          <button className="btn btn-sm btn-outline-secondary" onClick={handleDownload} title="Download" aria-label="Download configuration">
             <i className="bi bi-download"></i>
           </button>
         </div>
