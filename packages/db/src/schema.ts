@@ -1,5 +1,5 @@
 import {
-    pgTable, text, varchar, boolean, timestamp,
+    pgTable, text, varchar, boolean, timestamp, integer,
 } from 'drizzle-orm/pg-core';
 
 export const servers = pgTable('servers', {
@@ -24,6 +24,9 @@ export const sites = pgTable('sites', {
     synced: boolean('synced').notNull().default(true),
     status: varchar('status', {length: 20}).notNull().default('inactive'),
     statusDetail: text('status_detail'),
+    lastCheckedAt: timestamp('last_checked_at'),
+    healthLatencyMs: integer('health_latency_ms'),
+    consecutiveFailures: integer('consecutive_failures').notNull().default(0),
     healthEndpoint: varchar('health_endpoint', {length: 150}),
     healthHeaders: text('health_headers'),
     createdAt: timestamp('created_at').defaultNow().notNull(),

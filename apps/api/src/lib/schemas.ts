@@ -72,6 +72,9 @@ const siteResponseZod = z.object({
     .enum(['active', 'inactive', 'error'])
     .describe('Site status'),
   statusDetail: z.string().optional().describe('Detailed health-check result or error'),
+  lastCheckedAt: z.string().optional().describe('Timestamp of the most recent health check'),
+  healthLatencyMs: z.number().int().nonnegative().optional().describe('Health-check latency in milliseconds'),
+  consecutiveFailures: z.number().int().nonnegative().describe('Number of consecutive failed checks'),
   healthEndpoint: z.string().optional().describe('Health check endpoint path'),
   healthHeaders: z.string().optional().describe('Health check headers as JSON string'),
   createdAt: z.string().describe('Creation timestamp'),

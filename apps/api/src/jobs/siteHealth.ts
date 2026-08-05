@@ -93,6 +93,8 @@ export async function checkAllSites(): Promise<void> {
     const allSites = await siteRepo.findAll();
     console.log(`[site-health] checking ${allSites.length} sites`);
     for (const site of allSites) {
+        const checkedAt = new Date();
+        const checkStarted = Date.now();
         const url = site.healthEndpoint || `https://${site.domain}`;
         const parsedHeaders = site.healthHeaders ? tryParseHeaders(site.healthHeaders) : undefined;
         let result: {alive: boolean; detail: string};
@@ -110,7 +112,14 @@ export async function checkAllSites(): Promise<void> {
         } else {
             console.error(`[site-health] ${site.domain} → error: ${result.detail} (${url})`);
         }
-        await siteRepo.updateStatus(site.id, result.alive ? 'active' : 'error', result.detail);
+        await siteRepo.updateHealth(
+            site.id,
+            result.alive ? 'active' : 'error',
+            result.detail,
+            Date.now() - checkStarted,
+            checkedAt,
+            result.alive ? 0 : site.consecutiveFailures + 1,
+        );
     }
     console.log(`[site-health] completed in ${Date.now() - started}ms`);
 }

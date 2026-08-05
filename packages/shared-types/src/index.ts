@@ -24,6 +24,9 @@ export interface Site {
   synced: boolean;
   status: SiteStatus;
   statusDetail?: string;
+  lastCheckedAt?: string;
+  healthLatencyMs?: number;
+  consecutiveFailures: number;
   healthEndpoint?: string;
   healthHeaders?: string;
   createdAt: string;

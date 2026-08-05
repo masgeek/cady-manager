@@ -15,7 +15,7 @@ This roadmap is intentionally small and focused on the needs of an internal Cadd
 - [x] Replace environment-only authentication with database-backed password authentication.
 - [x] Enforce simple global roles for admin, operator, and viewer users.
 - [x] Improve audit events and actionable API error messages.
-- [ ] Add basic health latency and consecutive-failure information.
+- [x] Add basic health latency and consecutive-failure information.
 - [ ] Add database uniqueness constraints for duplicate sites.
 
 ## P2: Operator Experience
@@ -27,4 +27,4 @@ This roadmap is intentionally small and focused on the needs of an internal Cadd
 
 ## Current Implementation
 
-Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, graceful API/job/database shutdown, initial API/Caddy integration tests, database-backed authentication, simple global roles, and improved audit/API errors. The next active item is basic health latency and consecutive-failure information.
+Completed: outbound request protection, Caddy server-block targeting, Docker Compose deployment hardening, graceful API/job/database shutdown, initial API/Caddy integration tests, database-backed authentication, simple global roles, improved audit/API errors, and basic health latency/failure tracking. The next active item is duplicate-site protection.

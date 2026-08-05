@@ -40,6 +40,9 @@ function toSite(row: typeof sites.$inferSelect): Site {
     synced: row.synced,
     status: row.status as Site['status'],
     statusDetail: row.statusDetail ?? undefined,
+    lastCheckedAt: row.lastCheckedAt?.toISOString(),
+    healthLatencyMs: row.healthLatencyMs ?? undefined,
+    consecutiveFailures: row.consecutiveFailures,
     healthEndpoint: row.healthEndpoint ?? undefined,
     healthHeaders: row.healthHeaders ?? undefined,
     createdAt: row.createdAt.toISOString(),
@@ -113,9 +116,22 @@ class SiteRepository {
     await db.update(sites).set({ synced }).where(eq(sites.id, id));
   }
 
-  async updateStatus(id: string, status: string, statusDetail?: string): Promise<void> {
+  async updateHealth(
+    id: string,
+    status: string,
+    statusDetail: string,
+    healthLatencyMs: number,
+    lastCheckedAt: Date,
+    consecutiveFailures: number,
+  ): Promise<void> {
     await db.update(sites)
-      .set({ status, statusDetail: statusDetail ?? null })
+      .set({
+        status,
+        statusDetail,
+        healthLatencyMs,
+        lastCheckedAt,
+        consecutiveFailures,
+      })
       .where(eq(sites.id, id));
   }
 }

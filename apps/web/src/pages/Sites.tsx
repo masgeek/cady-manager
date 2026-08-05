@@ -36,6 +36,12 @@ const columns: Column<Site>[] = [
             {row.statusDetail}
           </div>
         )}
+        {row.healthLatencyMs !== undefined && (
+          <div className="small text-muted">{row.healthLatencyMs} ms</div>
+        )}
+        {row.consecutiveFailures > 0 && (
+          <div className="small text-danger">{row.consecutiveFailures} consecutive failures</div>
+        )}
       </div>
     ),
   },
