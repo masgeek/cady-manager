@@ -139,6 +139,10 @@ export class ApiClient {
     return this.request(`/config?serverId=${encodeURIComponent(serverId)}`);
   }
 
+  async getGeneratedConfig(serverId: string): Promise<Record<string, unknown>> {
+    return this.request(`/config/generated?serverId=${encodeURIComponent(serverId)}`);
+  }
+
   async reloadConfig(serverId: string): Promise<void> {
     return this.request('/config/reload', {
       method: 'POST',
