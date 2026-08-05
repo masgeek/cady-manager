@@ -6,3 +6,4 @@ export { JsonViewer } from './JsonViewer';
 export { ConfirmDialog } from './ConfirmDialog';
 export { PageHeader } from './PageHeader';
 export { SignalStrip } from './SignalStrip';
+export { Modal } from './Modal';

@@ -10,6 +10,51 @@ without adding enterprise complexity.
 The single product job is: **see what is healthy, identify what needs attention,
 and safely take the next action.**
 
+## Progress Checklist
+
+### Foundation
+
+- [x] Add graphite control-room shell and responsive navigation.
+- [x] Add design tokens, paper workspace, typography hierarchy, and focus styles.
+- [x] Add shared `PageHeader` and `SignalStrip` components.
+- [x] Add consistent status-pill styling.
+
+### Core Screens
+
+- [x] Redesign Dashboard around fleet health and attention queues.
+- [x] Modernize Servers page and server action hierarchy.
+- [x] Modernize Sites page and health summary.
+- [x] Modernize Configuration page with Active/Generated views.
+- [x] Modernize Logs page with search and severity treatment.
+- [x] Modernize Audit page with expandable details.
+- [x] Modernize Login page.
+
+### Modal Workflows
+
+- [x] Open Add/Edit Site in a responsive modal.
+- [x] Keep long Site forms internally scrollable.
+- [x] Keep Caddyfile-managed sites read-only in the UI.
+- [ ] Move Server Add/Edit, Discover, and Import Preview onto the shared `Modal` primitive.
+- [ ] Add focus trapping to the shared `Modal` primitive.
+- [ ] Add unsaved-change protection to long forms.
+
+### Responsive and Accessibility Polish
+
+- [x] Lock background scrolling while modals are open.
+- [x] Add Escape-to-close behavior for Site modals.
+- [x] Add accessible labels to shared icon-only controls and pagination.
+- [x] Add mobile full-screen treatment for long Site forms.
+- [ ] Add keyboard-only verification for navigation, tables, and forms.
+- [ ] Verify layouts at mobile, tablet, and desktop breakpoints.
+- [ ] Run a visual screenshot review for every authenticated page.
+
+### Final Cleanup
+
+- [ ] Migrate remaining page-specific header markup to shared components.
+- [ ] Remove redundant Bootstrap visual overrides where custom tokens now cover the use case.
+- [ ] Add frontend component tests for modals, status pills, loading states, and error states.
+- [ ] Document the UI tokens and modal usage for future contributors.
+
 ## Visual Direction
 
 ### Concept
