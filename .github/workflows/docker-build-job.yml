@@ -1,0 +1,41 @@
+name: Docker Build Job
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      dockerfile:
+        required: true
+        type: string
+    secrets:
+      docker_username:
+        required: true
+      docker_password:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    concurrency:
+      group: docker-build-${{ github.ref }}-${{ inputs.image_name }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build and push image
+        uses: ./.github/actions/docker-build
+        with:
+          image-name: ${{ inputs.image_name }}
+          dockerfile: ${{ inputs.dockerfile }}
+          docker-username: ${{ secrets.docker_username }}
+          docker-password: ${{ secrets.docker_password }}
+          cache-scope: ${{ inputs.image_name }}
