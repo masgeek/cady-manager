@@ -2,6 +2,7 @@
   "name": "caddy-manager",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -23,6 +24,8 @@
     "dev:kill": "npx kill-port 3500 5173"
   },
   "devDependencies": {
+    "@typescript-eslint/parser": "^8.66.0",
+    "eslint": "^10.8.0",
     "prettier": "^3.9.1",
     "turbo": "^2.10.0",
     "typescript": "^5.9.3"
