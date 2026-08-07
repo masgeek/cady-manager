@@ -157,12 +157,12 @@ Provider Layer
 ```
 caddy-manager/
 ├── apps/
-│   ├── web/              # React + Vite + MUI frontend
+│   ├── web/              # React + Vite + Bootstrap + modular SCSS frontend
 │   └── api/              # Fastify backend
 ├── packages/
 │   ├── shared-types/     # TypeScript interfaces and const arrays
 │   ├── shared-api/       # Typed API client for the frontend
-│   ├── ui/               # Shared MUI components
+│   ├── ui/               # Shared React layout and UI primitives
 │   ├── config/           # Centralized env loading and validation
 │   ├── db/               # Drizzle ORM schema, repositories, migrations, seeds
 │   └── utils/            # Shared utility functions
@@ -171,9 +171,9 @@ caddy-manager/
 ├── pnpm-workspace.yaml
 ├── docker-compose.yml
 ├── .dockerignore
-├── PRD.md
-├── PLAN.md
-└── FEATURES.md
+├── docs/PRD.md
+├── docs/PLAN.md
+└── docs/FEATURES.md
 ```
 
 ---
@@ -196,7 +196,7 @@ React Hook Form
 
 Zod
 
-Material UI
+Bootstrap utilities and modular SCSS
 
 ---
 
@@ -265,13 +265,16 @@ Properties:
 
 ## Site
 
-Represents a reverse proxy site.
+Represents a managed Caddy route and its health metadata.
 
 Properties:
 
 * id
 * domain
-* upstream
+* optional upstream
+* routeConfig
+* routeId
+* caddyServerName
 * tlsEnabled
 * status
 * serverId
@@ -674,13 +677,13 @@ Read active configuration.
 
 ---
 
-## Configuration History (Phase 2)
+## Configuration History (Future)
 
 Store snapshots.
 
 ---
 
-## Rollback (Phase 2)
+## Rollback (Future)
 
 Allow restoring previous configurations.
 
@@ -812,10 +815,9 @@ Excluded:
 
 ---
 
-# 22. Phase 2 Roadmap
+# 22. Next Roadmap
 
-* User management
-* Role-based permissions
+* Advanced user management and permissions
 * Configuration history
 * Rollbacks
 * WebSocket updates

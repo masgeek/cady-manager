@@ -6,7 +6,7 @@ visual patterns.
 
 ## Visual Tokens
 
-The tokens live in `apps/web/src/styles.css`.
+The tokens live in `apps/web/src/styles/_tokens.scss` and are loaded through `apps/web/src/styles/index.scss`.
 
 - `--ink`: primary text and dark control-room surfaces
 - `--graphite`: sidebar and operational hero backgrounds
@@ -44,7 +44,7 @@ describe real operational state.
 
 ## Modal
 
-Use the shared `Modal` for new add, edit, preview, and detail workflows:
+Use the shared `Modal` for server dialogs, import previews, confirmations, and detail workflows. Site add/edit uses a dedicated page so long route forms have room to breathe:
 
 ```tsx
 <Modal
@@ -66,6 +66,13 @@ Use the shared `Modal` for new add, edit, preview, and detail workflows:
 The shared modal provides background scroll locking, Escape-to-close, initial
 focus, keyboard focus trapping, responsive scrolling, and accessible labeling.
 Do not recreate backdrop or body-scroll logic in individual pages.
+
+## PageShell
+
+Authenticated pages render inside the shared `PageShell` supplied by `Layout`.
+The shell provides the common page boundary and the app content region owns
+vertical scrolling. Page-specific layout should be added below this boundary,
+not by changing document or body overflow.
 
 ## StatusBadge
 

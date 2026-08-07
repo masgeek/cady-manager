@@ -26,15 +26,15 @@
 - [x] Add logs endpoint (US-09)
 - [x] Add audit trail endpoint (US-10)
 - [x] Add Caddy integration provider with config reload, health check, status, logs
-- [x] Add JWT auth via `POST /api/auth/login` with configurable credentials (AUTH_USERNAME/AUTH_PASSWORD, JWT_SECRET)
+- [x] Add JWT auth via `POST /api/auth/login` with database-backed password hashes and configurable JWT signing (`JWT_SECRET`)
 - [x] Add swagger docs, rate limiting, CORS, and sensible error handling
 - [x] Fix Fastify schema validation — convert Zod schemas to JSON Schema via zod-to-json-schema
 - [x] Separate migrations from API startup — run via dedicated Docker service
 
 ## Frontend
 
-- [x] Create @caddy-manager/web (Vite + React + MUI + TanStack Query)
-- [x] Create @caddy-manager/ui with shared MUI components
+- [x] Create @caddy-manager/web (Vite + React + Bootstrap + TanStack Query)
+- [x] Create @caddy-manager/ui with shared layout and UI primitives
 - [x] Create @caddy-manager/shared-api with typed API client
 - [x] Add Login page
 - [x] Add Dashboard page (server status, site count, health indicators)
@@ -43,6 +43,10 @@
 - [x] Add Configuration viewer page
 - [x] Add Logs page
 - [x] Add Audit trail page
+- [x] Add visual Caddy route builder with redirect, static response, file server, rewrite, and custom JSON actions
+- [x] Add dynamic route preview and save review step
+- [x] Add response header editing for redirect and static response routes
+- [x] Add dedicated Site add/edit pages with shared scrolling layout
 
 ## Database
 
@@ -57,17 +61,16 @@
 - [x] Docker: .dockerignore
 - [x] GitHub Actions: CI workflow (typecheck, lint, build)
 - [x] GitHub Actions: Docker workflow (multi-arch build & push for api/web/migrate)
-- [x] Documentation: PRD.md, PLAN.md, FEATURES.md
+- [x] Documentation: docs/PRD.md, docs/PLAN.md, docs/FEATURES.md
 
-## Backlog (Phase 2)
+## Next Backlog
 
-- [ ] User management (US-12)
-- [ ] Role-based access control (US-13)
-- [ ] Configuration history / snapshots (US-14)
-- [ ] Configuration rollback (US-15)
-- [ ] WebSocket real-time updates (US-16)
-- [ ] Server metrics dashboard (US-17)
-- [ ] Integration tests
-- [ ] End-to-end tests
-- [ ] Unit test coverage ≥80%
-- [ ] Security review
+- [ ] Add path, method, header, and query matchers to the visual route builder
+- [ ] Add route validation and current-versus-proposed configuration comparison
+- [ ] Add configuration history and rollback
+- [ ] Add external route modification detection
+- [ ] Add local editor drafts and recovery
+- [ ] Add WebSocket or server-sent real-time updates
+- [ ] Add server metrics dashboard
+- [ ] Expand integration and end-to-end test coverage
+- [ ] Complete security review and document findings

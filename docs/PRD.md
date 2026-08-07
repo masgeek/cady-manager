@@ -1,6 +1,6 @@
 # Caddy Manager — Product Requirements Document
 
-Version: 1.0 | Status: Draft
+Version: 1.1 | Status: Active baseline
 
 ---
 
@@ -43,8 +43,8 @@ This creates operational risk, onboarding friction, and limited observability. T
 |---|---|---|
 | US-01 | As a user, I want to view all managed Caddy servers so I can see their status at a glance. | P0 |
 | US-02 | As a user, I want to register a new Caddy server so I can manage it through the platform. | P0 |
-| US-03 | As a user, I want to create a reverse proxy site so I can route traffic to my upstream services. | P0 |
-| US-04 | As a user, I want to update an existing site so I can change its domain or upstream target. | P0 |
+| US-03 | As a user, I want to create common Caddy route types through a visual builder so I can manage traffic without writing JSON. | P0 |
+| US-04 | As a user, I want to update an existing site and review its generated route before applying it. | P0 |
 | US-05 | As a user, I want to delete a site so I can remove unused configurations. | P0 |
 | US-06 | As a user, I want to view the active Caddy configuration so I can audit current settings. | P0 |
 | US-07 | As a user, I want to reload Caddy configuration so my changes take effect. | P0 |
@@ -81,7 +81,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 
 | ID | Requirement |
 |---|---|
-| FR-02.1 | System SHALL support creating a reverse proxy site with domain, upstream target, and TLS settings |
+| FR-02.1 | System SHALL support creating reverse proxy, redirect, static response, file server, rewrite, and custom JSON routes |
 | FR-02.2 | System SHALL display all sites with their status (active/inactive/error) |
 | FR-02.3 | System SHALL support searching and filtering sites |
 | FR-02.4 | System SHALL allow editing site configuration |
@@ -136,7 +136,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 | ID | Requirement |
 |---|---|
 | FR-08.1 | System SHALL authenticate users via a `POST /api/auth/login` endpoint that validates credentials and returns a JWT token |
-| FR-08.2 | System SHALL verify credentials against configured AUTH_USERNAME and AUTH_PASSWORD environment variables |
+| FR-08.2 | System SHALL verify credentials against password hashes stored in the users table |
 | FR-08.3 | System SHALL reject unauthenticated requests with a 401 response |
 | FR-08.4 | System SHALL require a valid JWT `Bearer` token on all authenticated API routes except `/auth/login` and `/health` |
 
@@ -180,7 +180,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 |---|---|
 | Dashboard | Server status, site count, health indicators |
 | Server Registration | Add/edit/remove Caddy server endpoints |
-| Site CRUD | Create, read, update, delete reverse proxy sites |
+| Site CRUD | Create, read, update, and delete visual or custom Caddy routes |
 | Configuration Viewer | Read-only view of active Caddy config with search/copy/download |
 | Configuration Reload | Trigger Caddy reload on configuration changes |
 | Health Monitoring | Basic health checks, version, status display |
@@ -239,7 +239,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 | Routing | React Router |
 | Server State | TanStack Query |
 | Forms | React Hook Form + Zod |
-| UI Library | Material UI |
+| UI Library | Bootstrap utilities, shared React primitives, and modular SCSS |
 | Backend Framework | Node.js + Fastify + TypeScript |
 | Validation | Zod |
 | API Documentation | OpenAPI + Swagger |
@@ -260,12 +260,12 @@ This creates operational risk, onboarding friction, and limited observability. T
 | M1 — Monorepo Foundation | pnpm workspace, TurboRepo config, tsconfig, ESLint, Prettier, Docker scaffolding |
 | M2 — Backend API Foundation | Fastify server, health endpoint, error handling, logging, OpenAPI setup |
 | M3 — Shared Packages | `shared-types`, `shared-api`, `ui`, `config`, `utils`, `db` packages published and consumable |
-| M4 — Frontend Shell | Vite + React + Router + MUI + TanStack Query wired up, layout in place |
+| M4 — Frontend Shell | Vite + React + Router + shared UI layout + TanStack Query wired up |
 | M5 — Dashboard | Server list, health status, site count — all wired to API |
 | M6 — Site Management | Full CRUD UI for sites with validation |
 | M7 — Configuration Management | Config viewer, reload trigger |
 | M8 — Logging | Log viewer with search and filters |
-| M9 — Authentication | Basic auth setup with configurable credentials |
+| M9 — Authentication | Database-backed username/password authentication with JWT sessions |
 | M10 — Docker Deployment | Docker Compose with web, api, migrate, and postgres services; environment configuration |
 | M11 — Testing & Hardening | Test coverage, security review, edge cases |
 | M12 — Release Candidate | Final polish, documentation, CI/CD finalization |
@@ -276,7 +276,7 @@ This creates operational risk, onboarding friction, and limited observability. T
 
 | Decision | Chosen Approach | Rationale |
 |---|---|---|
-| MVP Authentication | JWT tokens via `POST /api/auth/login` | Token-based auth keeps the client dumb and enables future SSO/OIDC/RBAC; JWT secret configured via `JWT_SECRET` env var |
+| MVP Authentication | Database-backed users with JWT tokens via `POST /api/auth/login` | Token-based auth keeps the client dumb; JWT signing remains configured through `JWT_SECRET` and the user model can evolve toward SSO/RBAC |
 | Data Persistence | PostgreSQL from MVP | Production-ready from day one; avoids migration pain later; single DB for all entity types |
 | Log Retention | Configurable max entries (default: 1000) | Keeps MVP simple; oldest entries dropped when limit hit; limit configurable via environment variable |
 | Caddy Deployment | External (user-managed) | The manager is an administration plane, not a Caddy orchestrator; users bring their own Caddy instance |

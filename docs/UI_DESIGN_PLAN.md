@@ -29,10 +29,10 @@ and safely take the next action.**
 - [x] Modernize Audit page with expandable details.
 - [x] Modernize Login page.
 
-### Modal Workflows
+### Workflow Surfaces
 
-- [x] Open Add/Edit Site in a responsive modal.
-- [x] Keep long Site forms internally scrollable.
+- [x] Open Add/Edit Site on dedicated responsive pages.
+- [x] Keep long Site forms scrollable through the shared page shell.
 - [x] Keep Caddyfile-managed sites read-only in the UI.
 - [x] Move Server Add/Edit, Discover, and Import Preview onto the shared `Modal` primitive.
 - [x] Add focus trapping to the shared `Modal` primitive.
@@ -40,10 +40,10 @@ and safely take the next action.**
 
 ### Responsive and Accessibility Polish
 
-- [x] Lock background scrolling while modals are open.
-- [x] Add Escape-to-close behavior for Site modals.
+- [x] Lock background scrolling while shared modals are open.
+- [x] Add Escape-to-close behavior for shared modal workflows.
 - [x] Add accessible labels to shared icon-only controls and pagination.
-- [x] Add mobile full-screen treatment for long Site forms.
+- [x] Add mobile single-column treatment for long Site forms.
 - [ ] Add keyboard-only verification for navigation, tables, and forms.
 - [ ] Verify layouts at mobile, tablet, and desktop breakpoints.
 - [ ] Run a visual screenshot review for every authenticated page.
@@ -144,8 +144,8 @@ Every page should have:
 - Use a compact table with domain as the strongest visual field.
 - Show status badge, status detail, latency, failure streak, route block, and sync state.
 - Keep sites without `@id` in the existing collapsed group, but style the group as a warning section.
-- Replace the separate SiteEditor page with a large responsive Add/Edit Site modal.
-- Add a right-side modal summary showing the generated domain and selected Caddy block.
+ - Keep Add/Edit Site on a dedicated page with the form on the left and generated Caddy JSON preview on the right.
+ - Keep the generated route preview sticky on desktop and stacked on mobile.
 - Keep destructive deletion behind a confirmation dialog with the domain and server named explicitly.
 
 ### Configuration
@@ -172,9 +172,9 @@ Every page should have:
 
 ## Modal System
 
-Create one shared modal pattern for all create/edit workflows.
+Create one shared modal pattern for dialog-based workflows. Long site editing remains page-based.
 
-- `FormModal` for Add/Edit Server and Add/Edit Site
+- `FormModal` for Add/Edit Server
 - `PreviewModal` for import and generated configuration previews
 - `ConfirmModal` for deletion and reload actions
 - `DetailsModal` for server health and audit details
@@ -247,7 +247,7 @@ longer depend on Bootstrap defaults for their visual identity.
 
 ### Phase 3: Modal Workflows
 
-- Convert SiteEditor into Add/Edit Site modal.
+ - Keep SiteEditor as a dedicated Add/Edit Site page with a visual route builder.
 - Consolidate Server add/edit modal behavior.
 - Add reusable confirmation, preview, and details modals.
 
@@ -267,7 +267,7 @@ longer depend on Bootstrap defaults for their visual identity.
 ## Definition of Done
 
 - The UI has a consistent visual identity across every authenticated page.
-- Add/Edit Server and Add/Edit Site use shared responsive modals.
+- Add/Edit Server uses shared responsive dialogs; Add/Edit Site uses the shared page shell.
 - Every data screen has intentional loading, empty, and error states.
 - Health state is visible without opening a detail page.
 - All primary actions are keyboard accessible and have clear feedback.
