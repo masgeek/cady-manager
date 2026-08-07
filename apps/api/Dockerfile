@@ -8,7 +8,7 @@ WORKDIR /repo
 RUN corepack enable
 
 # Copy manifests first for layer caching
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY packages/shared-types/package.json packages/shared-types/
 COPY packages/config/package.json      packages/config/
 COPY packages/db/package.json          packages/db/
@@ -32,7 +32,7 @@ RUN corepack enable
 RUN addgroup -S caddy && adduser -S caddy -G caddy
 
 # Install production dependencies only
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY packages/shared-types/package.json packages/shared-types/
 COPY packages/config/package.json      packages/config/
 COPY packages/db/package.json          packages/db/
