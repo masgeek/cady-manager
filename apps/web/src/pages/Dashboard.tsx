@@ -1,14 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { PageHeader, StatusBadge } from '@caddy-manager/ui';
+import { PageHeader, StatusBadge, formatDateTime } from '@caddy-manager/ui';
 import { api } from '../api/client';
 
 function formatCheckedAt(value?: string): string {
   if (!value) return 'Not checked yet';
-  return `Checked ${new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(value))}`;
+  return `Checked ${formatDateTime(value)}`;
+}
+
+function healthTone(siteCount: number, activeCount: number): 'neutral' | 'critical' | 'warning' | 'good' | 'healthy' {
+  if (siteCount === 0) return 'neutral';
+  const percentage = (activeCount / siteCount) * 100;
+  if (percentage < 50) return 'critical';
+  if (percentage < 80) return 'warning';
+  if (percentage < 95) return 'good';
+  return 'healthy';
 }
 
 export default function Dashboard() {
@@ -30,6 +36,8 @@ export default function Dashboard() {
   const activeSites = sites.filter((site) => site.status === 'active').length;
   const attentionSites = sites.filter((site) => site.status === 'warning' || site.status === 'error' || site.consecutiveFailures > 0);
   const checkedSites = sites.filter((site) => site.lastCheckedAt).length;
+  const healthPercentage = sites.length ? Math.round((activeSites / sites.length) * 100) : 0;
+  const healthState = healthTone(sites.length, activeSites);
   const isLoading = serversQuery.isLoading || sitesQuery.isLoading;
   const hasError = serversQuery.isError || sitesQuery.isError;
 
@@ -53,7 +61,7 @@ export default function Dashboard() {
           <>
             <strong>{onlineServers} of {servers.length} servers online</strong>
             <span className="ms-auto">{checkedSites} of {sites.length} sites checked</span>
-            <span>{new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+             <span>{formatDateTime(new Date())}</span>
           </>
         }
       />
@@ -66,20 +74,31 @@ export default function Dashboard() {
           <div className="row g-3 mb-4">
             <div className="col-12 col-lg-8">
               <section className="dashboard-hero h-100">
-                <div className="dashboard-hero-kicker">Fleet signal</div>
+                <div className="dashboard-hero-kicker-row">
+                  <div className="dashboard-hero-kicker">Fleet signal</div>
+                  <span className="dashboard-live-chip"><i className="bi bi-broadcast-pin" /> Live monitoring</span>
+                </div>
                 <div className="d-flex justify-content-between align-items-end gap-3">
                   <div>
-                    <div className="dashboard-number">{activeSites}<span>/{sites.length}</span></div>
+                    <div className="dashboard-number" aria-label={`${activeSites} of ${sites.length} sites responding normally`}>
+                      <strong>{activeSites}</strong>
+                      <span><i>/</i>{sites.length}</span>
+                    </div>
                     <div className="dashboard-hero-label">sites responding normally</div>
                   </div>
                   <i className="bi bi-activity dashboard-hero-icon"></i>
                 </div>
-                <div className="dashboard-progress mt-4">
+                <div className={`dashboard-progress dashboard-health-${healthState} mt-4`}>
                   <span style={{ width: `${sites.length ? (activeSites / sites.length) * 100 : 0}%` }} />
+                </div>
+                <div className="dashboard-hero-stats">
+                  <div><strong>{onlineServers}</strong><span>servers online</span></div>
+                  <div><strong>{checkedSites}</strong><span>sites checked</span></div>
+                  <div><strong>{attentionSites.length}</strong><span>need attention</span></div>
                 </div>
                 <div className="d-flex justify-content-between mt-2 dashboard-hero-meta">
                   <span>{attentionSites.length ? `${attentionSites.length} need attention` : 'Everything looks steady'}</span>
-                  <span>{sites.length ? Math.round((activeSites / sites.length) * 100) : 0}% healthy</span>
+                   <span className={`dashboard-health-percent dashboard-health-${healthState}`}>{healthPercentage}% <small>{healthState === 'healthy' ? 'healthy' : healthState}</small></span>
                 </div>
               </section>
             </div>
@@ -113,7 +132,7 @@ export default function Dashboard() {
                   {attentionSites.length === 0 ? (
                     <div className="empty-panel"><i className="bi bi-check2-circle"></i><span>No site issues detected.</span></div>
                   ) : attentionSites.slice(0, 5).map((site) => (
-                    <button className="attention-item" key={site.id} onClick={() => navigate(`/sites/${site.id}/edit`)}>
+                     <button className="attention-item" key={site.id} onClick={() => navigate(site.routeId ? `/sites/${site.id}/edit` : `/sites/${site.id}`)}>
                       <span className="status-dot status-dot-danger"></span>
                       <span className="attention-main"><strong>{site.domain}</strong><small>{site.statusDetail || 'Health check failed'}</small></span>
                       <span className="attention-side"><StatusBadge status={site.status} /><small>{formatCheckedAt(site.lastCheckedAt)}</small></span>

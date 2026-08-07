@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
-import { DataTable, PageHeader } from '@caddy-manager/ui';
+import { DataTable, PageHeader, formatDateTime } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 
 interface LogEntry {
@@ -12,7 +12,7 @@ interface LogEntry {
 }
 
 const logColumns: Column<LogEntry>[] = [
-  {field: 'timestamp', headerName: 'Timestamp', render: (value) => new Date(String(value)).toLocaleString()},
+  {field: 'timestamp', headerName: 'Timestamp', render: (value) => formatDateTime(String(value))},
   {field: 'level', headerName: 'Level', render: (value) => <span className={levelClass(String(value))}>{String(value)}</span>},
   {field: 'source', headerName: 'Source', render: (value) => value ? String(value) : '-'},
   {field: 'message', headerName: 'Message', render: (value) => <code className="log-message">{String(value)}</code>},

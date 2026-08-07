@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import type { AuditEvent } from '@caddy-manager/shared-types';
-import { DataTable, PageHeader } from '@caddy-manager/ui';
+import { DataTable, PageHeader, formatDateTime } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 
 const auditColumns: Column<AuditEvent>[] = [
-  {field: 'timestamp', headerName: 'Timestamp', render: (value) => new Date(String(value)).toLocaleString()},
+  {field: 'timestamp', headerName: 'Timestamp', render: (value) => formatDateTime(String(value))},
   {field: 'userId', headerName: 'User', render: (value) => <code>{String(value)}</code>},
   {field: 'action', headerName: 'Action', render: (value) => <span className={`audit-action ${String(value)}`}>{String(value)}</span>},
   {field: 'entity', headerName: 'Entity'},

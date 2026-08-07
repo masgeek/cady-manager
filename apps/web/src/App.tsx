@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Servers from './pages/Servers';
 import Sites from './pages/Sites';
 import SiteEditor from './pages/SiteEditor';
+import SiteOverview from './pages/SiteOverview';
 import Config from './pages/Config';
 import Logs from './pages/Logs';
 import Audit from './pages/Audit';
@@ -51,6 +52,7 @@ function AppRoutes() {
                 <Route path="/servers" element={<Servers />} />
                 <Route path="/sites" element={<Sites />} />
                 <Route path="/sites/new" element={<SiteEditor />} />
+                <Route path="/sites/:id" element={<SiteOverview />} />
                 <Route path="/sites/:id/edit" element={<SiteEditor />} />
                 <Route path="/config" element={<Config />} />
                 <Route path="/logs" element={<Logs />} />
