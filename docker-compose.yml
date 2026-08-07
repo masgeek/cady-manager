@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:17-alpine
     restart: unless-stopped
+    init: true
     environment:
       POSTGRES_USER: ${DB_USER:-caddy}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
@@ -13,6 +14,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    security_opt:
+      - no-new-privileges:true
     networks:
       - web
       - internal
@@ -37,6 +40,9 @@ services:
       db:
         condition: service_healthy
     restart: no
+    init: true
+    security_opt:
+      - no-new-privileges:true
     networks:
       - web
       - internal
@@ -48,6 +54,9 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
     environment:
       PORT: 3500
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -87,6 +96,9 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
     restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "${WEB_PORT:-80}:80"
     depends_on:

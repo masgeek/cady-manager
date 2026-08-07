@@ -21,6 +21,7 @@ WORKDIR /repo
 
 # Install pnpm directly
 RUN npm install -g pnpm@9
+RUN addgroup -S caddy && adduser -S caddy -G caddy
 
 # Workspace manifests (pnpm needs them to resolve workspace protocol links)
 COPY package.json pnpm-workspace.yaml ./
@@ -34,7 +35,9 @@ COPY --from=deps /repo/node_modules             ./node_modules
 COPY --from=deps /repo/packages/db/node_modules ./packages/db/node_modules
 
 # Copy workspace package sources (resolved via symlinks in node_modules)
-COPY packages/config/ packages/config/
-COPY packages/db/     packages/db/
+COPY --chown=caddy:caddy packages/config/ packages/config/
+COPY --chown=caddy:caddy packages/db/     packages/db/
+
+USER caddy
 
 CMD ["sh", "-c", "pnpm --filter @caddy-manager/db db:migrate && pnpm --filter @caddy-manager/db db:seed"]

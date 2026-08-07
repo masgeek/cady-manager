@@ -29,6 +29,7 @@ FROM node:24-alpine AS runtime
 WORKDIR /repo
 
 RUN corepack enable
+RUN addgroup -S caddy && adduser -S caddy -G caddy
 
 # Install production dependencies only
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -41,9 +42,11 @@ COPY apps/api/package.json             apps/api/
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy the bundled API output
-COPY --from=builder /repo/apps/api/dist apps/api/dist/
+COPY --from=builder --chown=caddy:caddy /repo/apps/api/dist apps/api/dist/
 
-RUN mkdir -p apps/api/uploads
+RUN mkdir -p apps/api/uploads && chown -R caddy:caddy apps/api
+
+USER caddy
 
 EXPOSE 3500
 CMD ["node", "apps/api/dist/index.js"]
