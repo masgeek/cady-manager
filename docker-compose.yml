@@ -21,7 +21,7 @@ services:
       - internal
 
   migrate:
-    image: caddy-manager-migrate:${TAG:-latest}
+    image: masgeek/caddy-manager-migrate:${TAG:-latest}
     container_name: migrate
     build:
       context: .
@@ -48,7 +48,7 @@ services:
       - internal
 
   api:
-    image: caddy-manager-api:${TAG:-latest}
+    image: masgeek/caddy-manager-api:${TAG:-latest}
     container_name: api
     build:
       context: .
@@ -90,7 +90,7 @@ services:
       - internal
 
   web:
-    image: caddy-manager-web:${TAG:-latest}
+    image: masgeek/caddy-manager-web:${TAG:-latest}
     container_name: web
     build:
       context: .
