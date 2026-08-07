@@ -44,7 +44,7 @@
     list-style-position: inside;
 
     &::marker {
-      color: var(--mint-dark);
+      color: $mint-dark;
     }
   }
 }

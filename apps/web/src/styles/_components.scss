@@ -177,7 +177,7 @@
 .app-mobile-nav-link:hover,
 .app-mobile-nav-link.active {
   background: $surface-mint;
-  color: var(--mint-dark);
+  color: $mint-dark;
   font-weight: 700;
 }
 
@@ -187,7 +187,7 @@
 
 .page-eyebrow {
   margin-bottom: 7px;
-  color: var(--mint-dark);
+  color: $mint-dark;
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.15em;
@@ -234,12 +234,53 @@
 }
 
 .dashboard-hero {
+  position: relative;
+  overflow: hidden;
   min-height: 286px;
   padding: 28px;
   border-radius: var(--radius);
   background: var(--graphite);
   color: $white-strong;
   box-shadow: 0 18px 48px $shadow-card;
+  isolation: isolate;
+}
+
+.dashboard-hero::after {
+  position: absolute;
+  top: -90px;
+  right: -50px;
+  z-index: -1;
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba($mint, 0.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 30px rgba($mint, 0.04), 0 0 0 60px rgba($mint, 0.025);
+  content: '';
+}
+
+.dashboard-hero-kicker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-live-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid rgba($mint, 0.26);
+  border-radius: 999px;
+  background: rgba($mint, 0.08);
+  color: $mint-bright;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dashboard-live-chip i {
+  font-size: 0.72rem;
 }
 
 .dashboard-hero-kicker,
@@ -252,6 +293,9 @@
 }
 
 .dashboard-number {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
   margin-top: 34px;
   font-family: 'Space Grotesk', 'Avenir Next', sans-serif;
   font-size: clamp(3.8rem, 8vw, 6.2rem);
@@ -261,9 +305,20 @@
 }
 
 .dashboard-number span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  color: $text-soft;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 500;
+  letter-spacing: -0.07em;
+}
+
+.dashboard-number span i {
   color: $text-dark-muted;
-  font-size: 0.42em;
-  letter-spacing: -0.06em;
+  font-size: 0.72em;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .dashboard-hero-label {
@@ -292,10 +347,60 @@
   transition: width 400ms ease;
 }
 
+.dashboard-hero-stats {
+  display: flex;
+  gap: 28px;
+  margin-top: 22px;
+  padding-top: 15px;
+  border-top: 1px solid rgba($white, 0.1);
+}
+
+.dashboard-hero-stats div {
+  display: grid;
+  gap: 2px;
+}
+
+.dashboard-hero-stats strong {
+  font-family: 'Space Grotesk', 'Avenir Next', sans-serif;
+  font-size: 1.15rem;
+}
+
+.dashboard-hero-stats span {
+  color: $text-dark-muted;
+  font-size: 0.68rem;
+}
+
 .dashboard-hero-meta {
   color: $text-nav;
   font-size: 0.76rem;
 }
+
+.dashboard-health-percent {
+  color: $mint-bright;
+  font-family: 'Space Grotesk', 'Avenir Next', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.dashboard-health-percent small {
+  color: $text-nav;
+  font-family: 'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.dashboard-health-percent.dashboard-health-neutral { color: $text-dark-muted; }
+.dashboard-health-percent.dashboard-health-warning { color: $amber; }
+.dashboard-health-percent.dashboard-health-good { color: $mint-dark; }
+.dashboard-health-percent.dashboard-health-critical { color: $coral; }
+
+.dashboard-progress.dashboard-health-neutral span { background: $text-dark-muted; }
+.dashboard-progress.dashboard-health-warning span { background: $amber; }
+.dashboard-progress.dashboard-health-good span { background: $mint-dark; }
+.dashboard-progress.dashboard-health-critical span { background: $coral; }
 
 .dashboard-metric-stack {
   display: grid;
@@ -421,7 +526,7 @@
 }
 
 .empty-panel i {
-  color: var(--mint-dark);
+  color: $mint-dark;
   font-size: 1.2rem;
 }
 
@@ -458,7 +563,7 @@
   text-transform: uppercase;
 }
 
-.log-level-info { background: $surface-mint; color: var(--mint-dark); }
+.log-level-info { background: $surface-mint; color: $mint-dark; }
 .log-level-warn { background: $surface-amber; color: $text-amber; }
 .log-level-error { background: $surface-danger; color: $text-danger; }
 
@@ -479,18 +584,18 @@
   text-transform: uppercase;
 }
 
-.audit-action.create { background: $surface-mint; color: var(--mint-dark); }
+.audit-action.create { background: $surface-mint; color: $mint-dark; }
 .audit-action.update { background: $surface-blue; color: $text-blue; }
 .audit-action.delete { background: $surface-danger; color: $text-danger; }
 .audit-action.reload { background: $surface-amber; color: $text-amber; }
 .audit-action.login,
 .audit-action.logout { background: $surface-neutral; color: $text-neutral; }
-.audit-result.success { background: $surface-mint; color: var(--mint-dark); }
+.audit-result.success { background: $surface-mint; color: $mint-dark; }
 .audit-result.failure { background: $surface-danger; color: $text-danger; }
 
 .audit-details summary {
   cursor: pointer;
-  color: var(--mint-dark);
+  color: $mint-dark;
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -583,7 +688,7 @@
 }
 
 .status-pill-online,
-.status-pill-active { background: $surface-mint; color: var(--mint-dark); }
+.status-pill-active { background: $surface-mint; color: $mint-dark; }
 .status-pill-offline,
 .status-pill-error { background: $surface-danger; color: $text-danger; }
 .status-pill-degraded { background: $surface-amber; color: $text-amber; }
