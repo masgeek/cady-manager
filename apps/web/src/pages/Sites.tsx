@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DataTable, StatusBadge, ConfirmDialog, PageHeader } from '@caddy-manager/ui';
 import type { Column } from '@caddy-manager/ui';
 import type { Site } from '@caddy-manager/shared-types';
 import { api } from '../api/client';
-import SiteEditor from './SiteEditor';
 import SiteFilters from '../components/SiteFilters';
 
 const columns: Column<Site>[] = [
@@ -59,10 +58,10 @@ const SITE_PAGE_SIZE = 20;
 
 export default function Sites() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [editor, setEditor] = useState<{ id?: string } | null>(null);
   const [domainFilter, setDomainFilter] = useState('');
   const [serverIdFilter, setServerIdFilter] = useState('');
   const [serverFilter, setServerFilter] = useState('');
@@ -162,7 +161,7 @@ export default function Sites() {
         )}
         <button
           className="btn btn-sm btn-outline-primary"
-          onClick={() => setEditor({ id: row.id })}
+           onClick={() => navigate(`/sites/${row.id}/edit`)}
           title="Edit site"
         >
           <i className="bi bi-pencil"></i>
@@ -192,7 +191,7 @@ export default function Sites() {
         description={siteView === 'api'
           ? 'Routes managed by Caddy Manager through the admin API.'
           : 'Routes discovered from Caddyfile configuration and kept read-only here.'}
-        actions={<button className="btn btn-primary" onClick={() => setEditor({})}><i className="bi bi-plus-lg me-1"></i> Add site</button>}
+        actions={<button className="btn btn-primary" onClick={() => navigate('/sites/new')}><i className="bi bi-plus-lg me-1"></i> Add site</button>}
         signal={
           <>
           <strong>{activeCount} of {rows.length} healthy</strong>
@@ -300,8 +299,6 @@ export default function Sites() {
           <span>Page {currentPage + 1} of {totalPages}</span>
         </div>
       )}
-
-      {editor && <SiteEditor modal siteId={editor.id} onClose={() => setEditor(null)} />}
 
       <ConfirmDialog
         open={!!deleteId}
