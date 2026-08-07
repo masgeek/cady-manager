@@ -116,3 +116,4 @@ See `docker/` for configuration details.
 - [UI Design Plan](docs/UI_DESIGN_PLAN.md) — Visual direction and interaction rules
 - [UI Component Guide](docs/UI_COMPONENT_GUIDE.md) — Shared UI and layout guidance
 - [Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md) — Route builder and platform improvement plan
+- [Docker Deployment](docs/DOCKER.md) — Compose services, configuration, and operations
