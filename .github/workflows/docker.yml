@@ -2,8 +2,8 @@ name: Docker
 
 on:
   push:
-    branches: [main]
-    tags: ['v*']
+    branches: [ main ]
+    tags: [ '*' ]
 
 concurrency:
   group: docker-${{ github.ref }}
@@ -19,15 +19,15 @@ jobs:
       matrix:
         include:
           - name: api
-            image: caddy-manager-api
+            image: masgeek/caddy-manager-api
             dockerfile: apps/api/Dockerfile
 
           - name: web
-            image: caddy-manager-web
+            image: masgeek/caddy-manager-web
             dockerfile: apps/web/Dockerfile
 
           - name: migrate
-            image: caddy-manager-migrate
+            image: masgeek/caddy-manager-migrate
             dockerfile: apps/api/Dockerfile.migrations
 
     steps:
