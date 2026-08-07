@@ -72,7 +72,7 @@ export default function Servers() {
   }, [editServer, reset]);
 
   const createMutation = useMutation({
-    mutationFn: (data: ServerForm) => api.createServer(data),
+     mutationFn: (data: ServerForm) => api.createServer(serverSchema.parse(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['servers'] });
       setDialogOpen(false);
@@ -81,7 +81,7 @@ export default function Servers() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: ServerForm) => api.updateServer(editServer!.id, data),
+     mutationFn: (data: ServerForm) => api.updateServer(editServer!.id, serverSchema.parse(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['servers'] });
       setDialogOpen(false);
