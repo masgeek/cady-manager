@@ -1,0 +1,1 @@
+ALTER TABLE "sites" ALTER COLUMN "upstream" DROP NOT NULL;

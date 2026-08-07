@@ -17,7 +17,7 @@ export async function getSite(id: string): Promise<Site> {
 export async function createSite(data: {
   serverId: string;
   domain: string;
-  upstream: string;
+  upstream?: string;
   routeId?: string;
   caddyServerName?: string;
   routeConfig?: Record<string, unknown>;
@@ -41,7 +41,9 @@ export async function createSite(data: {
 
   if (serverName) {
     const route = buildCaddyRoute(data);
+    const routeId = data.routeId ?? route['@id'] as string | undefined;
     await provider.addRoute(serverName, route);
+    data = {...data, routeId};
   }
 
   return siteRepo.create(data);
@@ -49,7 +51,7 @@ export async function createSite(data: {
 
 export async function updateSite(
   id: string,
-  data: Partial<{ serverId: string; domain: string; upstream: string; routeId?: string; caddyServerName?: string; routeConfig?: Record<string, unknown>; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
+  data: Partial<{ serverId: string; domain: string; upstream?: string; routeId?: string; caddyServerName?: string; routeConfig?: Record<string, unknown>; tlsEnabled: boolean; healthEndpoint?: string; healthHeaders?: string }>,
 ): Promise<Site> {
   const existing = await siteRepo.findById(id);
   if (!existing) throw new NotFoundError('Site', id);

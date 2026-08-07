@@ -17,7 +17,7 @@ export const sites = pgTable('sites', {
     id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
     serverId: text('server_id').notNull().references(() => servers.id, {onDelete: 'cascade'}),
     domain: varchar('domain', {length: 255}).notNull(),
-    upstream: varchar('upstream', {length: 255}).notNull(),
+    upstream: varchar('upstream', {length: 255}),
     routeId: varchar('route_id', {length: 255}),
     caddyServerName: varchar('caddy_server_name', {length: 255}),
     routeConfig: jsonb('route_config'),

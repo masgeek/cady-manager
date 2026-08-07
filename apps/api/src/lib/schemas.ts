@@ -63,7 +63,7 @@ const siteResponseZod = z.object({
   id: z.string().uuid().describe('Site ID'),
   serverId: z.string().uuid().describe('Associated server ID'),
   domain: z.string().describe('Site domain name'),
-  upstream: z.string().url().describe('Upstream target URL'),
+  upstream: z.string().url().optional().describe('Upstream target URL for reverse proxy routes'),
   routeId: z.string().optional().describe('Caddy route ID'),
   caddyServerName: z.string().optional().describe('Caddy HTTP server block name'),
   routeConfig: z.record(z.unknown()).optional().describe('Complete imported Caddy route configuration'),

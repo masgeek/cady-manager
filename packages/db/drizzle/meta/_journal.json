@@ -29,6 +29,13 @@
       "when": 1785932491503,
       "tag": "0003_create_users",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785932491504,
+      "tag": "0004_allow_sites_without_upstream",
+      "breakpoints": true
     }
   ]
 }

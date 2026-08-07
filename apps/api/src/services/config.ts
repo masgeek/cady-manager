@@ -4,7 +4,7 @@ import { CaddyProvider } from '../providers/caddy';
 
 export interface ParsedSite {
   domain: string;
-  upstream: string;
+  upstream?: string;
   routeId?: string;
   caddyServerName: string;
   tlsEnabled: boolean;
@@ -92,9 +92,7 @@ export function parseSitesFromConfig(config: Record<string, unknown>): ParsedSit
       if (!hosts || hosts.length === 0) continue;
 
       const dial = findReverseProxyDial(route.handle as Array<Record<string, unknown>> | undefined);
-      if (!dial) continue;
-
-      const upstreamUrl = dial.includes('://') ? dial : `http://${dial}`;
+      const upstreamUrl = dial ? (dial.includes('://') ? dial : `http://${dial}`) : undefined;
       const routeId = route['@id'] as string | undefined;
 
       for (const domain of hosts) {
@@ -197,7 +195,7 @@ export function buildCaddyConfig(server: Server, sites: Site[]): Record<string, 
 
 export function buildCaddyRoute(site: {
   domain: string;
-  upstream: string;
+  upstream?: string;
   routeId?: string;
   routeConfig?: Record<string, unknown>;
 }): Record<string, unknown> {
@@ -209,6 +207,10 @@ export function buildCaddyRoute(site: {
     }
     if (site.routeId) route['@id'] = site.routeId;
     return route;
+  }
+
+  if (!site.upstream) {
+    throw new Error('An upstream URL is required when no custom route configuration is provided');
   }
 
   return {

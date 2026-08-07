@@ -63,6 +63,30 @@ describe('site config preservation', () => {
     expect(routeConfig).not.toHaveProperty('@id');
   });
 
+  it('imports and preserves routes that do not have a reverse proxy upstream', () => {
+    const route = {
+      '@id': 'shortener-web',
+      match: [{host: ['lnk-admin.example.com']}],
+      handle: [{
+        handler: 'static_response',
+        headers: {Location: ['https://lnk.example.com{http.request.uri}']},
+        status_code: 301,
+      }],
+      terminal: true,
+    };
+
+    const [site] = parseSitesFromConfig({
+      apps: {http: {servers: {proxy: {routes: [route]}}}},
+    });
+
+    expect(site).toMatchObject({
+      domain: 'lnk-admin.example.com',
+      upstream: undefined,
+      routeConfig: route,
+    });
+    expect(buildCaddyRoute(site)).toEqual(route);
+  });
+
   it('updates the host while preserving imported path matchers', () => {
     const route = buildCaddyRoute({
       domain: 'new.example.com',

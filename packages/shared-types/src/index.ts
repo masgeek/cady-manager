@@ -17,7 +17,7 @@ export interface Site {
   id: string;
   serverId: string;
   domain: string;
-  upstream: string;
+  upstream?: string;
   routeId?: string;
   caddyServerName?: string;
   routeConfig?: Record<string, unknown>;

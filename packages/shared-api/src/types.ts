@@ -35,9 +35,10 @@ export interface UpdateServerRequest {
 export interface CreateSiteRequest {
   serverId: string;
   domain: string;
-  upstream: string;
+  upstream?: string;
   routeId?: string;
   caddyServerName?: string;
+  routeConfig?: Record<string, unknown>;
   tlsEnabled: boolean;
   healthEndpoint?: string;
   healthHeaders?: string;
@@ -48,6 +49,7 @@ export interface UpdateSiteRequest {
   upstream?: string;
   routeId?: string;
   caddyServerName?: string;
+  routeConfig?: Record<string, unknown>;
   tlsEnabled?: boolean;
   healthEndpoint?: string;
   healthHeaders?: string;
@@ -55,7 +57,7 @@ export interface UpdateSiteRequest {
 
 export interface ImportPreviewSite {
   domain: string;
-  upstream: string;
+  upstream?: string;
   routeId?: string;
   caddyServerName: string;
   tlsEnabled: boolean;

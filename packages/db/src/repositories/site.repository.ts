@@ -7,7 +7,7 @@ import { sites } from '../schema';
 export const createSiteSchema = z.object({
   serverId: z.string().uuid(),
   domain: z.string().min(1).max(255),
-  upstream: z.string().url(),
+  upstream: z.string().url().optional(),
   routeId: z.string().max(255).optional(),
   caddyServerName: z.string().max(255).optional(),
   routeConfig: z.record(z.unknown()).optional(),
@@ -36,7 +36,7 @@ function toSite(row: typeof sites.$inferSelect): Site {
     id: row.id,
     serverId: row.serverId,
     domain: row.domain,
-    upstream: row.upstream,
+    upstream: row.upstream ?? undefined,
     routeId: row.routeId ?? undefined,
     caddyServerName: row.caddyServerName ?? undefined,
     routeConfig: row.routeConfig as Record<string, unknown> | undefined,
