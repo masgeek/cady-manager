@@ -1,0 +1,63 @@
+.site-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.site-editor-form {
+  min-width: 0;
+}
+
+.site-editor-preview {
+  position: sticky;
+  top: 18px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.route-sample {
+  max-height: 220px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f4f7f5;
+  color: var(--graphite);
+  font-size: 0.72rem;
+  white-space: pre-wrap;
+}
+
+.editor-details {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+
+  summary {
+    color: var(--graphite);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    list-style-position: inside;
+
+    &::marker {
+      color: var(--mint-dark);
+    }
+  }
+}
+
+.site-editor-form > form > .mb-3,
+.site-editor-form > form > .card {
+  margin-bottom: 18px !important;
+}
+
+@media (max-width: 900px) {
+  .site-editor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-editor-preview {
+    position: static;
+  }
+}
