@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { PageShell } from './PageShell';
 
 const navItems = [
   { label: 'Dashboard', path: '/', icon: 'bi-speedometer2' },
@@ -93,9 +94,9 @@ export function Layout({ children, onLogout }: LayoutProps) {
             </button>
           )}
         </div>
-        <div className="app-content flex-grow-1">
-          {children}
-        </div>
+        <main className="app-content flex-grow-1" tabIndex={-1}>
+          <PageShell>{children}</PageShell>
+        </main>
       </div>
     </div>
   );
