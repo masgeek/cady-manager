@@ -1,3 +1,5 @@
+@use 'tokens' as *;
+
 * {
   box-sizing: border-box;
 }
@@ -31,6 +33,6 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible {
-  outline: 3px solid rgba(57, 211, 162, 0.45);
+  outline: 3px solid $focus-ring;
   outline-offset: 2px;
 }
