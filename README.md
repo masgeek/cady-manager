@@ -105,15 +105,8 @@ container, attach it to the generated `caddy-manager_internal` network so the
 API can reach it. The API is intentionally not published directly; access it
 through the web container on `WEB_PORT`.
 
-See `docker/` for configuration details.
+See [`docs/DOCKER.md`](docs/DOCKER.md) for Compose and deployment details.
 
 ## Documentation
 
-- [Plan & Architecture](docs/PLAN.md) — Full project plan and architecture document
-- [PRD](docs/PRD.md) — Product requirements and key decisions
-- [Features](docs/FEATURES.md) — Implemented features and current backlog
-- [Priorities](docs/PRIORITIES.md) — Completed priorities and next work
-- [UI Design Plan](docs/UI_DESIGN_PLAN.md) — Visual direction and interaction rules
-- [UI Component Guide](docs/UI_COMPONENT_GUIDE.md) — Shared UI and layout guidance
-- [Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md) — Route builder and platform improvement plan
 - [Docker Deployment](docs/DOCKER.md) — Compose services, configuration, and operations

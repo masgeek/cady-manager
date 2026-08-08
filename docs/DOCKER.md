@@ -29,6 +29,8 @@ CADDY_ALLOWED_HOSTS=caddy,host.docker.internal
 
 Add the Caddy hostname to the same Docker network as the stack when Caddy is
 running in another container. When Caddy runs on the host, use
+`host.docker.internal` where supported and set `ALLOW_PRIVATE_OUTBOUND=true`
+only when the Caddy endpoint requires private-network access.
 
 ## Start
 
@@ -68,3 +70,18 @@ The active Dockerfiles are kept beside their applications:
 
 The API and migration runtime containers run as the unprivileged `caddy` user.
 The web image uses the unprivileged Nginx Alpine runtime defaults.
+
+## GitHub Actions
+
+CI is defined in `.github/workflows/ci.yml` and runs typechecking, tests,
+linting, and builds on pushes and pull requests targeting `main`.
+
+Docker publishing is defined in `.github/workflows/docker.yml`. It delegates
+each image build to the reusable workflow
+`.github/workflows/docker-build-job.yml`, which uses the local composite action
+`.github/actions/docker-build` for multi-architecture builds, metadata, layer
+caching, SBOM generation, and provenance attestations.
+
+The shared Node setup is available through
+`.github/actions/setup-node-pnpm`. Docker Hub credentials must be configured as
+the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets.
