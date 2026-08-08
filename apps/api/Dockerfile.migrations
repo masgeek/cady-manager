@@ -1,0 +1,43 @@
+# ─── Stage 1: Install dependencies ────────────────────────────────────────────
+FROM node:24-alpine AS deps
+WORKDIR /repo
+
+# Install pnpm directly instead of corepack
+RUN npm install -g pnpm@9
+
+# Copy manifests only — maximises layer cache hit on source-only changes
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY packages/config/package.json      packages/config/
+COPY packages/db/package.json          packages/db/
+COPY packages/shared-types/package.json packages/shared-types/
+COPY apps/api/package.json             apps/api/
+
+# drizzle-kit + tsx are devDependencies — install everything
+RUN pnpm install --frozen-lockfile
+
+# ─── Stage 2: Runner ──────────────────────────────────────────────────────────
+FROM node:24-alpine AS runner
+WORKDIR /repo
+
+# Install pnpm directly
+RUN npm install -g pnpm@9
+RUN addgroup -S caddy && adduser -S caddy -G caddy
+
+# Workspace manifests (pnpm needs them to resolve workspace protocol links)
+COPY package.json pnpm-workspace.yaml tsconfig.json ./
+COPY packages/config/package.json      packages/config/
+COPY packages/db/package.json          packages/db/
+COPY packages/shared-types/package.json packages/shared-types/
+COPY apps/api/package.json             apps/api/
+
+# Copy installed node_modules from the deps stage (pnpm virtual store + symlinks)
+COPY --from=deps /repo/node_modules             ./node_modules
+COPY --from=deps /repo/packages/db/node_modules ./packages/db/node_modules
+
+# Copy workspace package sources (resolved via symlinks in node_modules)
+COPY --chown=caddy:caddy packages/config/ packages/config/
+COPY --chown=caddy:caddy packages/db/     packages/db/
+
+USER caddy
+
+CMD ["sh", "-c", "pnpm --filter @caddy-manager/db db:migrate && pnpm --filter @caddy-manager/db db:seed"]

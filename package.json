@@ -1,0 +1,38 @@
+{
+  "name": "caddy-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
+    "db:generate": "pnpm --filter @caddy-manager/db db:generate",
+    "db:migrate": "pnpm --filter @caddy-manager/db db:migrate",
+    "db:push": "pnpm --filter @caddy-manager/db db:push",
+    "db:pull": "pnpm --filter @caddy-manager/db db:pull",
+    "db:studio": "pnpm --filter @caddy-manager/db db:studio",
+    "db:seed": "pnpm --filter @caddy-manager/db db:seed",
+    "seed:admin": "pnpm db:migrate && pnpm --filter @caddy-manager/api seed",
+    "db:seed:demo": "pnpm --filter @caddy-manager/db db:seed:demo",
+    "db:purge": "pnpm --filter @caddy-manager/db db:purge",
+    "db:purge:demo": "pnpm --filter @caddy-manager/db db:purge:demo",
+    "dev:kill": "npx kill-port 3500 5173"
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.66.0",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.1",
+    "turbo": "^2.10.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.4"
+}

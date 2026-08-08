@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1785932491500,
+      "tag": "0000_create_audit_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785932491501,
+      "tag": "0001_create_servers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785932491502,
+      "tag": "0002_create_sites",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785932491503,
+      "tag": "0003_create_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785932491504,
+      "tag": "0004_allow_sites_without_upstream",
+      "breakpoints": true
+    }
+  ]
+}
