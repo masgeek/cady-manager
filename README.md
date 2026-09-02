@@ -110,3 +110,4 @@ See [`docs/DOCKER.md`](docs/DOCKER.md) for Compose and deployment details.
 ## Documentation
 
 - [Docker Deployment](docs/DOCKER.md) — Compose services, configuration, and operations
+- [Homarr Dashboard](docker/README.md) — Optional Homarr integration and proxy setup
