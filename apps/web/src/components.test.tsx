@@ -1,15 +1,17 @@
-import {fireEvent, render, screen} from '@testing-library/react';
-import {describe, expect, it, vi} from 'vitest';
-import {DataTable, Modal, PageHeader, StatusBadge} from '@caddy-manager/ui';
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { DataTable, Modal, PageHeader, StatusBadge } from "@caddy-manager/ui";
 
-describe('shared UI primitives', () => {
-  it('renders a semantic status pill', () => {
+describe("shared UI primitives", () => {
+  it("renders a semantic status pill", () => {
     render(<StatusBadge status="active" />);
 
-    expect(screen.getByText('Active').classList.contains('status-pill-active')).toBe(true);
+    expect(
+      screen.getByText("Active").classList.contains("status-pill-active"),
+    ).toBe(true);
   });
 
-  it('closes on Escape and traps focus within the modal', () => {
+  it("closes on Escape and traps focus within the modal", () => {
     const onClose = vi.fn();
     render(
       <Modal
@@ -22,17 +24,21 @@ describe('shared UI primitives', () => {
       </Modal>,
     );
 
-    expect(screen.getByRole('dialog', {name: 'Edit site'})).toBeTruthy();
-    expect(document.activeElement).toBe(screen.getByRole('button', {name: 'Close dialog'}));
+    expect(screen.getByRole("dialog", { name: "Edit site" })).toBeTruthy();
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Close dialog" }),
+    );
 
-    fireEvent.keyDown(document, {key: 'Tab', shiftKey: true});
-    expect(document.activeElement).toBe(screen.getByRole('button', {name: 'Save changes'}));
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Save changes" }),
+    );
 
-    fireEvent.keyDown(document, {key: 'Escape'});
+    fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('renders shared page hierarchy and signal content', () => {
+  it("renders shared page hierarchy and signal content", () => {
     render(
       <PageHeader
         eyebrow="Operations"
@@ -42,16 +48,16 @@ describe('shared UI primitives', () => {
       />,
     );
 
-    expect(screen.getByRole('heading', {name: 'Servers'})).toBeTruthy();
-    expect(screen.getByText('3 online')).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Servers" })).toBeTruthy();
+    expect(screen.getByText("3 online")).toBeTruthy();
   });
 
-  it('labels table pagination controls for keyboard users', () => {
+  it("labels table pagination controls for keyboard users", () => {
     const onPageChange = vi.fn();
     render(
       <DataTable
-        columns={[{field: 'name', headerName: 'Name'}]}
-        rows={[{id: 'one', name: 'One'}]}
+        columns={[{ field: "name", headerName: "Name" }]}
+        rows={[{ id: "one", name: "One" }]}
         getRowId={(row) => row.id}
         totalCount={21}
         pageSize={20}
@@ -59,7 +65,7 @@ describe('shared UI primitives', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', {name: 'Next page'}));
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(onPageChange).toHaveBeenCalledWith(1);
   });
 });

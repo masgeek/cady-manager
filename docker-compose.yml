@@ -10,7 +10,8 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-caddy} -d ${DB_NAME:-caddy}" ]
+      test:
+        ["CMD-SHELL", "pg_isready -U ${DB_USER:-caddy} -d ${DB_NAME:-caddy}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -75,7 +76,11 @@ services:
       SEED_PASSWORD: ${SEED_PASSWORD:?SEED_PASSWORD is required}
       SEED_ROLE: ${SEED_ROLE:-admin}
     healthcheck:
-      test: [ "CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3500/api/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))\"" ]
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "fetch(''http://127.0.0.1:3500/api/health'').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -105,7 +110,7 @@ services:
       api:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1" ]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

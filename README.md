@@ -35,18 +35,18 @@ caddy-manager/
 
 ## Tech Stack
 
-| Layer              | Technology                              |
-|--------------------|-----------------------------------------|
-| Frontend           | React + TypeScript + Vite + Bootstrap    |
-| Backend            | Node.js + Fastify + TypeScript          |
-| Database           | PostgreSQL                              |
-| Validation         | Zod                                     |
-| API Docs           | OpenAPI + Swagger                       |
-| Package Manager    | pnpm                                    |
-| Build System       | TurboRepo                               |
-| Styling            | Modular SCSS                            |
-| Testing            | Vitest, React Testing Library            |
-| Containerization   | Docker + Docker Compose                 |
+| Layer            | Technology                            |
+| ---------------- | ------------------------------------- |
+| Frontend         | React + TypeScript + Vite + Bootstrap |
+| Backend          | Node.js + Fastify + TypeScript        |
+| Database         | PostgreSQL                            |
+| Validation       | Zod                                   |
+| API Docs         | OpenAPI + Swagger                     |
+| Package Manager  | pnpm                                  |
+| Build System     | TurboRepo                             |
+| Styling          | Modular SCSS                          |
+| Testing          | Vitest, React Testing Library         |
+| Containerization | Docker + Docker Compose               |
 
 ## MVP Features
 

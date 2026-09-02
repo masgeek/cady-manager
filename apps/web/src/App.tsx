@@ -1,19 +1,19 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import './styles/index.scss';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Layout } from '@caddy-manager/ui';
-import { AuthProvider, useAuth } from './api/auth';
-import Dashboard from './pages/Dashboard';
-import Servers from './pages/Servers';
-import Sites from './pages/Sites';
-import SiteEditor from './pages/SiteEditor';
-import SiteOverview from './pages/SiteOverview';
-import Config from './pages/Config';
-import Logs from './pages/Logs';
-import Audit from './pages/Audit';
-import Login from './pages/Login';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import "./styles/index.scss";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Layout } from "@caddy-manager/ui";
+import { AuthProvider, useAuth } from "./api/auth";
+import Dashboard from "./pages/Dashboard";
+import Servers from "./pages/Servers";
+import Sites from "./pages/Sites";
+import SiteEditor from "./pages/SiteEditor";
+import SiteOverview from "./pages/SiteOverview";
+import Config from "./pages/Config";
+import Logs from "./pages/Logs";
+import Audit from "./pages/Audit";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient({
   defaultOptions: {

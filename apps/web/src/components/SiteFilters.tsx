@@ -14,7 +14,7 @@ interface SiteFiltersProps {
     serverBlock: string;
     status: string;
   };
-  onChange: (filter: keyof SiteFiltersProps['values'], value: string) => void;
+  onChange: (filter: keyof SiteFiltersProps["values"], value: string) => void;
 }
 
 function FilterSelect({
@@ -32,7 +32,9 @@ function FilterSelect({
 }) {
   return (
     <>
-      <label className="visually-hidden" htmlFor={id}>{label}</label>
+      <label className="visually-hidden" htmlFor={id}>
+        {label}
+      </label>
       <select
         id={id}
         className="form-select"
@@ -40,8 +42,14 @@ function FilterSelect({
         aria-label={label}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value={`all-${id}`}>All {label.toLowerCase().replace('filter by ', '')}</option>
-        {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        <option value={`all-${id}`}>
+          All {label.toLowerCase().replace("filter by ", "")}
+        </option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </select>
     </>
   );
@@ -55,37 +63,52 @@ export default function SiteFilters({
   values,
   onChange,
 }: SiteFiltersProps) {
-  const options = (items: string[]): SiteFilterOption[] => items.map((item) => ({value: item, label: item}));
+  const options = (items: string[]): SiteFilterOption[] =>
+    items.map((item) => ({ value: item, label: item }));
 
   return (
     <div className="sites-filter-controls d-flex gap-2 justify-content-end">
       <FilterSelect
         id="site-domain-filter"
         label="Filter by domain"
-        value={values.domain || 'all-site-domain-filter'}
+        value={values.domain || "all-site-domain-filter"}
         options={options(domains)}
-        onChange={(value) => onChange('domain', value === 'all-site-domain-filter' ? '' : value)}
+        onChange={(value) =>
+          onChange("domain", value === "all-site-domain-filter" ? "" : value)
+        }
       />
       <FilterSelect
         id="site-server-id-filter"
         label="Filter by server"
-        value={values.serverId || 'all-site-server-id-filter'}
+        value={values.serverId || "all-site-server-id-filter"}
         options={servers}
-        onChange={(value) => onChange('serverId', value === 'all-site-server-id-filter' ? '' : value)}
+        onChange={(value) =>
+          onChange(
+            "serverId",
+            value === "all-site-server-id-filter" ? "" : value,
+          )
+        }
       />
       <FilterSelect
         id="site-server-filter"
         label="Filter by server block"
-        value={values.serverBlock || 'all-site-server-filter'}
+        value={values.serverBlock || "all-site-server-filter"}
         options={options(serverBlocks)}
-        onChange={(value) => onChange('serverBlock', value === 'all-site-server-filter' ? '' : value)}
+        onChange={(value) =>
+          onChange(
+            "serverBlock",
+            value === "all-site-server-filter" ? "" : value,
+          )
+        }
       />
       <FilterSelect
         id="site-status-filter"
         label="Filter by status"
-        value={values.status || 'all-site-status-filter'}
+        value={values.status || "all-site-status-filter"}
         options={options(statuses)}
-        onChange={(value) => onChange('status', value === 'all-site-status-filter' ? '' : value)}
+        onChange={(value) =>
+          onChange("status", value === "all-site-status-filter" ? "" : value)
+        }
       />
     </div>
   );

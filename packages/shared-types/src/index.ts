@@ -9,9 +9,14 @@ export interface Server {
   updatedAt: string;
 }
 
-export type ServerStatus = 'online' | 'offline' | 'degraded' | 'unknown';
+export type ServerStatus = "online" | "offline" | "degraded" | "unknown";
 
-export const SERVER_STATUSES: ServerStatus[] = ['online', 'offline', 'degraded', 'unknown'];
+export const SERVER_STATUSES: ServerStatus[] = [
+  "online",
+  "offline",
+  "degraded",
+  "unknown",
+];
 
 export interface Site {
   id: string;
@@ -34,9 +39,14 @@ export interface Site {
   updatedAt: string;
 }
 
-export type SiteStatus = 'active' | 'inactive' | 'warning' | 'error';
+export type SiteStatus = "active" | "inactive" | "warning" | "error";
 
-export const SITE_STATUSES: SiteStatus[] = ['active', 'inactive', 'warning', 'error'];
+export const SITE_STATUSES: SiteStatus[] = [
+  "active",
+  "inactive",
+  "warning",
+  "error",
+];
 
 export interface Route {
   id: string;
@@ -60,16 +70,29 @@ export interface AuditEvent {
   entityId?: string;
   details?: string;
   timestamp: string;
-  result: 'success' | 'failure';
+  result: "success" | "failure";
 }
 
-export type AuditAction = 'create' | 'update' | 'delete' | 'reload' | 'login' | 'logout';
+export type AuditAction =
+  "create" | "update" | "delete" | "reload" | "login" | "logout";
 
-export const AUDIT_ACTIONS: AuditAction[] = ['create', 'update', 'delete', 'reload', 'login', 'logout'];
+export const AUDIT_ACTIONS: AuditAction[] = [
+  "create",
+  "update",
+  "delete",
+  "reload",
+  "login",
+  "logout",
+];
 
-export type AuditEntity = 'site' | 'server' | 'config' | 'user';
+export type AuditEntity = "site" | "server" | "config" | "user";
 
-export const AUDIT_ENTITIES: AuditEntity[] = ['site', 'server', 'config', 'user'];
+export const AUDIT_ENTITIES: AuditEntity[] = [
+  "site",
+  "server",
+  "config",
+  "user",
+];
 
 export interface User {
   id: string;
@@ -79,9 +102,9 @@ export interface User {
   createdAt: string;
 }
 
-export type UserRole = 'admin' | 'operator' | 'viewer';
+export type UserRole = "admin" | "operator" | "viewer";
 
-export const USER_ROLES: UserRole[] = ['admin', 'operator', 'viewer'];
+export const USER_ROLES: UserRole[] = ["admin", "operator", "viewer"];
 
 export interface ConfigurationSnapshot {
   id: string;

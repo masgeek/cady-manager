@@ -1,6 +1,6 @@
-import React from 'react';
-import type { Column } from './types';
-import { Pagination } from './Pagination';
+import React from "react";
+import type { Column } from "./types";
+import { Pagination } from "./Pagination";
 
 interface DataTableProps<T> {
   columns: Column<T>[];
@@ -39,7 +39,10 @@ export function DataTable<T>({
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="text-center text-muted py-3">
+                <td
+                  colSpan={columns.length}
+                  className="text-center text-muted py-3"
+                >
                   No data
                 </td>
               </tr>
@@ -50,7 +53,7 @@ export function DataTable<T>({
                     <td key={String(col.field)}>
                       {col.render
                         ? col.render(row[col.field as keyof T], row)
-                        : String(row[col.field as keyof T] ?? '')}
+                        : String(row[col.field as keyof T] ?? "")}
                     </td>
                   ))}
                 </tr>
@@ -60,7 +63,12 @@ export function DataTable<T>({
         </table>
       </div>
       {totalCount !== undefined && onPageChange && (
-        <Pagination page={page} pageSize={pageSize} totalCount={totalCount} onPageChange={onPageChange} />
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+        />
       )}
     </div>
   );

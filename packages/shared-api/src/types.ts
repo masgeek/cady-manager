@@ -4,7 +4,7 @@ import type {
   HealthResponse,
   AuditEvent,
   ConfigurationSnapshot,
-} from '@caddy-manager/shared-types';
+} from "@caddy-manager/shared-types";
 
 export interface PaginatedResponse<T> {
   data: T[];

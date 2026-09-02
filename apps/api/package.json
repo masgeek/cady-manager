@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/migrate.ts",
     "seed": "tsx src/seed.ts",
+    "caddy:reconcile": "tsx src/reconcile.ts",
     "lint": "eslint src/",
     "test": "vitest run"
   },

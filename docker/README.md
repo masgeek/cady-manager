@@ -67,11 +67,13 @@ through the proxy. The Caddy route should target the Docker service and port:
 ```json
 {
   "@id": "homarr-web",
-  "match": [{"host": ["dashboard.example.com"]}],
-  "handle": [{
-    "handler": "reverse_proxy",
-    "upstreams": [{"dial": "homarr:7575"}]
-  }],
+  "match": [{ "host": ["dashboard.example.com"] }],
+  "handle": [
+    {
+      "handler": "reverse_proxy",
+      "upstreams": [{ "dial": "homarr:7575" }]
+    }
+  ],
   "terminal": true
 }
 ```

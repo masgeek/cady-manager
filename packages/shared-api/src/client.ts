@@ -3,7 +3,7 @@ import type {
   Site,
   HealthResponse,
   AuditEvent,
-} from '@caddy-manager/shared-types';
+} from "@caddy-manager/shared-types";
 import type {
   PaginatedResponse,
   CreateServerRequest,
@@ -11,7 +11,7 @@ import type {
   CreateSiteRequest,
   UpdateSiteRequest,
   ImportPreviewSite,
-} from './types.js';
+} from "./types.js";
 
 export class ApiClientError extends Error {
   constructor(
@@ -20,16 +20,16 @@ export class ApiClientError extends Error {
     public details?: unknown,
   ) {
     super(message);
-    this.name = 'ApiClientError';
+    this.name = "ApiClientError";
   }
 }
 
 export class ApiClient {
   private baseUrl: string;
-  private token: string = '';
+  private token: string = "";
 
   constructor(baseUrl: string, token?: string) {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.baseUrl = baseUrl.replace(/\/$/, "");
     if (token) this.token = token;
   }
 
@@ -50,7 +50,7 @@ export class ApiClient {
       ...this.headers,
     };
     if (options?.body) {
-      headers['Content-Type'] = 'application/json';
+      headers["Content-Type"] = "application/json";
     }
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
@@ -58,10 +58,12 @@ export class ApiClient {
     });
 
     if (!response.ok) {
-      const body = await response.json().catch(() => undefined) as {
-        message?: string;
-        details?: unknown;
-      } | undefined;
+      const body = (await response.json().catch(() => undefined)) as
+        | {
+            message?: string;
+            details?: unknown;
+          }
+        | undefined;
       throw new ApiClientError(
         response.status,
         body?.message ?? `API error: ${response.status} ${response.statusText}`,
@@ -78,7 +80,7 @@ export class ApiClient {
 
   // Servers
   async getServers(): Promise<Server[]> {
-    return this.request('/servers');
+    return this.request("/servers");
   }
 
   async getServer(id: string): Promise<Server> {
@@ -90,26 +92,26 @@ export class ApiClient {
   }
 
   async createServer(data: CreateServerRequest): Promise<Server> {
-    return this.request('/servers', {
-      method: 'POST',
+    return this.request("/servers", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
   async updateServer(id: string, data: UpdateServerRequest): Promise<Server> {
     return this.request(`/servers/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
   async deleteServer(id: string): Promise<void> {
-    return this.request(`/servers/${id}`, { method: 'DELETE' });
+    return this.request(`/servers/${id}`, { method: "DELETE" });
   }
 
   // Sites
   async getSites(): Promise<Site[]> {
-    return this.request('/sites');
+    return this.request("/sites");
   }
 
   async getSite(id: string): Promise<Site> {
@@ -117,21 +119,21 @@ export class ApiClient {
   }
 
   async createSite(data: CreateSiteRequest): Promise<Site> {
-    return this.request('/sites', {
-      method: 'POST',
+    return this.request("/sites", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
   async updateSite(id: string, data: UpdateSiteRequest): Promise<Site> {
     return this.request(`/sites/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
   async deleteSite(id: string): Promise<void> {
-    return this.request(`/sites/${id}`, { method: 'DELETE' });
+    return this.request(`/sites/${id}`, { method: "DELETE" });
   }
 
   // Config
@@ -140,19 +142,21 @@ export class ApiClient {
   }
 
   async getGeneratedConfig(serverId: string): Promise<Record<string, unknown>> {
-    return this.request(`/config/generated?serverId=${encodeURIComponent(serverId)}`);
+    return this.request(
+      `/config/generated?serverId=${encodeURIComponent(serverId)}`,
+    );
   }
 
   async reloadConfig(serverId: string): Promise<void> {
-    return this.request('/config/reload', {
-      method: 'POST',
+    return this.request("/config/reload", {
+      method: "POST",
       body: JSON.stringify({ serverId }),
     });
   }
 
   // Health
   async getHealth(): Promise<HealthResponse> {
-    return this.request('/health');
+    return this.request("/health");
   }
 
   // Logs
@@ -161,32 +165,34 @@ export class ApiClient {
     search?: string;
   }): Promise<string[]> {
     const query = new URLSearchParams();
-    if (params?.limit) query.set('limit', String(params.limit));
-    if (params?.search) query.set('search', params.search);
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.search) query.set("search", params.search);
     const qs = query.toString();
-    return this.request(`/logs${qs ? `?${qs}` : ''}`);
+    return this.request(`/logs${qs ? `?${qs}` : ""}`);
   }
 
   // Audit
-  async getAuditLogs(params?: {
-    limit?: number;
-  }): Promise<AuditEvent[]> {
+  async getAuditLogs(params?: { limit?: number }): Promise<AuditEvent[]> {
     const query = new URLSearchParams();
-    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.limit) query.set("limit", String(params.limit));
     const qs = query.toString();
-    return this.request(`/audit${qs ? `?${qs}` : ''}`);
+    return this.request(`/audit${qs ? `?${qs}` : ""}`);
   }
 
   // Health
-  async checkServerHealth(id: string): Promise<{ status: string; server: Server }> {
-    return this.request(`/servers/${id}/health`, { method: 'POST' });
+  async checkServerHealth(
+    id: string,
+  ): Promise<{ status: string; server: Server }> {
+    return this.request(`/servers/${id}/health`, { method: "POST" });
   }
 
   // Import
-  async importServerSites(id: string): Promise<{ imported: number; skipped: number; sites: Site[] }> {
+  async importServerSites(
+    id: string,
+  ): Promise<{ imported: number; skipped: number; sites: Site[] }> {
     return this.request(`/servers/${id}/import`, {
-      method: 'POST',
-      body: '{}',
+      method: "POST",
+      body: "{}",
     });
   }
 
@@ -196,21 +202,28 @@ export class ApiClient {
 
   // Sync
   async syncSite(id: string): Promise<Site> {
-    return this.request(`/sites/${id}/sync`, { method: 'POST', body: '{}' });
+    return this.request(`/sites/${id}/sync`, { method: "POST", body: "{}" });
   }
 
   async reconcileSites(): Promise<void> {
-    return this.request('/sites/reconcile', { method: 'POST', body: '{}' });
+    return this.request("/sites/reconcile", { method: "POST", body: "{}" });
   }
 
   async checkAllSites(): Promise<void> {
-    return this.request('/sites/health-check', { method: 'POST', body: '{}' });
+    return this.request("/sites/health-check", { method: "POST", body: "{}" });
   }
 
   // Discover
-  async discoverServers(apiEndpoint: string): Promise<{ servers: Server[]; imported: number; skipped: number; sites: Site[] }> {
-    return this.request('/servers/discover', {
-      method: 'POST',
+  async discoverServers(
+    apiEndpoint: string,
+  ): Promise<{
+    servers: Server[];
+    imported: number;
+    skipped: number;
+    sites: Site[];
+  }> {
+    return this.request("/servers/discover", {
+      method: "POST",
       body: JSON.stringify({ apiEndpoint }),
     });
   }
