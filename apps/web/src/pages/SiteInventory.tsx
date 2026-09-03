@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@caddy-manager/ui";
-import type { SiteInventory } from "@caddy-manager/shared-types";
+import type { SiteGroup, SiteInventory } from "@caddy-manager/shared-types";
 import { api } from "../api/client";
 
 export default function SiteInventory() {
@@ -10,6 +10,8 @@ export default function SiteInventory() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupServerId, setNewGroupServerId] = useState("");
   const inventoryView =
     searchParams.get("view") === "caddyfile" ? "caddyfile" : "dynamic";
   const ensureMutation = useMutation({
@@ -29,6 +31,48 @@ export default function SiteInventory() {
     queryKey: ["site-inventory"],
     queryFn: () => api.getSiteInventory(),
     refetchInterval: 30_000,
+  });
+  const groupsQuery = useQuery({
+    queryKey: ["site-groups"],
+    queryFn: () => api.getSiteGroups(),
+  });
+  const serversQuery = useQuery({
+    queryKey: ["servers"],
+    queryFn: () => api.getServers(),
+  });
+
+  const createGroupMutation = useMutation({
+    mutationFn: () =>
+      api.createSiteGroup({ serverId: newGroupServerId, name: newGroupName }),
+    onSuccess: () => {
+      setNewGroupName("");
+      queryClient.invalidateQueries({ queryKey: ["site-groups"] });
+    },
+    onError: (error) =>
+      setFeedback(
+        error instanceof Error ? error.message : "Failed to create group",
+      ),
+  });
+  const assignGroupMutation = useMutation({
+    mutationFn: ({ id, groupId }: { id: string; groupId: string | null }) =>
+      api.updateSiteInventory(id, { groupId }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["site-inventory"] }),
+    onError: (error) =>
+      setFeedback(
+        error instanceof Error ? error.message : "Failed to assign group",
+      ),
+  });
+  const deleteGroupMutation = useMutation({
+    mutationFn: (id: string) => api.deleteSiteGroup(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-groups"] });
+      queryClient.invalidateQueries({ queryKey: ["site-inventory"] });
+    },
+    onError: (error) =>
+      setFeedback(
+        error instanceof Error ? error.message : "Failed to delete group",
+      ),
   });
 
   const updateMutation = useMutation({
@@ -138,6 +182,61 @@ export default function SiteInventory() {
         </button>
       </nav>
 
+      <section className="card p-3 mb-3">
+        <div className="d-flex gap-2 align-items-center flex-wrap">
+          <strong className="me-2">Create group</strong>
+          <select
+            className="form-select"
+            style={{ maxWidth: 240 }}
+            value={newGroupServerId}
+            onChange={(event) => setNewGroupServerId(event.target.value)}
+          >
+            <option value="">Select server</option>
+            {(serversQuery.data ?? []).map((server) => (
+              <option key={server.id} value={server.id}>
+                {server.name}
+              </option>
+            ))}
+          </select>
+          <input
+            className="form-control"
+            style={{ maxWidth: 240 }}
+            value={newGroupName}
+            onChange={(event) => setNewGroupName(event.target.value)}
+            placeholder="Group name"
+          />
+          <button
+            className="btn btn-outline-primary"
+            disabled={
+              !newGroupServerId ||
+              !newGroupName.trim() ||
+              createGroupMutation.isPending
+            }
+            onClick={() => createGroupMutation.mutate()}
+          >
+            Create group
+          </button>
+        </div>
+        {(groupsQuery.data ?? []).length > 0 && (
+          <div className="d-flex gap-2 flex-wrap mt-3">
+            {(groupsQuery.data ?? []).map((group) => (
+              <span
+                className="badge text-bg-light border d-inline-flex align-items-center gap-2"
+                key={group.id}
+              >
+                {group.name}
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label={`Delete ${group.name}`}
+                  onClick={() => deleteGroupMutation.mutate(group.id)}
+                />
+              </span>
+            ))}
+          </div>
+        )}
+      </section>
+
       {feedback && (
         <div className="alert alert-danger" role="alert">
           {feedback}
@@ -159,7 +258,11 @@ export default function SiteInventory() {
       {!query.isLoading && !query.isError && (
         <InventoryTable
           rows={rows}
+          groups={groupsQuery.data ?? []}
           onAction={(id, action) => updateMutation.mutate({ id, action })}
+          onGroupChange={(id, groupId) =>
+            assignGroupMutation.mutate({ id, groupId })
+          }
         />
       )}
     </div>
@@ -168,10 +271,14 @@ export default function SiteInventory() {
 
 function InventoryTable({
   rows,
+  groups,
   onAction,
+  onGroupChange,
 }: {
   rows: SiteInventory[];
+  groups: SiteGroup[];
   onAction: (id: string, action: "ready" | "provision" | "disable") => void;
+  onGroupChange: (id: string, groupId: string | null) => void;
 }) {
   if (rows.length === 0) {
     return (
@@ -189,6 +296,7 @@ function InventoryTable({
             <th>Domain</th>
             <th>Route ID</th>
             <th>Type</th>
+            <th>Group</th>
             <th>State</th>
             <th>Actions</th>
           </tr>
@@ -201,6 +309,25 @@ function InventoryTable({
                 <code>{row.routeId ?? "Caddyfile"}</code>
               </td>
               <td>{row.managementType}</td>
+              <td>
+                <select
+                  className="form-select form-select-sm"
+                  value={row.groupId ?? ""}
+                  disabled={!row.serverId || row.managementType === "caddyfile"}
+                  onChange={(event) =>
+                    onGroupChange(row.id, event.target.value || null)
+                  }
+                >
+                  <option value="">No group</option>
+                  {groups
+                    .filter((group) => group.serverId === row.serverId)
+                    .map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                </select>
+              </td>
               <td>
                 {row.state}
                 {row.stateDetail && (
