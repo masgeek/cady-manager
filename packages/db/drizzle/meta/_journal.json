@@ -64,6 +64,13 @@
       "when": 1788414345396,
       "tag": "0009_add_site_groups",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788415000000,
+      "tag": "0010_backfill_site_groups",
+      "breakpoints": true
     }
   ]
 }
