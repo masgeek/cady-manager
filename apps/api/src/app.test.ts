@@ -25,4 +25,20 @@ describe("API integration", () => {
     expect(response.statusCode).toBe(401);
     expect(response.json()).toMatchObject({ message: "Unauthorized" });
   });
+
+  it("rejects expired JWTs without running the protected handler", async () => {
+    const token = app.jwt.sign(
+      { sub: "expired-user", username: "expired-user", role: "admin" },
+      { expiresIn: "1ms" },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/servers",
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({ message: "Unauthorized" });
+  });
 });

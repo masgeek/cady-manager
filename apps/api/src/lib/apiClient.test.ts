@@ -29,4 +29,24 @@ describe("ApiClient errors", () => {
       details: { field: "upstream" },
     });
   });
+
+  it("calls the unauthorized handler for expired sessions", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        json: vi
+          .fn()
+          .mockResolvedValue({ message: "Invalid or expired token" }),
+      }),
+    );
+    const onUnauthorized = vi.fn();
+    const client = new ApiClient("/api");
+    client.setUnauthorizedHandler(onUnauthorized);
+
+    await expect(client.getSites()).rejects.toMatchObject({ statusCode: 401 });
+    expect(onUnauthorized).toHaveBeenCalledOnce();
+  });
 });
