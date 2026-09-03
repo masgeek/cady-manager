@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./api/auth";
 import Dashboard from "./pages/Dashboard";
 import Servers from "./pages/Servers";
 import Sites from "./pages/Sites";
+import SiteInventory from "./pages/SiteInventory";
 import SiteEditor from "./pages/SiteEditor";
 import SiteOverview from "./pages/SiteOverview";
 import Config from "./pages/Config";
@@ -51,6 +52,7 @@ function AppRoutes() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/servers" element={<Servers />} />
                 <Route path="/sites" element={<Sites />} />
+                <Route path="/site-inventory" element={<SiteInventory />} />
                 <Route path="/sites/new" element={<SiteEditor />} />
                 <Route path="/sites/:id" element={<SiteOverview />} />
                 <Route path="/sites/:id/edit" element={<SiteEditor />} />

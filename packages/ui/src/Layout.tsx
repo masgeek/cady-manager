@@ -6,6 +6,7 @@ const navItems = [
   { label: "Dashboard", path: "/", icon: "bi-speedometer2" },
   { label: "Servers", path: "/servers", icon: "bi-hdd-rack" },
   { label: "Sites", path: "/sites", icon: "bi-file-text" },
+  { label: "Site Inventory", path: "/site-inventory", icon: "bi-boxes" },
   { label: "Config", path: "/config", icon: "bi-gear" },
   { label: "Logs", path: "/logs", icon: "bi-terminal" },
   { label: "Audit", path: "/audit", icon: "bi-clock-history" },

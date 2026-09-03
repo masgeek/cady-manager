@@ -398,9 +398,10 @@ export default function SiteEditor({
   );
 
   const createMutation = useMutation({
-    mutationFn: (data: SiteForm) => api.createSite(toApiPayload(data)),
+    mutationFn: (data: SiteForm) => api.createSiteInventory({ ...toApiPayload(data), state: "draft", managementType: "dynamic" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sites"] });
+      queryClient.invalidateQueries({ queryKey: ["site-inventory"] });
       onClose ? onClose() : navigate("/sites");
     },
   });
@@ -780,7 +781,7 @@ export default function SiteEditor({
                 <input
                   {...register("routeId")}
                   className={`form-control ${errors.routeId ? "is-invalid" : ""}`}
-                  placeholder="Generated automatically if blank"
+                  placeholder="Required for dynamic inventory"
                 />
                 {errors.routeId && (
                   <div className="invalid-feedback">

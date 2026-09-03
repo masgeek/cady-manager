@@ -87,10 +87,18 @@ export default function Sites() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sitePage, setSitePage] = useState(0);
   const siteView = searchParams.get("view") === "caddy" ? "caddy" : "api";
+  const showCaddyfile = searchParams.get("showCaddyfile") === "true";
 
   const changeSiteView = (view: "api" | "caddy") => {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("view", view);
+    setSearchParams(nextParams);
+    setSitePage(0);
+  };
+
+  const changeShowCaddyfile = (show: boolean) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("showCaddyfile", String(show));
     setSearchParams(nextParams);
     setSitePage(0);
   };
@@ -152,9 +160,10 @@ export default function Sites() {
   });
 
   const rows = query.data || [];
-  const viewRows = rows.filter((row) =>
-    siteView === "api" ? row.routeId : !row.routeId,
-  );
+  const viewRows = rows.filter((row) => {
+    if (siteView === "caddy") return !row.routeId;
+    return showCaddyfile || Boolean(row.routeId);
+  });
   const servers = serversQuery.data || [];
   const serverNames = new Map(
     servers.map((server) => [server.id, server.name]),
@@ -241,12 +250,18 @@ export default function Sites() {
       <PageHeader
         eyebrow="Routing inventory"
         title={
-          siteView === "api" ? "API-managed sites" : "Caddyfile-managed sites"
+          siteView === "caddy"
+            ? "Caddyfile-managed sites"
+            : showCaddyfile
+              ? "All sites"
+              : "API-managed sites"
         }
         description={
-          siteView === "api"
-            ? "Routes managed by Caddy Manager through the admin API."
-            : "Routes discovered from Caddyfile configuration and kept read-only here."
+          siteView === "caddy"
+            ? "Routes discovered from Caddyfile configuration and kept read-only here."
+            : showCaddyfile
+              ? "Provisioned routes, including sites managed directly in the Caddyfile."
+              : "Routes managed by Caddy Manager through the admin API."
         }
         actions={
           <button
@@ -301,6 +316,14 @@ export default function Sites() {
           Caddyfile-managed{" "}
           <span>{rows.filter((row) => !row.routeId).length}</span>
         </button>
+        <label className="ms-auto d-flex align-items-center gap-2 small text-muted">
+          <input
+            type="checkbox"
+            checked={showCaddyfile}
+            onChange={(event) => changeShowCaddyfile(event.target.checked)}
+          />
+          Show Caddyfile-managed
+        </label>
       </nav>
 
       <div className="sites-toolbar d-flex justify-content-between align-items-center mb-3">
