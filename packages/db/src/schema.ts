@@ -59,6 +59,31 @@ export const sites = pgTable(
   ],
 );
 
+export const siteGroups = pgTable(
+  "site_groups",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    serverId: text("server_id")
+      .notNull()
+      .references(() => servers.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 100 }).notNull(),
+    description: text("description"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex("site_groups_server_name_unique").on(
+      table.serverId,
+      table.name,
+    ),
+  ],
+);
+
 export const siteInventory = pgTable(
   "site_inventory",
   {
@@ -77,6 +102,9 @@ export const siteInventory = pgTable(
     upstream: varchar("upstream", { length: 255 }),
     routeConfig: jsonb("route_config"),
     tlsEnabled: boolean("tls_enabled").notNull().default(true),
+    groupId: text("group_id").references(() => siteGroups.id, {
+      onDelete: "set null",
+    }),
     state: varchar("state", { length: 20 }).notNull().default("draft"),
     stateDetail: text("state_detail"),
     provisionedSiteId: text("provisioned_site_id").references(() => sites.id, {

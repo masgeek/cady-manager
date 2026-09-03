@@ -23,6 +23,13 @@ export type {
   UpdateSiteInventoryInput,
 } from "./site-inventory.repository";
 
+export {
+  siteGroupRepo,
+  createSiteGroupSchema,
+  updateSiteGroupSchema,
+} from "./site-group.repository";
+export type { SiteGroup } from "@caddy-manager/shared-types";
+
 export { auditRepo, createAuditEventSchema } from "./audit.repository";
 export type { CreateAuditEventInput } from "./audit.repository";
 

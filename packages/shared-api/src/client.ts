@@ -2,6 +2,7 @@ import type {
   Server,
   Site,
   SiteInventory,
+  SiteGroup,
   HealthResponse,
   AuditEvent,
 } from "@caddy-manager/shared-types";
@@ -13,6 +14,8 @@ import type {
   UpdateSiteRequest,
   CreateSiteInventoryRequest,
   UpdateSiteInventoryRequest,
+  CreateSiteGroupRequest,
+  UpdateSiteGroupRequest,
   ImportPreviewSite,
 } from "./types.js";
 
@@ -151,6 +154,33 @@ export class ApiClient {
     return this.request(
       `/site-inventory${serverId ? `?serverId=${encodeURIComponent(serverId)}` : ""}`,
     );
+  }
+
+  async getSiteGroups(serverId?: string): Promise<SiteGroup[]> {
+    return this.request(
+      `/site-groups${serverId ? `?serverId=${encodeURIComponent(serverId)}` : ""}`,
+    );
+  }
+
+  async createSiteGroup(data: CreateSiteGroupRequest): Promise<SiteGroup> {
+    return this.request("/site-groups", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSiteGroup(
+    id: string,
+    data: UpdateSiteGroupRequest,
+  ): Promise<SiteGroup> {
+    return this.request(`/site-groups/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteSiteGroup(id: string): Promise<void> {
+    return this.request(`/site-groups/${id}`, { method: "DELETE" });
   }
 
   async ensureDynamicInfrastructure(): Promise<{

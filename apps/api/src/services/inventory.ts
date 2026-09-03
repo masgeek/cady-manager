@@ -1,5 +1,10 @@
 import type { SiteInventory } from "@caddy-manager/shared-types";
-import { serverRepo, siteRepo, siteInventoryRepo } from "@caddy-manager/db";
+import {
+  serverRepo,
+  siteRepo,
+  siteInventoryRepo,
+  siteGroupRepo,
+} from "@caddy-manager/db";
 import { CaddyProvider } from "../providers/caddy";
 import { buildDynamicRoutes, syncDynamicRoutes } from "./config";
 import { ConflictError, NotFoundError } from "../lib/errors";
@@ -88,6 +93,11 @@ export async function updateInventory(
 ): Promise<SiteInventory> {
   const current = await getInventory(id);
   const next = { ...current, ...data };
+  if (next.groupId) {
+    const group = await siteGroupRepo.findById(next.groupId);
+    if (!group || group.serverId !== next.serverId)
+      throw new ConflictError("Site group must belong to the inventory server");
+  }
   if (next.managementType === "dynamic" && !next.routeId)
     throw new ConflictError("A dynamic inventory site requires route_id");
   if (next.managementType === "caddyfile" && next.routeId)

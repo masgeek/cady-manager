@@ -57,6 +57,13 @@
       "when": 1788393221225,
       "tag": "0008_detach_inventory_on_server_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788414345396,
+      "tag": "0009_add_site_groups",
+      "breakpoints": true
     }
   ]
 }

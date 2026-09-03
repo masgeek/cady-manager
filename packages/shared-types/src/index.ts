@@ -59,12 +59,22 @@ export interface SiteInventory {
   upstream?: string;
   routeConfig?: Record<string, unknown>;
   tlsEnabled: boolean;
+  groupId?: string;
   state: InventoryState;
   stateDetail?: string;
   provisionedSiteId?: string;
   provisionAttempts: number;
   lastProvisionAttemptAt?: string;
   provisionedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SiteGroup {
+  id: string;
+  serverId: string;
+  name: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
 }

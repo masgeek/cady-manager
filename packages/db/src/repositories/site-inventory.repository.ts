@@ -28,6 +28,7 @@ export const createSiteInventorySchema = z.object({
   upstream: z.string().url().optional(),
   routeConfig: z.record(z.unknown()).optional(),
   tlsEnabled: z.boolean().default(true),
+  groupId: z.string().uuid().nullable().optional(),
   state: z.literal("draft").default("draft"),
 });
 
@@ -56,6 +57,7 @@ function toInventory(row: typeof siteInventory.$inferSelect): SiteInventory {
     upstream: row.upstream ?? undefined,
     routeConfig: row.routeConfig as Record<string, unknown> | undefined,
     tlsEnabled: row.tlsEnabled,
+    groupId: row.groupId ?? undefined,
     state: row.state as InventoryState,
     stateDetail: row.stateDetail ?? undefined,
     provisionedSiteId: row.provisionedSiteId ?? undefined,

@@ -5,9 +5,11 @@ import type {
   AuditEvent,
   ConfigurationSnapshot,
   SiteInventory,
+  SiteGroup,
 } from "@caddy-manager/shared-types";
 
 export type { SiteInventory } from "@caddy-manager/shared-types";
+export type { SiteGroup } from "@caddy-manager/shared-types";
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -57,8 +59,16 @@ export type CreateSiteInventoryRequest = Omit<
   | "provisionedAt"
   | "createdAt"
   | "updatedAt"
-> & { state?: SiteInventory["state"] };
+  | "groupId"
+> & { state?: SiteInventory["state"]; groupId?: string | null };
 export type UpdateSiteInventoryRequest = Partial<CreateSiteInventoryRequest>;
+
+export type CreateSiteGroupRequest = Pick<SiteGroup, "serverId" | "name"> & {
+  description?: string;
+};
+export type UpdateSiteGroupRequest = Partial<
+  Pick<SiteGroup, "name" | "description">
+>;
 
 export interface UpdateSiteRequest {
   domain?: string;

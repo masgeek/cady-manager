@@ -15,6 +15,7 @@ import { registerConfigRoutes } from "./routes/config";
 import { registerLogRoutes } from "./routes/logs";
 import { registerAuditRoutes } from "./routes/audit";
 import { registerInventoryRoutes } from "./routes/inventory";
+import { registerSiteGroupRoutes } from "./routes/site-groups";
 
 export async function buildApp() {
   const app = Fastify({
@@ -65,6 +66,7 @@ export async function buildApp() {
         await registerLogRoutes(protected_);
         await registerAuditRoutes(protected_);
         await registerInventoryRoutes(protected_);
+        await registerSiteGroupRoutes(protected_);
       });
     },
     { prefix: "/api" },
