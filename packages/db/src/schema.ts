@@ -59,6 +59,46 @@ export const sites = pgTable(
   ],
 );
 
+export const siteInventory = pgTable(
+  "site_inventory",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    serverId: text("server_id").references(() => servers.id, {
+      onDelete: "set null",
+    }),
+    domain: varchar("domain", { length: 255 }).notNull(),
+    managementType: varchar("management_type", { length: 20 })
+      .notNull()
+      .default("dynamic"),
+    routeId: varchar("route_id", { length: 255 }),
+    caddyServerName: varchar("caddy_server_name", { length: 255 }),
+    upstream: varchar("upstream", { length: 255 }),
+    routeConfig: jsonb("route_config"),
+    tlsEnabled: boolean("tls_enabled").notNull().default(true),
+    state: varchar("state", { length: 20 }).notNull().default("draft"),
+    stateDetail: text("state_detail"),
+    provisionedSiteId: text("provisioned_site_id").references(() => sites.id, {
+      onDelete: "set null",
+    }),
+    provisionAttempts: integer("provision_attempts").notNull().default(0),
+    lastProvisionAttemptAt: timestamp("last_provision_attempt_at"),
+    provisionedAt: timestamp("provisioned_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex("site_inventory_server_domain_unique").on(
+      table.serverId,
+      table.domain,
+    ),
+  ],
+);
+
 export const auditEvents = pgTable("audit_events", {
   id: text("id")
     .primaryKey()

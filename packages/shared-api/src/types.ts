@@ -4,7 +4,10 @@ import type {
   HealthResponse,
   AuditEvent,
   ConfigurationSnapshot,
+  SiteInventory,
 } from "@caddy-manager/shared-types";
+
+export type { SiteInventory } from "@caddy-manager/shared-types";
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -43,6 +46,19 @@ export interface CreateSiteRequest {
   healthEndpoint?: string;
   healthHeaders?: string;
 }
+
+export type CreateSiteInventoryRequest = Omit<
+  SiteInventory,
+  | "id"
+  | "state"
+  | "provisionedSiteId"
+  | "provisionAttempts"
+  | "lastProvisionAttemptAt"
+  | "provisionedAt"
+  | "createdAt"
+  | "updatedAt"
+> & { state?: SiteInventory["state"] };
+export type UpdateSiteInventoryRequest = Partial<CreateSiteInventoryRequest>;
 
 export interface UpdateSiteRequest {
   domain?: string;

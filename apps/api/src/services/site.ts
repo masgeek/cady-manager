@@ -2,7 +2,8 @@ import type { Site } from "@caddy-manager/shared-types";
 import { siteRepo, serverRepo } from "@caddy-manager/db";
 import { CaddyProvider } from "../providers/caddy";
 import { buildCaddyRoute, syncDynamicRoutes } from "./config";
-import { ConflictError, NotFoundError } from "../lib/errors";
+import { NotFoundError } from "../lib/errors";
+import { disableInventoryForSite } from "./inventory";
 
 export async function listSites(serverId?: string): Promise<Site[]> {
   return siteRepo.findAll(serverId);
@@ -12,56 +13,6 @@ export async function getSite(id: string): Promise<Site> {
   const site = await siteRepo.findById(id);
   if (!site) throw new NotFoundError("Site", id);
   return site;
-}
-
-export async function createSite(data: {
-  serverId: string;
-  domain: string;
-  upstream?: string;
-  routeId?: string;
-  caddyServerName?: string;
-  routeConfig?: Record<string, unknown>;
-  tlsEnabled: boolean;
-  healthEndpoint?: string;
-  healthHeaders?: string;
-}): Promise<Site> {
-  if (!data.routeId)
-    throw new Error("routeId is required for an application-managed site");
-  const server = await serverRepo.findById(data.serverId);
-  if (!server) throw new NotFoundError("Server", data.serverId);
-
-  const existing = await siteRepo.findByDomainAndServer(
-    data.domain,
-    data.serverId,
-  );
-  if (existing)
-    throw new ConflictError(
-      `Site '${data.domain}' already exists on this server`,
-    );
-
-  const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
-  const servers = await provider.getServerNames();
-  const serverName = data.caddyServerName ?? servers[0];
-
-  if (serverName && !servers.includes(serverName)) {
-    throw new Error(`Caddy server block not found: ${serverName}`);
-  }
-
-  if (serverName) {
-    const existingSites = await siteRepo.findByServer(data.serverId);
-    await syncDynamicRoutes(provider, serverName, [
-      ...existingSites.filter(
-        (site) => !site.caddyServerName || site.caddyServerName === serverName,
-      ),
-      data as Site,
-    ]);
-    data = {
-      ...data,
-      caddyServerName: serverName,
-    };
-  }
-
-  return siteRepo.create(data);
 }
 
 export async function updateSite(
@@ -134,16 +85,16 @@ export async function updateSite(
         merged as Site,
       ]);
     } else {
+      const serverName =
+        existing.caddyServerName ?? (await oldProvider.getServerNames())[0];
+      if (!serverName)
+        throw new Error(`No Caddy server block found for site ${existing.id}`);
       const sites = (await siteRepo.findByServer(existing.serverId))
         .filter(
           (site) =>
             !site.caddyServerName || site.caddyServerName === serverName,
         )
         .map((site) => (site.id === existing.id ? (merged as Site) : site));
-      const serverName =
-        existing.caddyServerName ?? (await oldProvider.getServerNames())[0];
-      if (!serverName)
-        throw new Error(`No Caddy server block found for site ${existing.id}`);
       await syncDynamicRoutes(oldProvider, serverName, sites);
     }
 
@@ -165,21 +116,7 @@ export async function deleteSite(id: string): Promise<void> {
   const site = await siteRepo.findById(id);
   if (!site) throw new NotFoundError("Site", id);
 
-  if (site.routeId) {
-    const server = await serverRepo.findById(site.serverId);
-    if (server) {
-      const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
-      const serverName =
-        site.caddyServerName ?? (await provider.getServerNames())[0];
-      if (!serverName)
-        throw new Error(`No Caddy server block found for site ${site.id}`);
-      const remaining = (await siteRepo.findByServer(site.serverId)).filter(
-        (item) => item.id !== site.id,
-      );
-      await syncDynamicRoutes(provider, serverName, remaining);
-    }
-  }
-
+  await disableInventoryForSite(site.serverId, site.domain);
   await siteRepo.delete(id);
 }
 

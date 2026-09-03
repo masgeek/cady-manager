@@ -1,9 +1,13 @@
 import cron, { type ScheduledTask } from "node-cron";
-import { serverRepo, siteRepo } from "@caddy-manager/db";
+import { serverRepo, siteRepo, siteInventoryRepo } from "@caddy-manager/db";
 import { config } from "@caddy-manager/config";
 import { CaddyProvider } from "../providers/caddy.js";
-import { buildDynamicRoutes, syncDynamicRoutes } from "../services/config.js";
+import { buildDynamicRoutes } from "../services/config.js";
 import { assertSafeHealthUrl } from "../lib/outbound.js";
+import {
+  provisionInventory,
+  shouldProvisionInventory,
+} from "../services/inventory.js";
 
 const PING_TIMEOUT = 5000;
 
@@ -138,6 +142,7 @@ export async function checkAllSites(): Promise<void> {
   const allSites = await siteRepo.findAll();
   console.log(`[site-health] checking ${allSites.length} sites`);
   for (const site of allSites) {
+    if (site.status === "not_provisioned") continue;
     const checkedAt = new Date();
     const checkStarted = Date.now();
     const url = site.healthEndpoint || `https://${site.domain}`;
@@ -175,6 +180,50 @@ export async function checkAllSites(): Promise<void> {
     );
   }
   console.log(`[site-health] completed in ${Date.now() - started}ms`);
+}
+
+export async function housekeepSiteProvisioning(): Promise<{
+  inventoryMarked: number;
+  sitesMarked: number;
+}> {
+  const servers = await serverRepo.findAll();
+  let inventoryMarked = 0;
+  let sitesMarked = 0;
+
+  for (const server of servers) {
+    const inventory = await siteInventoryRepo.findAll(server.id);
+    const sites = await siteRepo.findAll(server.id);
+    const inventoryByDomain = new Map(
+      inventory.map((item) => [item.domain, item]),
+    );
+    const sitesByDomain = new Map(sites.map((site) => [site.domain, site]));
+
+    for (const item of inventory) {
+      if (
+        item.managementType === "dynamic" &&
+        ["provisioned", "provisioning"].includes(item.state) &&
+        !sitesByDomain.has(item.domain)
+      ) {
+        await siteInventoryRepo.markNotProvisioned(
+          item.id,
+          "No matching provisioned site exists",
+        );
+        inventoryMarked += 1;
+      }
+    }
+
+    for (const site of sites) {
+      if (!inventoryByDomain.has(site.domain)) {
+        await siteRepo.markNotProvisioned(
+          site.id,
+          "No matching site inventory definition exists",
+        );
+        sitesMarked += 1;
+      }
+    }
+  }
+
+  return { inventoryMarked, sitesMarked };
 }
 
 function routeContainsSite(
@@ -222,6 +271,7 @@ export function configContainsSite(
 }
 
 export interface ReconcileReport {
+  inventoryStates: Record<string, number>;
   caddyfileManaged: number;
   dynamicSites: number;
   routeGroups: number;
@@ -237,6 +287,7 @@ export async function reconcileAllSites(
 ): Promise<ReconcileReport> {
   const servers = await serverRepo.findAll();
   const report: ReconcileReport = {
+    inventoryStates: {},
     caddyfileManaged: 0,
     dynamicSites: 0,
     routeGroups: 0,
@@ -250,11 +301,20 @@ export async function reconcileAllSites(
   for (const server of servers) {
     try {
       const provider = new CaddyProvider({ apiEndpoint: server.apiEndpoint });
-      const allSites = await siteRepo.findAll(server.id);
-      const dynamicSites = allSites.filter(
-        (site) => site.routeId !== undefined && site.routeId !== null,
+      const inventory = await siteInventoryRepo.findAll(server.id);
+      for (const item of inventory) {
+        report.inventoryStates[item.state] =
+          (report.inventoryStates[item.state] ?? 0) + 1;
+      }
+      const dynamicSites = inventory.filter(
+        (item) =>
+          item.managementType === "dynamic" &&
+          item.routeId !== undefined &&
+          item.routeId !== null,
       );
-      report.caddyfileManaged += allSites.length - dynamicSites.length;
+      report.caddyfileManaged += inventory.filter(
+        (item) => item.managementType === "caddyfile",
+      ).length;
       report.dynamicSites += dynamicSites.length;
       const serverNames = await provider.getServerNames();
       const byServer = new Map<string, typeof dynamicSites>();
@@ -264,7 +324,14 @@ export async function reconcileAllSites(
           byServer.set(serverName, [...(byServer.get(serverName) ?? []), site]);
       }
       for (const [serverName, serverSites] of byServer) {
-        const routes = buildDynamicRoutes(serverSites);
+        const eligible = serverSites
+          .filter(
+            (item) =>
+              item.serverId === server.id &&
+              shouldProvisionInventory(item.state),
+          )
+          .map((item) => ({ ...item, serverId: item.serverId! }));
+        const routes = buildDynamicRoutes(eligible);
         report.routeGroups += routes.length;
         if (options.dryRun) {
           let actual: Array<Record<string, unknown>> = [];
@@ -294,7 +361,9 @@ export async function reconcileAllSites(
             )
           ).length;
         } else {
-          await syncDynamicRoutes(provider, serverName, serverSites);
+          const candidate = eligible.find((item) => item.routeId);
+          if (candidate) await provisionInventory(candidate.id);
+          else await provider.ensureDynamicRouteContainer(serverName);
         }
       }
       if (!options.dryRun && byServer.size === 0) {
@@ -338,6 +407,7 @@ export function startSiteHealthJob(): void {
     if (running) return;
     running = true;
     const run = Promise.resolve()
+      .then(() => housekeepSiteProvisioning())
       .then(() => checkAllSites())
       .then(async () => {
         await reconcileAllSites();

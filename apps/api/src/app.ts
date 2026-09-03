@@ -14,6 +14,7 @@ import { registerSiteRoutes } from "./routes/sites";
 import { registerConfigRoutes } from "./routes/config";
 import { registerLogRoutes } from "./routes/logs";
 import { registerAuditRoutes } from "./routes/audit";
+import { registerInventoryRoutes } from "./routes/inventory";
 
 export async function buildApp() {
   const app = Fastify({
@@ -53,7 +54,7 @@ export async function buildApp() {
           try {
             await app.authenticate(request, reply);
           } catch {
-            reply
+            return reply
               .status(401)
               .send({ statusCode: 401, message: "Unauthorized" });
           }
@@ -63,6 +64,7 @@ export async function buildApp() {
         await registerConfigRoutes(protected_);
         await registerLogRoutes(protected_);
         await registerAuditRoutes(protected_);
+        await registerInventoryRoutes(protected_);
       });
     },
     { prefix: "/api" },

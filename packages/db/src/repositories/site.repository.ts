@@ -163,6 +163,13 @@ class SiteRepository {
       })
       .where(eq(sites.id, id));
   }
+
+  async markNotProvisioned(id: string, detail: string): Promise<void> {
+    await db
+      .update(sites)
+      .set({ status: "not_provisioned", statusDetail: detail, synced: false })
+      .where(eq(sites.id, id));
+  }
 }
 
 export const siteRepo = new SiteRepository();

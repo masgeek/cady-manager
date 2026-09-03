@@ -39,13 +39,45 @@ export interface Site {
   updatedAt: string;
 }
 
-export type SiteStatus = "active" | "inactive" | "warning" | "error";
+export type InventoryManagementType = "dynamic" | "caddyfile";
+export type InventoryState =
+  | "draft"
+  | "ready"
+  | "provisioning"
+  | "provisioned"
+  | "not_provisioned"
+  | "failed"
+  | "disabled";
+
+export interface SiteInventory {
+  id: string;
+  serverId: string | null;
+  domain: string;
+  managementType: InventoryManagementType;
+  routeId?: string;
+  caddyServerName?: string;
+  upstream?: string;
+  routeConfig?: Record<string, unknown>;
+  tlsEnabled: boolean;
+  state: InventoryState;
+  stateDetail?: string;
+  provisionedSiteId?: string;
+  provisionAttempts: number;
+  lastProvisionAttemptAt?: string;
+  provisionedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SiteStatus =
+  "active" | "inactive" | "warning" | "error" | "not_provisioned";
 
 export const SITE_STATUSES: SiteStatus[] = [
   "active",
   "inactive",
   "warning",
   "error",
+  "not_provisioned",
 ];
 
 export interface Route {

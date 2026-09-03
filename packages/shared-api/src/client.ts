@@ -1,6 +1,7 @@
 import type {
   Server,
   Site,
+  SiteInventory,
   HealthResponse,
   AuditEvent,
 } from "@caddy-manager/shared-types";
@@ -10,6 +11,8 @@ import type {
   UpdateServerRequest,
   CreateSiteRequest,
   UpdateSiteRequest,
+  CreateSiteInventoryRequest,
+  UpdateSiteInventoryRequest,
   ImportPreviewSite,
 } from "./types.js";
 
@@ -27,6 +30,7 @@ export class ApiClientError extends Error {
 export class ApiClient {
   private baseUrl: string;
   private token: string = "";
+  private unauthorizedHandler?: () => void;
 
   constructor(baseUrl: string, token?: string) {
     this.baseUrl = baseUrl.replace(/\/$/, "");
@@ -35,6 +39,10 @@ export class ApiClient {
 
   setToken(token: string) {
     this.token = token;
+  }
+
+  setUnauthorizedHandler(handler?: () => void) {
+    this.unauthorizedHandler = handler;
   }
 
   private get headers(): Record<string, string> {
@@ -58,6 +66,9 @@ export class ApiClient {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        this.unauthorizedHandler?.();
+      }
       const body = (await response.json().catch(() => undefined)) as
         | {
             message?: string;
@@ -118,7 +129,7 @@ export class ApiClient {
     return this.request(`/sites/${id}`);
   }
 
-  async createSite(data: CreateSiteRequest): Promise<Site> {
+  async createSite(data: CreateSiteRequest): Promise<SiteInventory> {
     return this.request("/sites", {
       method: "POST",
       body: JSON.stringify(data),
@@ -134,6 +145,62 @@ export class ApiClient {
 
   async deleteSite(id: string): Promise<void> {
     return this.request(`/sites/${id}`, { method: "DELETE" });
+  }
+
+  async getSiteInventory(serverId?: string): Promise<SiteInventory[]> {
+    return this.request(
+      `/site-inventory${serverId ? `?serverId=${encodeURIComponent(serverId)}` : ""}`,
+    );
+  }
+
+  async ensureDynamicInfrastructure(): Promise<{
+    servers: number;
+    serverBlocks: number;
+  }> {
+    return this.request("/site-inventory/ensure-dynamic", {
+      method: "POST",
+      body: "{}",
+    });
+  }
+
+  async createSiteInventory(
+    data: CreateSiteInventoryRequest,
+  ): Promise<SiteInventory> {
+    return this.request("/site-inventory", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSiteInventory(
+    id: string,
+    data: UpdateSiteInventoryRequest,
+  ): Promise<SiteInventory> {
+    return this.request(`/site-inventory/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async markInventoryReady(id: string): Promise<SiteInventory> {
+    return this.request(`/site-inventory/${id}/ready`, {
+      method: "POST",
+      body: "{}",
+    });
+  }
+
+  async provisionInventory(id: string): Promise<SiteInventory> {
+    return this.request(`/site-inventory/${id}/provision`, {
+      method: "POST",
+      body: "{}",
+    });
+  }
+
+  async disableInventory(id: string): Promise<SiteInventory> {
+    return this.request(`/site-inventory/${id}/disable`, {
+      method: "POST",
+      body: "{}",
+    });
   }
 
   // Config
@@ -214,9 +281,7 @@ export class ApiClient {
   }
 
   // Discover
-  async discoverServers(
-    apiEndpoint: string,
-  ): Promise<{
+  async discoverServers(apiEndpoint: string): Promise<{
     servers: Server[];
     imported: number;
     skipped: number;

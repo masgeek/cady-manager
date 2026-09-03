@@ -10,6 +10,7 @@ import {
   toJsonSchema,
 } from "../lib/schemas";
 import * as siteService from "../services/site";
+import * as inventoryService from "../services/inventory";
 import { checkAllSites, reconcileAllSites } from "../jobs/siteHealth.js";
 import { recordAuditEvent } from "../services/audit";
 
@@ -70,13 +71,17 @@ export async function registerSiteRoutes(app: FastifyInstance) {
             healthEndpoint: "/health",
           },
         },
-        response: { 201: siteObjectSchema },
+        response: { 201: { type: "object" } },
       },
       preHandler: app.authorize(["admin", "operator"]),
     },
     async (request, reply) => {
       const data = dynamicCreateSiteSchema.parse(request.body);
-      const site = await siteService.createSite(data);
+      const site = await inventoryService.createInventory({
+        ...data,
+        state: "draft",
+        managementType: "dynamic",
+      });
 
       await recordAuditEvent({
         userId: request.user.sub,

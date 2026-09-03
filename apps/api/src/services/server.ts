@@ -1,5 +1,5 @@
 import type { Server } from "@caddy-manager/shared-types";
-import { serverRepo } from "@caddy-manager/db";
+import { serverRepo, siteInventoryRepo } from "@caddy-manager/db";
 import { NotFoundError } from "../lib/errors";
 
 export async function listServers(): Promise<Server[]> {
@@ -30,6 +30,10 @@ export async function updateServer(
 }
 
 export async function deleteServer(id: string): Promise<void> {
+  await siteInventoryRepo.detachFromServer(
+    id,
+    "Server was deleted; inventory is not provisioned",
+  );
   const deleted = await serverRepo.delete(id);
   if (!deleted) throw new NotFoundError("Server", id);
 }

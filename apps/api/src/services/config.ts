@@ -1,5 +1,5 @@
 import type { Server, Site } from "@caddy-manager/shared-types";
-import { siteRepo, serverRepo } from "@caddy-manager/db";
+import { siteRepo, serverRepo, backfillSiteInventory } from "@caddy-manager/db";
 import { CaddyProvider, DYNAMIC_SITE_ROUTER_ID } from "../providers/caddy";
 
 export interface ParsedSite {
@@ -176,6 +176,7 @@ export async function importSitesFromConfig(
     sites.push(site);
   }
 
+  await backfillSiteInventory();
   return { imported, skipped, sites };
 }
 
@@ -266,8 +267,18 @@ function routeBehavior(route: Record<string, unknown>): string {
   return stableJson(copy);
 }
 
+export interface DynamicRouteSite {
+  serverId?: string;
+  domain: string;
+  upstream?: string;
+  routeId?: string;
+  caddyServerName?: string;
+  routeConfig?: Record<string, unknown>;
+  tlsEnabled: boolean;
+}
+
 export function buildDynamicRoutes(
-  sites: Site[],
+  sites: DynamicRouteSite[],
 ): Array<Record<string, unknown>> {
   const groups = new Map<
     string,
@@ -435,9 +446,7 @@ export function deriveBaseDomain(domain: string): string {
     .join(".");
 }
 
-export async function discoverAndImport(
-  apiEndpoint: string,
-): Promise<{
+export async function discoverAndImport(apiEndpoint: string): Promise<{
   servers: Server[];
   imported: number;
   skipped: number;
@@ -497,6 +506,7 @@ export async function discoverAndImport(
     sites.push(site);
   }
 
+  await backfillSiteInventory();
   return { servers: [...servers.values()], imported, skipped, sites };
 }
 
@@ -534,7 +544,7 @@ export async function reloadServerConfig(
 export async function syncDynamicRoutes(
   provider: CaddyProvider,
   caddyServerName: string,
-  sites: Site[],
+  sites: DynamicRouteSite[],
 ): Promise<void> {
   await provider.withDynamicRouteLock(caddyServerName, async () => {
     const dynamicSites = sites.filter(
@@ -548,6 +558,17 @@ export async function syncDynamicRoutes(
     );
     await provider.replaceDynamicRoutes(desired);
     const actual = await provider.getDynamicRoutes();
+    if (
+      actual.length !== desired.length ||
+      actual.some(
+        (route) =>
+          !desired.some((candidate) => candidate["@id"] === route["@id"]),
+      )
+    ) {
+      throw new Error(
+        "Caddy dynamic route verification failed: runtime route set differs from desired state",
+      );
+    }
     for (const route of desired) {
       const found = actual.find(
         (candidate) => candidate["@id"] === route["@id"],

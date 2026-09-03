@@ -11,6 +11,16 @@ try {
   console.log(
     `Dynamic\n-------\n${report.dynamicSites} sites\n${report.routeGroups} distinct route_id groups`,
   );
+  for (const state of [
+    "draft",
+    "ready",
+    "provisioning",
+    "provisioned",
+    "not_provisioned",
+    "failed",
+    "disabled",
+  ])
+    console.log(`${state}: ${report.inventoryStates[state] ?? 0}`);
   console.log(`Routes to create: ${report.routesToCreate}`);
   console.log(`Routes to update: ${report.routesToUpdate}`);
   console.log(`Legacy top-level routes to migrate: ${report.legacyRoutes}`);
