@@ -1,5 +1,6 @@
-INSERT INTO "site_groups" ("server_id", "name", "description")
+INSERT INTO "site_groups" ("id", "server_id", "name", "description")
 SELECT DISTINCT
+  md5('site-group:' || "server_id" || ':' || coalesce("caddy_server_name", "route_id") || ':' || "route_id"),
   "server_id",
   CASE
     WHEN length(coalesce("caddy_server_name", "route_id") || ':' || "route_id") <= 100
